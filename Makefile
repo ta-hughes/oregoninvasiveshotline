@@ -35,7 +35,7 @@ coverage:
 	coverage run ./manage.py test && coverage html
 
 test:
-	$(MANAGE) test
+	$(MANAGE) test && flake8 && isort -rc --diff $(PROJECT_NAME)
 
 reload:
 	$(MANAGE) migrate
