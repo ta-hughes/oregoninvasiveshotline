@@ -1,0 +1,13 @@
+varlet
+psycopg2
+django-cloak
+pytz
+git+https://github.com/PSU-OIT-ARC/django-arcutils.git#egg=django-arcutils
+#elasticsearch
+#django-cas
+django-perms
+mock
+model-mommy
+coverage
+flake8
+isort
