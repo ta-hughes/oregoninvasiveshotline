@@ -21,6 +21,7 @@ init:
 	@$(MAKE) $(VENV_DIR)
 	dropdb --if-exists $(PROJECT_NAME)
 	createdb $(PROJECT_NAME)
+	psql -c "CREATE EXTENSION postgis" $(PROJECT_NAME)
 	$(MANAGE) migrate
 	$(MANAGE) check
 	# create a dummy user

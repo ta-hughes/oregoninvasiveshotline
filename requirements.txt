@@ -11,3 +11,4 @@ model-mommy
 coverage
 flake8
 isort
+mommy_spatial_generators

@@ -4,6 +4,7 @@ from fnmatch import fnmatch
 from django.conf.global_settings import TEMPLATE_CONTEXT_PROCESSORS as TCP
 from django.contrib.messages import constants as messages
 from django.core.urlresolvers import reverse_lazy
+from mommy_spatial_generators import MOMMY_SPATIAL_FIELDS
 from varlet import variable
 
 #
@@ -91,7 +92,7 @@ EMAIL_BACKEND = variable("EMAIL_BACKEND", default='django.core.mail.backends.con
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'ENGINE': 'django.contrib.gis.db.backends.postgis',
         'NAME': 'hotline',
         # the default is fine for dev
         'USER': variable("DB_USER", default='root'),
@@ -128,10 +129,12 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.gis',
     'permissions',
     'arcutils',
     'hotline.users',
     'hotline.species',
+    'hotline.regions',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -188,3 +191,9 @@ TEMPLATE_DIRS = (
     # Don't forget to use absolute paths, not relative paths.
     DJANGO_DIR("templates"),
 )
+
+#
+# Test specific stuff
+#
+
+MOMMY_CUSTOM_FIELDS_GEN = MOMMY_SPATIAL_FIELDS
