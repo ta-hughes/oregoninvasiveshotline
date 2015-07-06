@@ -131,6 +131,7 @@ INSTALLED_APPS = (
     'permissions',
     'arcutils',
     'hotline.users',
+    'hotline.species',
 )
 
 MIDDLEWARE_CLASSES = (
