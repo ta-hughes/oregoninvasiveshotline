@@ -1,14 +1,13 @@
 from arcutils import will_be_deleted_with
-
-from django.shortcuts import render, get_object_or_404, redirect
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
+from django.shortcuts import get_object_or_404, redirect, render
 
 from .forms import UserForm
 from .models import User
-from .perms import permissions, can_list_users
+from .perms import can_list_users, permissions
 
 
 @login_required

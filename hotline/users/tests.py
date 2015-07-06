@@ -1,13 +1,13 @@
-from unittest.mock import Mock, patch
+from unittest.mock import patch
+
+from django.core.urlresolvers import reverse
+from django.test import TestCase
 from model_mommy.mommy import make, prepare
 
-from django.test import TestCase
-from django.core.urlresolvers import reverse
-
-from .models import User
 from .forms import UserForm
-from .views import detail
+from .models import User
 from .perms import permissions
+from .views import detail
 
 
 class DetailViewTest(TestCase):
