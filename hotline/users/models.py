@@ -7,9 +7,13 @@ class User(AbstractBaseUser):
     email = models.EmailField(max_length=255, unique=True)
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
+    prefix = models.CharField(max_length=255)
+    suffix = models.CharField(max_length=255)
     date_joined = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(default=True, blank=True, help_text="Inactive users cannot login")
+    is_manager = models.BooleanField(default=False, blank=True)
     is_staff = models.BooleanField(default=False, blank=True)
+    affiliations = models.TextField()
 
     USERNAME_FIELD = 'email'
 

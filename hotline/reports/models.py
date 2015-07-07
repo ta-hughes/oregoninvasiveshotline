@@ -11,10 +11,11 @@ class Report(models.Model):
 
     description = models.TextField(verbose_name="Please provide a description of your find")
     location = models.TextField(verbose_name="Please provide a description of the area where species was found")
+    has_specimen = models.BooleanField(default=False)
 
     point = models.PointField(srid=4326)
 
-    reported_by = models.ForeignKey("users.User", related_name="reports")
+    created_by = models.ForeignKey("users.User", related_name="reports")
     created_on = models.DateTimeField(auto_now_add=True)
 
     claimed_by = models.ForeignKey("users.User", null=True, default=None, related_name="claimed_reports")
@@ -28,7 +29,7 @@ class Report(models.Model):
         (4, 'Population treated',),
         (5, 'Ongoing monitoring',),
         (6, 'Controlled at site'),
-    ])
+    ], default=0)
 
     # the actual species confirmed by an expert
     actual_species = models.ForeignKey("species.Species", null=True, default=None, related_name="reports")
@@ -71,8 +72,8 @@ class Invite(models.Model):
     invite_id = models.AutoField(primary_key=True)
     # the person invited (a User object will be created for them)
     user = models.ForeignKey("users.User", related_name="invites")
-    invited_on = models.DateTimeField(auto_now_add=True)
-    invited_by = models.ForeignKey("users.User", related_name="+")
+    created_on = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey("users.User", related_name="+")
     report = models.ForeignKey(Report)
 
     class Meta:
