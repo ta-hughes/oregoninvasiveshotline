@@ -135,6 +135,7 @@ INSTALLED_APPS = (
     'hotline.users',
     'hotline.species',
     'hotline.regions',
+    'hotline.reports',
 )
 
 MIDDLEWARE_CLASSES = (
