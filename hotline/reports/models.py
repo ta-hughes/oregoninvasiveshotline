@@ -42,27 +42,26 @@ class Report(models.Model):
     class Meta:
         db_table = "report"
 
+    @property
+    def species(self):
+        """
+        Returns the actual species if it exists, and falls back on the reported_species
+        """
+        return self.actual_species or self.reported_species
 
-class Comment(models.Model):
-    """
-    Comments can be left on reports
-    """
-    comment_id = models.AutoField(primary_key=True)
-    body = models.TextField()
-    created_on = models.DateField(auto_now_add=True)
-    edited_on = models.DateField(auto_now=True)
+    @property
+    def category(self):
+        """
+        Returns the Category of the actual species, falling back to the reported_category
+        """
+        return self.actual_species.category if self.actual_species else self.reported_category
 
-    visibility = models.IntegerField([
-        (0, "Private"),  # only managers/admins/invited experts can see
-        (1, "Protected"),  # private + the person reporting it can see
-        (2, "Public"),  # the public can see (on a public report)
-    ], default=0)
-
-    created_by = models.ForeignKey("users.User")
-    report = models.ForeignKey(Report)
-
-    class Meta:
-        db_table = "comment"
+    @property
+    def is_misidentified(self):
+        """
+        Returns True if the reported_species differs from the actual species (and both fields are filled out)
+        """
+        return bool(self.reported_species and self.actual_species and self.reported_species != self.actual_species)
 
 
 class Invite(models.Model):
