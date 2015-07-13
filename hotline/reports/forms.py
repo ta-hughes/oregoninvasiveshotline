@@ -1,8 +1,6 @@
 from django import forms
 
 from hotline.comments.models import Comment
-from hotline.images.fields import MultiFileField
-from hotline.images.models import Image
 from hotline.users.models import User
 
 from .models import Report
@@ -18,7 +16,6 @@ class ReportForm(forms.ModelForm):
     prefix = forms.CharField(required=False)
     suffix = forms.CharField(required=False)
     email = forms.EmailField()
-    images = MultiFileField(required=False)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -42,11 +39,6 @@ class ReportForm(forms.ModelForm):
 
         self.instance.created_by = user
         super().save(*args, **kwargs)
-
-        # now save every image that was attached to this report
-        for image in self.cleaned_data.get('images', []):
-            i = Image(image=image, created_by=user, report=self.instance)
-            i.save()
 
         # if the submitter left a question, add it as a comment
         if self.cleaned_data.get("questions"):

@@ -1,14 +1,11 @@
 import json
-import tempfile
 from unittest.mock import patch
 
-from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 from model_mommy.mommy import make, prepare
 
 from hotline.comments.models import Comment
-from hotline.images.models import Image
 from hotline.species.models import Category, Species
 from hotline.users.models import User
 
@@ -71,6 +68,10 @@ class CreateViewTest(TestCase):
             "last_name": "Evil",
             "suffix": "PHD",
             "email": "john@example.com",
+            "form-TOTAL_FORMS": "0",
+            "form-INITIAL_FORMS": "0",
+            "form-MIN_NUM_FORMS": "0",
+            "form-MAX_NUM_FORMS": "1000",
         }
 
         response = self.client.post(reverse("reports-create"), data)
@@ -168,6 +169,10 @@ class DetailViewTest(TestCase):
         data = {
             "body": "foo",
             "visibility": Comment.PUBLIC,
+            "form-TOTAL_FORMS": "0",
+            "form-INITIAL_FORMS": "0",
+            "form-MIN_NUM_FORMS": "0",
+            "form-MAX_NUM_FORMS": "1000",
         }
         response = self.client.post(reverse("reports-detail", args=[report.pk]), data)
         self.assertRedirects(response, reverse("reports-detail", args=[report.pk]))
@@ -215,22 +220,6 @@ class ReportFormTest(TestCase):
 
         self.assertEqual(User.objects.count(), pre_count)
         self.assertEqual(user.pk, form.instance.created_by.pk)
-
-    def test_images_are_saved_to_report(self):
-        form = ReportForm({
-            "email": "foo@example.com",
-            "first_name": "Foo",
-            "last_name": "Bar",
-        })
-        self.assertFalse(form.is_valid())
-        report = make(Report)
-        form.instance = report
-        with tempfile.NamedTemporaryFile() as f:
-            form.cleaned_data['images'] = [SimpleUploadedFile(f.name, f.read())]
-            with patch("hotline.reports.forms.forms.ModelForm.save"):
-                form.save()
-
-        self.assertEqual(Image.objects.filter(report=report).count(), 1)
 
     def test_comment_is_added(self):
         form = ReportForm({

@@ -29,32 +29,20 @@
         {{ form.suffix|bootstrap }}
         {{ form.email|bootstrap }}
     </fieldset>
-    {{ form.images }}
+
+    {% include '_images.html' %}
+
+    <input type="submit" name="submit" value="Submit" id="submit" />
     <div id="previews"></div>
-    <input type="submit" name="submit" value="Submit" />
 </form>
+
 <script>
 var category_id_to_species_id = {{ category_id_to_species_id|safe }};
-$(document).ready(function(){
-    $('#id_images').change(function(){
-        var files = $(this).get(0).files;
-        $('#previews').html("");
-        for(var i = 0; i < files.length; i++){
-            var file = files[i];
-            if(file){
-                var reader  = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onloadend = function () {
-                    var preview = $("<img width='100' />");
-                    $('#previews').append(preview);
-                    preview.attr('src', this.result);
-                }
-            }
 
-        }
-    })
+$(document).ready(function(){
+
     // when a category is selected, we need to change up the species field
-    $('#id_reported_category').change(function(){
+    $('body').on('change', '#id_reported_category', function(e){
         var category_id = $(this).val();
         if(category_id){
             $('#reported-species').show()
@@ -75,7 +63,8 @@ $(document).ready(function(){
         } else {
             $('#reported-species').hide()
         }
-    }).change();
+    });
+    $('#id_reported_category').change()
 });
 </script>
 {% endblock %}

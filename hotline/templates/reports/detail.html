@@ -11,36 +11,33 @@
             <p class="misidentified">(mistakenly reported as {{ report.reported_species }})</p>
         {% endif %}
 
-        <div class="pictures clearfix">
-            <div class="pictures-main pull-left">
-                <img src="holder.js/400x300" />
+        {% if images %}
+            <div class="galleria">
+                {% for image in images %}
+                    <img src="{{ image.image.url }}" alt="{{ image.name }}" />
+                {% endfor %}
             </div>
+        {% else %}
 
-            <div class="pictures-gallery pull-left">
-                <img src="holder.js/65x64" />
-                <img src="holder.js/64x64" />
-                <img src="holder.js/64x64" />
-                <img src="holder.js/64x64" />
-                <img src="holder.js/64x64" />
-                <img src="holder.js/64x64" />
-            </div>
-        </div>
+        {% endif %}
 
         <h3>Commentary</h3>
         {% for comment in comments %}
-            <div class="media">
-                <div class="media-left">
-                    <img src="holder.js/60x60" class="pull-left" />
-                </div>
-                <div class="media-body">
-                    {{ comment.body }}
-                    <p class="text-right">
-                        <cite>{{ comment.created_by }}</cite>
-                        &ndash; {{ comment.created_on }}
-                        {% if user|can_edit_comment:comment %}
-                            <a href="{% url 'comments-edit' %}">Edit</a>
-                        {% endif %}
-                    </p>
+            <div class="comment-list">
+                <div class="media">
+                    <div class="media-left">
+                        <img src="holder.js/60x60" class="pull-left" />
+                    </div>
+                    <div class="media-body">
+                        {{ comment.body }}
+                        <p class="text-right">
+                            <cite>{{ comment.created_by }}</cite>
+                            &ndash; {{ comment.created_on }}
+                            {% if user|can_edit_comment:comment %}
+                                <a href="{% url 'comments-edit' comment.pk %}">Edit</a>
+                            {% endif %}
+                        </p>
+                    </div>
                 </div>
             </div>
         {% empty %}
@@ -48,22 +45,8 @@
         {% endfor %}
 
         {% if user|can_create_comment:report %}
-            <hr />
-            <form method="post">
-                {% csrf_token %}
-                {{ form.body|bootstrap }}
-                <div class="row">
-                    {% if form.visibility %}
-                        <div class="col-md-4">
-                            {{ form.visibility|bootstrap }}
-                        </div>
-                    {% endif %}
-                    <div class="col-md-8">
-                        {{ form.images|bootstrap }}
-                    </div>
-                </div>
-                <input type="submit" value="Submit" name="submit" />
-            </form>
+            <p id="add-comment"><a href="#">Add a Comment</a></p>
+            {% include "comments/_edit.html" %}
         {% endif %}
     </div>
 
@@ -93,4 +76,19 @@
     </div>
 </div>
 
+<script src="{{ STATIC_URL }}galleria/galleria-1.4.2.min.js"></script>
+<script>
+Galleria.loadTheme('{{ STATIC_URL }}galleria/themes/classic/galleria.classic.min.js');
+Galleria.run('.galleria');
+
+$('#add-comment a').click(function(e){
+    e.preventDefault();
+    $(this).parent().remove();
+    $('#create-comment').slideDown();
+});
+
+{% if form.is_bound %}
+    $('#add-comment a').click()
+{% endif %}
+</script>
 {% endblock %}
