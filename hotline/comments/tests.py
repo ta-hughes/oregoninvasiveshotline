@@ -26,7 +26,7 @@ class CommentFormTest(TestCase):
         self.assertEqual(form.instance.visibility, Comment.PROTECTED)
 
 
-class CommentEditTest(TestCase):
+class CommentEditViewTest(TestCase):
     def test_get(self):
         report = make(Report, created_by__is_active=False)
         session = self.client.session
@@ -36,12 +36,18 @@ class CommentEditTest(TestCase):
         response = self.client.get(reverse("comments-edit", args=[comment.pk]))
         self.assertEqual(response.status_code, 200)
 
-    def test_cant_edit_comment_that_isnt_yours(self):
-        report = make(Report, created_by__is_active=False)
-        session = self.client.session
-        session['report_ids'] = [report.pk]
-        session.save()
+    def test_anonymous_users_are_forced_to_login(self):
+        comment = make(Comment)
+        response = self.client.get(reverse("comments-edit", args=[comment.pk]))
+        self.assertEqual(response.status_code, 302)
+
+    def test_not_allowed_to_edit(self):
+        report = make(Report)
         comment = make(Comment, report=report)
+        user = report.created_by
+        user.set_password("foo")
+        user.save()
+        self.client.login(email=user.email, password="foo")
         response = self.client.get(reverse("comments-edit", args=[comment.pk]))
         self.assertEqual(response.status_code, 403)
 

@@ -123,6 +123,7 @@ class ClearableImageInputTest(TestCase):
         form = self.Form({"name": "", "image_data_uri": img_uri})
         self.assertFalse(form.is_valid())
         signed_path = form.fields['image'].widget.signed_path
+        self.assertIn(signed_path, str(form))
 
         # post the signed_path back
         form = self.Form({"name": "hello", "image_signed_path": signed_path})

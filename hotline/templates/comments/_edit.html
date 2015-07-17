@@ -17,6 +17,8 @@
         </div>
 
         {% include '_images.html' %}
+
+        <input type="hidden" name="submit_flag" value="{{ form.SUBMIT_FLAG }}" />
         <input type="submit" value="Submit" name="submit" />
     </fieldset>
 </form>

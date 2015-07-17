@@ -6,6 +6,8 @@ from .models import Comment
 
 
 class CommentForm(forms.ModelForm):
+    SUBMIT_FLAG = "COMMENT"
+
     class Meta:
         model = Comment
         fields = [

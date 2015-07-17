@@ -1,27 +1,28 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.functional import curry
 
 from hotline.images.forms import get_image_formset
 from hotline.images.models import Image
-from hotline.reports.perms import can_masquerade_as_user_for_report
 
 from .forms import CommentForm
 from .models import Comment
-from .perms import permissions
+from .perms import can_edit_comment
 
 
 def edit(request, comment_id):
     comment = get_object_or_404(Comment, pk=comment_id)
+    report = comment.report
+    if request.user.is_anonymous() and report.pk in request.session.get("report_ids", []) and not report.created_by.is_active:
+        request.user = report.created_by
 
-    # this will redirect to login page if the user doesn't have permission to
-    # be here
-    if not can_masquerade_as_user_for_report(request, comment.report):
+    if request.user.is_anonymous():
         return login_required(lambda request: None)(request)
 
-    # if they aren't allowed to edit this comment, send them away
-    permissions.can_edit_comment(lambda *args, **kwargs: None)(request, comment_id)
+    if not can_edit_comment(request.user, comment):
+        raise PermissionDenied()
 
     PartialCommentForm = curry(CommentForm, user=request.user, report=comment.report, instance=comment)
     # this is dumb, but the only way to pass an extra arg to the subform

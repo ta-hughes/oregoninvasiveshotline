@@ -29,4 +29,9 @@ $(document).ready(function(){
         $(this).closest('.formset-row').toggleClass("formset-row-deleted");
     });
     $('.formset-row:has(.delete-field input[type=checkbox]:checked)').addClass("formset-row-deleted")
+
+    $('.nav-tabs a').click(function(){
+        Cookies.set('tab', $(this).attr('href'), {path: window.location.pathname})
+    });
+    $('.nav-tabs a:first, .nav-tabs a[href="' + Cookies.get('tab') + '"]').click();
 });
