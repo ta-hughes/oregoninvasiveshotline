@@ -171,8 +171,10 @@ var category_id_to_species_id = {{ category_id_to_species_id|safe }};
 <script src="{{ STATIC_URL }}js/species_selector.js"></script>
 <script src="{{ STATIC_URL }}galleria/galleria-1.4.2.min.js"></script>
 <script>
-Galleria.loadTheme('{{ STATIC_URL }}galleria/themes/classic/galleria.classic.min.js');
-Galleria.run('.galleria');
+if($('.galleria').length){
+    Galleria.loadTheme('{{ STATIC_URL }}galleria/themes/classic/galleria.classic.min.js');
+    Galleria.run('.galleria');
+}
 
 $('#add-comment a').click(function(e){
     e.preventDefault();
