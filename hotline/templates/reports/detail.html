@@ -23,7 +23,7 @@
 
         <h3>Commentary</h3>
         {% for comment in comments %}
-            <div class="comment-list">
+            <div class="comment-list" id="comment-{{ comment.pk }}">
                 <div class="media">
                     <div class="media-left">
                         <img src="holder.js/60x60" class="pull-left" />
@@ -179,11 +179,6 @@ $('#add-comment a').click(function(e){
     $(this).parent().remove();
     $('#create-comment').slideDown();
 });
-
-$('#management-tabs a').click(function (e) {
-    e.preventDefault()
-    $(this).tab('show')
-})
 
 {% if comment_form.is_bound %}
     $('#add-comment a').click()
