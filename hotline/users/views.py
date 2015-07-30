@@ -1,17 +1,48 @@
 from arcutils import will_be_deleted_with
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth import login
+from django.contrib.auth import login as django_login
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.core.signing import BadSignature
+from django.contrib.auth.views import login as django_login_view
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 
 from hotline.reports.models import Invite, Report
 
-from .forms import UserForm
+from .forms import UserForm, LoginForm
 from .models import User
 from .perms import can_list_users, permissions
+
+
+def login(request, *args, **kwargs):
+    """
+    This delegates most of the work to `django.contrib.auth.views.login`, but
+    we need to display an extra form, that allows users to login with just an
+    email address. To do that without rewriting all the django login code, we
+    tap into the TemplateResponse.context_data and add the extra form
+    """
+    response = django_login_view(request, *args, **kwargs)
+    # if our special "OTHER_LOGIN" flag is present, we process our login form
+    if request.method == "POST" and request.POST.get("form") == "OTHER_LOGIN":
+        # make it look like the django login form wasn't filled out
+        response.context_data['form'] = response.context_data['form'].__class__(request)
+        # now do the regular form processing stuff...
+        other_form = LoginForm(request.POST)
+        if other_form.is_valid():
+            other_form.save(request=request)
+            messages.success(request, "Check your email! You have been sent the login link.")
+            return redirect(request.get_full_path())
+    else:
+        other_form = LoginForm()
+
+    # patch in the other_form variable, so the template can render it.
+    # Sometimes the django_login_view returns an HttpResponseRedirect, which
+    # doesn't have context_data, hence the check
+    if hasattr(response, "context_data"):
+        response.context_data['other_form'] = other_form
+
+    return response
 
 
 def authenticate(request):
@@ -24,7 +55,7 @@ def authenticate(request):
 
     if user.is_active or Invite.objects.filter(user=user).exists():
         user.backend = settings.AUTHENTICATION_BACKENDS[0]
-        login(request, user)
+        django_login(request, user)
 
     # populate the report_ids session variable with all the reports the user made
     request.session['report_ids'] = list(Report.objects.filter(created_by=user).values_list('pk', flat=True))
