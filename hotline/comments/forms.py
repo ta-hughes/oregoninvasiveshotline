@@ -43,9 +43,7 @@ class CommentForm(forms.ModelForm):
             # people
             # any managers or staff who commented on this should get notified
             to_notify = set(
-                Comment.objects.filter(report=self.instance.report).filter(
-                    Q(created_by__is_staff=True) | Q(created_by__is_manager=True)
-                ).values_list(
+                Comment.objects.filter(report=self.instance.report, created_by__is_active=True).values_list(
                     "created_by__email",
                     flat=True
                 )

@@ -48,7 +48,7 @@ def home(request):
     open_and_claimed = Report.objects.filter(claimed_by_id=user.pk, is_public=False, is_archived=False).exclude(claimed_by=None)
 
     unclaimed_reports = []
-    if user.is_authenticated() and user.is_elevated:
+    if user.is_authenticated() and user.is_active:
         unclaimed_reports = Report.objects.filter(claimed_by=None, is_public=False, is_archived=False)
 
     return render(request, "users/home.html", {

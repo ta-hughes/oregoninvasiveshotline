@@ -194,7 +194,7 @@ class DetailViewTest(TestCase):
         self.assertNotIn(private.body, response.content.decode())
 
         # staffers should see everything
-        user = prepare(User, is_manager=True)
+        user = prepare(User, is_active=True)
         user.set_password("foo")
         user.save()
         self.client.login(email=user.email, password="foo")
@@ -208,10 +208,12 @@ class DetailViewTest(TestCase):
 
         # invited experts should see everything
         self.client.logout()
-        user = prepare(User, is_manager=False, is_staff=False, is_active=True)
+        user = prepare(User, is_active=True, is_staff=False)
         user.set_password("foo")
         user.save()
         self.client.login(email=user.email, password="foo")
+        user.is_active = False  # we just had to set this to True to make self.client.login work
+        user.save()
         make(Invite, user=user, report=report)
         response = self.client.get(reverse("reports-detail", args=[report.pk]))
         self.assertIn(public.body, response.content.decode())
@@ -220,7 +222,7 @@ class DetailViewTest(TestCase):
 
     def test_create_comment(self):
         report = make(Report)
-        user = prepare(User, is_manager=True)
+        user = prepare(User, is_active=True)
         user.set_password("foo")
         user.save()
         self.client.login(email=user.email, password="foo")
@@ -476,7 +478,7 @@ class InviteFormTest(TestCase):
 
 class ClaimViewTest(TestCase):
     def setUp(self):
-        user = prepare(User, is_manager=True)
+        user = prepare(User, is_active=True)
         user.set_password("foo")
         user.save()
         self.client.login(email=user.email, password="foo")
@@ -540,15 +542,18 @@ class IconViewTest(TestCase):
 
 class ReportListView(ESTestCase, TestCase):
     def test_permissions(self):
-        user = prepare(User, is_manager=False, is_staff=False)
+        user = prepare(User, is_active=True, is_staff=False)
         user.set_password("foo")
         user.save()
         self.client.login(email=user.email, password="foo")
+        # we just had to set this to True to make the self.client.login feature work
+        user.is_active = False
+        user.save()
         response = self.client.get(reverse("reports-list"))
         self.assertEqual(response.status_code, 403)
 
         # staffers and managers can see the page
-        user.is_manager = True
+        user.is_active = True
         user.save()
         self.client.login(email=user.email, password="foo")
         response = self.client.get(reverse("reports-list"))
@@ -556,7 +561,7 @@ class ReportListView(ESTestCase, TestCase):
 
     def test_get(self):
         reports = make(Report, _quantity=3)
-        user = prepare(User, is_manager=True)
+        user = prepare(User, is_active=True)
         user.set_password("foo")
         user.save()
         self.client.login(email=user.email, password="foo")
@@ -568,7 +573,7 @@ class ReportListView(ESTestCase, TestCase):
         other_reports = make(Report, _quantity=3)
         make(Report, reported_category__name="Foobarius Foobar")
 
-        user = prepare(User, is_manager=True)
+        user = prepare(User, is_active=True)
         user.set_password("foo")
         user.save()
         self.client.login(email=user.email, password="foo")

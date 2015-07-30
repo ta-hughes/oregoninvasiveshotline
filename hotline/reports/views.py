@@ -191,7 +191,7 @@ def detail(request, report_id):
     if request.user.is_anonymous():
         comments = comments.filter(visibility=Comment.PUBLIC)
         images = images.filter(visibility=Image.PUBLIC)
-    elif request.user.is_elevated or Invite.objects.filter(user=request.user, report=report).exists():
+    elif request.user.is_active or Invite.objects.filter(user=request.user, report=report).exists():
         # no need to filter for these folks
         pass
     else:
