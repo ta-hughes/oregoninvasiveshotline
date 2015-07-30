@@ -63,7 +63,7 @@ class ReportTest(TestCase):
         self.assertEqual(None, report.image_url())
         # this public image should be the image_url
         image = make(Image, report=report, visibility=Image.PUBLIC)
-        self.assertEqual(image.image.url, report.image_url())
+        self.assertEqual(settings.MEDIA_URL + "generated_thumbnails/" + str(image.pk) + ".png", report.image_url())
 
         Image.objects.all().delete()
 
@@ -72,7 +72,10 @@ class ReportTest(TestCase):
         self.assertEqual(None, report.image_url())
         # public images on comments can be used for the image_url
         image = make(Image, comment=make(Comment, report=report), visibility=Image.PUBLIC)
-        self.assertEqual(image.image.url, report.image_url())
+        self.assertEqual(settings.MEDIA_URL + "generated_thumbnails/" + str(image.pk) + ".png", report.image_url())
+
+        # make sure the file got created
+        self.assertTrue(os.path.exists(os.path.join(settings.MEDIA_ROOT, "generated_thumbnails", str(image.pk) + ".png")))
 
 
 class CreateViewTest(TestCase):

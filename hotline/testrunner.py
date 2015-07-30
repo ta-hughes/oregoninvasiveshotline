@@ -1,3 +1,4 @@
+import os
 import shutil
 import tempfile
 
@@ -12,6 +13,9 @@ class TestRunner(SearchRunner):
     def run_tests(self, *args, **kwargs):
         settings.TEST = True
         media_root = tempfile.mkdtemp()
+        # these directories are needed for generated icons and thumbnails
+        os.mkdir(os.path.join(media_root, "generated_icons"))
+        os.mkdir(os.path.join(media_root, "generated_thumbnails"))
         settings.MEDIA_ROOT = media_root
         settings.CELERY_ALWAYS_EAGER = True
         settings.PASSWORD_HASHERS = (

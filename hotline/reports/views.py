@@ -253,11 +253,6 @@ def icon(request, report_id):
     # can change the appearance of the map icon
     key = hashlib.md5("|".join(map(str, [category.icon.path, color])).encode("utf8")).hexdigest()
     icon_location = os.path.join(settings.MEDIA_ROOT, "generated_icons", key + ".png")
-    try:
-        os.mkdir(os.path.dirname(icon_location))
-    except FileExistsError:
-        pass
-
     # if the PNG doesn't exist, create it
     if not os.path.exists(icon_location):
         with tempfile.NamedTemporaryFile("wt", suffix=".svg") as f:

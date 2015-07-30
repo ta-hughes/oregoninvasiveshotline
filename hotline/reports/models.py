@@ -1,5 +1,8 @@
 import itertools
+import os
+import subprocess
 
+from django.conf import settings
 from django.contrib.gis.db import models
 from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
@@ -57,12 +60,35 @@ class Report(models.Model):
 
     def image_url(self):
         """
-        Returns the URL to the first public image attached to this report or None
+        Returns the URL to the thumbnail generated for the first public image
+        attached to this report or None.
+
+        If the thumbnail doesn't exist, it is created
         """
-        # TODO make this return a thumbnail image instead
         for image in itertools.chain(self.image_set.all(), *(comment.image_set.all() for comment in self.comment_set.all())):
             if image.visibility == image.PUBLIC:
-                return image.image.url
+                output_path = os.path.join(settings.MEDIA_ROOT, "generated_thumbnails", str(image.pk) + ".png")
+                thumbnail_size = "64x64"
+                if not os.path.exists(output_path):
+                    subprocess.call([
+                        "convert",
+                        image.image.path,
+                        "-thumbnail",
+                        # the > below means don't enlarge images that fit in the 64x64 box
+                        thumbnail_size + ">",
+                        "-background",
+                        "transparent",
+                        "-gravity",
+                        "center",
+                        # fill the 64x64 box with the background color (which
+                        # is transparent) so all the thumbnails are exactly the
+                        # same size
+                        "-extent",
+                        thumbnail_size,
+                        output_path
+                    ])
+                return settings.MEDIA_URL + os.path.relpath(output_path, settings.MEDIA_ROOT)
+
         return None
 
     @property

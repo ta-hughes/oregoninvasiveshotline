@@ -309,8 +309,6 @@ body.white {
 }
 
 .map-popover img {
-    max-width:64px;
-    max-height:64px;
     float:left;
     padding-right:5px;
 }
