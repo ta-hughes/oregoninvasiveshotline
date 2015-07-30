@@ -42,3 +42,16 @@ $(document).ready(function(){
     });
     $('.nav-tabs a:first, .nav-tabs a[href="' + Cookies.get('tab') + '"]').click();
 });
+
+/* This exists solely to avoid duplicating the icon dimension information
+ * everywhere. If you are to change this make sure you update
+ * `hotline/reports/views.py:icon`
+ */
+function generateIcon(url){
+    return {
+        url: url,
+        size: new google.maps.Size(30, 45),
+        origin: new google.maps.Point(0,0),
+        anchor: new google.maps.Point(15,45),
+    }
+}

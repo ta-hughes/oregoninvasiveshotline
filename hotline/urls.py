@@ -26,6 +26,8 @@ urlpatterns = patterns(
     url(r'^reports/create/?$', reports.create, name='reports-create'),
     url(r'^reports/detail/(?P<report_id>\d+)?$', reports.detail, name='reports-detail'),
     url(r'^reports/claim/(?P<report_id>\d+)?$', reports.claim, name='reports-claim'),
+    url(r'^reports/list/?$', reports.list_, name='reports-list'),
+    url(r'^reports/icon/(?P<report_id>\d+).svg$', reports.icon, name='reports-icon'),
 
     url(r'^comments/edit/(?P<comment_id>\d+)?$', comments.edit, name='comments-edit'),
 

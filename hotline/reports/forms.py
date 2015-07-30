@@ -5,12 +5,94 @@ from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
 from django.core.validators import validate_email
 from django.template.loader import render_to_string
+from elasticmodels.forms import SearchForm
 
 from hotline.comments.models import Comment
 from hotline.species.models import Category, Severity, Species
 from hotline.users.models import User
 
+from .indexes import ReportIndex
 from .models import Invite, Report
+
+
+class ReportSearchForm(SearchForm):
+    q = None  # the default SearchForm has a q field with we don't want to use
+
+    querystring = forms.CharField(required=False, widget=forms.widgets.TextInput(attrs={
+        "placeholder": "county:Washington AND species:Brome"
+    }), label="Query")
+
+    is_archived = forms.ChoiceField(choices=[
+        ("", "Any"),
+        ("archived", "Archived"),
+        ("notarchived", "Not archived"),
+    ], required=False, initial="notarchived")
+
+    is_public = forms.ChoiceField(choices=[
+        ("", "Any"),
+        ("public", "Public"),
+        ("notpublic", "Not public"),
+    ], required=False)
+
+    claimed_by = forms.ChoiceField(choices=[
+        ("", "Any"),
+        ("me", "Me"),
+        ("nobody", "Nobody"),
+    ], required=False)
+
+    sort_by = forms.ChoiceField(choices=[
+        ("_score", "Relevance"),
+        ("species.raw", "Species"),
+        ("category.raw", "Category"),
+        ("-created_on", "Date"),
+    ], required=False, widget=forms.widgets.RadioSelect)
+
+    def __init__(self, *args, user, **kwargs):
+        self.user = user
+        super().__init__(*args, index=ReportIndex, **kwargs)
+
+    def get_queryset(self):
+        queryset = super().get_queryset().prefetch_related("image_set", "comment_set__image_set")
+        is_archived = self.cleaned_data.get("is_archived")
+        if is_archived == "archived":
+            queryset = queryset.filter(is_archived=True)
+        elif is_archived == "notarchived":
+            queryset = queryset.filter(is_archived=False)
+
+        return queryset
+
+    def search(self):
+        results = super().search()
+        if self.cleaned_data.get("querystring"):
+            results = results.query(
+                "query_string",
+                query=self.cleaned_data.get("querystring", ""),
+                lenient=True,
+            )
+
+        is_public = self.cleaned_data.get("is_public")
+        if is_public == "public":
+            results = results.filter("term", is_public=True)
+        elif is_public == "notpublic":
+            results = results.filter("term", is_public=False)
+
+        is_archived = self.cleaned_data.get("is_archived")
+        if is_archived == "archived":
+            results = results.filter("term", is_archived=True)
+        elif is_archived == "notarchived":
+            results = results.filter("term", is_archived=False)
+
+        claimed_by = self.cleaned_data.get("claimed_by")
+        if claimed_by == "me":
+            results = results.filter("term", claimed_by=self.user.email)
+        elif claimed_by == "nobody":
+            results = results.filter("missing", field="claimed_by")
+
+        sort_by = self.cleaned_data.get("sort_by")
+        if sort_by:
+            results = results.sort(sort_by)
+
+        return results
 
 
 class ReportForm(forms.ModelForm):
