@@ -521,6 +521,21 @@ class IconViewTest(TestCase):
         with patch("hotline.reports.views.hashlib.md5", return_value=Mock(hexdigest=Mock(return_value="foo"))):
             self.client.get(reverse("reports-icon", args=[report.pk]))
         self.assertTrue(os.path.exists(os.path.join(settings.MEDIA_ROOT, "generated_icons", "foo.png")))
+        # remove the garbage we created
+        os.unlink(os.path.join(settings.MEDIA_ROOT, "generated_icons", "foo.png"))
+
+    def test_icon_when_no_category_icon_set(self):
+        report = make(
+            Report,
+            actual_species__severity__color="#ff8800",
+            actual_species__category__icon=None
+        )
+
+        # make sure imagemagick gets called with the right args
+        with patch("hotline.reports.views.hashlib.md5", return_value=Mock(hexdigest=Mock(return_value="foo"))):
+            with patch("hotline.reports.views.subprocess.call") as call:
+                self.client.get(reverse("reports-icon", args=[report.pk]))
+                self.assertTrue(re.match(r"convert -background none -crop 30x45\+0\+0 /tmp/.*?\.svg .*?generated_icons/foo\.png", " ".join(call.call_args[0][0])))  # noqa
 
 
 class ReportListView(ESTestCase, TestCase):

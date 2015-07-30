@@ -20,7 +20,7 @@ class Category(models.Model):
     icon = models.ImageField(upload_to="icons", help_text="""
         It is expected that you got the icon from http://mapicons.mapsmarker.com
         and they have a transparent background, and a white foreground
-    """)
+    """, null=True, blank=True)
 
     class Meta:
         db_table = "category"

@@ -251,7 +251,7 @@ def icon(request, report_id):
     icon_size = "30x45"
     # the file path for the generated icon will be based on the parameters that
     # can change the appearance of the map icon
-    key = hashlib.md5("|".join(map(str, [category.icon.path, color])).encode("utf8")).hexdigest()
+    key = hashlib.md5("|".join(map(str, [category.icon.path if category.icon else "", color])).encode("utf8")).hexdigest()
     icon_location = os.path.join(settings.MEDIA_ROOT, "generated_icons", key + ".png")
     # if the PNG doesn't exist, create it
     if not os.path.exists(icon_location):
@@ -259,7 +259,7 @@ def icon(request, report_id):
             f.write(render_to_string("reports/icon.svg", {
                 # we encode the category PNG inside the SVG, to avoid file path
                 # problems that come from generating the PNG from imagemagick
-                "img": base64.b64encode(open(category.icon.path, "rb").read()),
+                "img": base64.b64encode(open(category.icon.path, "rb").read()) if category.icon else None,
                 "color": color
             }))
             f.flush()
