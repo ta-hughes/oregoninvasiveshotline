@@ -1,6 +1,5 @@
 from django import forms
 from django.core.mail import send_mass_mail
-from django.db.models import Q
 from django.template.loader import render_to_string
 
 from hotline.reports.models import Invite

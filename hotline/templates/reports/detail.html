@@ -4,7 +4,7 @@
 
 <div class="row">
     <div class="col-md-8">
-        <h3><img src="holder.js/20x20" /> {{ report.species.name|default:report.reported_category }} <small>{% if report.species.scientific_name %}({{ report.species.scientific_name }}){% endif %}</small> on {{ report.created_on|date:"M j, Y" }}</h3>
+        <h3><img src="{{ report.icon_url }}" title="{{ report.category.name }} - {{ report.species.severity }}" alt="{{ report.category.name }} - {{ report.species.severity }}" /> {{ report.species.name|default:report.reported_category }} <small>{% if report.species.scientific_name %}({{ report.species.scientific_name }}){% endif %}</small> on {{ report.created_on|date:"M j, Y" }}</h3>
         {% if report.is_misidentified %}
             <p class="misidentified">Mistakenly reported as {{ report.reported_species }}</p>
         {% endif %}
@@ -200,7 +200,7 @@ google.maps.event.addDomListener(window, 'load', function(){;
             lat: {{ report.point.y }}, lng: {{ report.point.x }}
         },
         map: map,
-        icon: generateIcon('{% url 'reports-icon' report.pk %}')
+        icon: generateIcon('{{ report.icon_url }}')
     });
 });
 </script>

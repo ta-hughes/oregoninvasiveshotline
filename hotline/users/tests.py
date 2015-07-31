@@ -9,7 +9,7 @@ from model_mommy.mommy import make, prepare
 
 from hotline.reports.models import Invite, Report
 
-from .forms import UserForm, LoginForm
+from .forms import LoginForm, UserForm
 from .models import User
 from .perms import permissions
 from .views import detail

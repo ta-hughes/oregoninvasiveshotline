@@ -1,5 +1,5 @@
 from elasticmodels import DateField, Index, IntegerField, StringField
-from elasticsearch_dsl import analyzer, token_filter, tokenizer
+from elasticsearch_dsl import MetaField, analyzer, token_filter, tokenizer
 
 from .models import Report
 
@@ -74,3 +74,4 @@ class ReportIndex(Index):
             'is_public',
             'is_archived',
         ]
+        all = MetaField(analyzer='name')

@@ -77,6 +77,42 @@ class ReportTest(TestCase):
         # make sure the file got created
         self.assertTrue(os.path.exists(os.path.join(settings.MEDIA_ROOT, "generated_thumbnails", str(image.pk) + ".png")))
 
+    def test_icon_url_generates_image(self):
+        f = SimpleUploadedFile(
+            "foo.png",
+            base64.b64decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNg+P+/HgAFfwJ+BSYS9wAAAABJRU5ErkJggg==")
+        )
+        report = make(
+            Report,
+            actual_species__severity__color="#ff8800",
+            actual_species__category__icon=f
+        )
+        # make sure imagemagick gets called with the right args
+        with patch("hotline.reports.models.hashlib.md5", return_value=Mock(hexdigest=Mock(return_value="foo"))):
+            with patch("hotline.reports.models.subprocess.call") as call:
+                report.icon_url()  # trigger the image generation
+                self.assertTrue(re.match(r"convert -background none -crop 30x45\+0\+0 /tmp/.*?\.svg .*?generated_icons/foo\.png", " ".join(call.call_args[0][0])))  # noqa
+
+        # ensure the file actually gets created
+        with patch("hotline.reports.models.hashlib.md5", return_value=Mock(hexdigest=Mock(return_value="foo"))):
+            report.icon_url()  # trigger the report generation
+        self.assertTrue(os.path.exists(os.path.join(settings.MEDIA_ROOT, "generated_icons", "foo.png")))
+        # remove the garbage we created
+        os.unlink(os.path.join(settings.MEDIA_ROOT, "generated_icons", "foo.png"))
+
+    def test_icon_when_no_category_icon_set(self):
+        report = make(
+            Report,
+            actual_species__severity__color="#ff8800",
+            actual_species__category__icon=None
+        )
+
+        # make sure imagemagick gets called with the right args
+        with patch("hotline.reports.models.hashlib.md5", return_value=Mock(hexdigest=Mock(return_value="foo"))):
+            with patch("hotline.reports.models.subprocess.call") as call:
+                report.icon_url()  # trigger the report generation
+                self.assertTrue(re.match(r"convert -background none -crop 30x45\+0\+0 /tmp/.*?\.svg .*?generated_icons/foo\.png", " ".join(call.call_args[0][0])))  # noqa
+
 
 class CreateViewTest(TestCase):
     def test_get(self):
@@ -502,70 +538,15 @@ class ClaimViewTest(TestCase):
         self.assertRedirects(response, reverse("reports-detail", args=[report.pk]))
 
 
-class IconViewTest(TestCase):
-    def test(self):
-        f = SimpleUploadedFile(
-            "foo.png",
-            base64.b64decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNg+P+/HgAFfwJ+BSYS9wAAAABJRU5ErkJggg==")
-        )
-        report = make(
-            Report,
-            actual_species__severity__color="#ff8800",
-            actual_species__category__icon=f
-        )
-        # make sure imagemagick gets called with the right args
-        with patch("hotline.reports.views.hashlib.md5", return_value=Mock(hexdigest=Mock(return_value="foo"))):
-            with patch("hotline.reports.views.subprocess.call") as call:
-                self.client.get(reverse("reports-icon", args=[report.pk]))
-                self.assertTrue(re.match(r"convert -background none -crop 30x45\+0\+0 /tmp/.*?\.svg .*?generated_icons/foo\.png", " ".join(call.call_args[0][0])))  # noqa
-
-        # ensure the file actually gets created
-        with patch("hotline.reports.views.hashlib.md5", return_value=Mock(hexdigest=Mock(return_value="foo"))):
-            self.client.get(reverse("reports-icon", args=[report.pk]))
-        self.assertTrue(os.path.exists(os.path.join(settings.MEDIA_ROOT, "generated_icons", "foo.png")))
-        # remove the garbage we created
-        os.unlink(os.path.join(settings.MEDIA_ROOT, "generated_icons", "foo.png"))
-
-    def test_icon_when_no_category_icon_set(self):
-        report = make(
-            Report,
-            actual_species__severity__color="#ff8800",
-            actual_species__category__icon=None
-        )
-
-        # make sure imagemagick gets called with the right args
-        with patch("hotline.reports.views.hashlib.md5", return_value=Mock(hexdigest=Mock(return_value="foo"))):
-            with patch("hotline.reports.views.subprocess.call") as call:
-                self.client.get(reverse("reports-icon", args=[report.pk]))
-                self.assertTrue(re.match(r"convert -background none -crop 30x45\+0\+0 /tmp/.*?\.svg .*?generated_icons/foo\.png", " ".join(call.call_args[0][0])))  # noqa
-
-
 class ReportListView(ESTestCase, TestCase):
-    def test_permissions(self):
-        user = prepare(User, is_active=True, is_staff=False)
-        user.set_password("foo")
-        user.save()
-        self.client.login(email=user.email, password="foo")
-        # we just had to set this to True to make the self.client.login feature work
-        user.is_active = False
-        user.save()
-        response = self.client.get(reverse("reports-list"))
-        self.assertEqual(response.status_code, 403)
-
-        # staffers and managers can see the page
-        user.is_active = True
-        user.save()
-        self.client.login(email=user.email, password="foo")
-        response = self.client.get(reverse("reports-list"))
-        self.assertEqual(response.status_code, 200)
-
     def test_get(self):
         reports = make(Report, _quantity=3)
         user = prepare(User, is_active=True)
         user.set_password("foo")
         user.save()
         self.client.login(email=user.email, password="foo")
-        response = self.client.get(reverse("reports-list"))
+        with patch("hotline.reports.models.Report.icon_url", return_value="foo.png"):
+            response = self.client.get(reverse("reports-list"))
         self.assertEqual(response.status_code, 200)
         self.assertIn(str(reports[0]), response.content.decode())
 
@@ -577,7 +558,7 @@ class ReportListView(ESTestCase, TestCase):
         user.set_password("foo")
         user.save()
         self.client.login(email=user.email, password="foo")
-        response = self.client.get(reverse("reports-list") + "?querystring=foobarius&sort_by=category")
+        response = self.client.get(reverse("reports-list") + "?querystring=category:foobarius&sort_by=category")
         self.assertEqual(response.status_code, 200)
         self.assertIn("Foobarius Foobar", response.content.decode())
         self.assertNotIn(str(other_reports[0]), response.content.decode())

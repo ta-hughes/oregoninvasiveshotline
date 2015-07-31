@@ -1,9 +1,11 @@
+import itertools
 from collections import namedtuple
 
 from django import forms
 from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
 from django.core.validators import validate_email
+from django.db.models import Q
 from django.template.loader import render_to_string
 from elasticmodels.forms import SearchForm
 
@@ -20,7 +22,14 @@ class ReportSearchForm(SearchForm):
 
     querystring = forms.CharField(required=False, widget=forms.widgets.TextInput(attrs={
         "placeholder": "county:Washington AND species:Brome"
-    }), label="Query")
+    }), label="Search")
+
+    sort_by = forms.ChoiceField(choices=[
+        ("_score", "Relevance"),
+        ("species.raw", "Species"),
+        ("category.raw", "Category"),
+        ("-created_on", "Date"),
+    ], required=False, widget=forms.widgets.RadioSelect)
 
     is_archived = forms.ChoiceField(choices=[
         ("", "Any"),
@@ -40,19 +49,68 @@ class ReportSearchForm(SearchForm):
         ("nobody", "Nobody"),
     ], required=False)
 
-    sort_by = forms.ChoiceField(choices=[
-        ("_score", "Relevance"),
-        ("species.raw", "Species"),
-        ("category.raw", "Category"),
-        ("-created_on", "Date"),
-    ], required=False, widget=forms.widgets.RadioSelect)
-
-    def __init__(self, *args, user, **kwargs):
+    def __init__(self, *args, user, report_ids=(), **kwargs):
         self.user = user
+        self.report_ids = report_ids
         super().__init__(*args, index=ReportIndex, **kwargs)
 
+        # only certain fields on this form can be used by members of the public
+        public_fields = ['querystring', 'sort_by']
+        if not user.is_active:
+            for name in self.fields.keys():
+                if name not in public_fields:
+                    self.fields.pop(name)
+
+        # create a MultipleChoiceField listing the species, for each category
+        groups = itertools.groupby(
+            Species.objects.all().select_related("category").order_by("category__name", "category__pk", "name"),
+            key=lambda obj: obj.category
+        )
+        self.categories = []
+        for category, species in groups:
+            self.categories.append(category)
+            choices = [(s.pk, str(s)) for s in species]
+            self.fields['category-%d' % category.pk] = forms.MultipleChoiceField(
+                choices=choices,
+                required=False,
+                label="",
+                widget=forms.widgets.CheckboxSelectMultiple
+            )
+
+    def iter_categories(self):
+        """
+        Just makes it easier to look through the category fields
+        """
+        for category in self.categories:
+            yield category, self['category-%d' % category.pk]
+
     def get_queryset(self):
-        queryset = super().get_queryset().prefetch_related("image_set", "comment_set__image_set")
+        # We do a monster join here so we get all the data we need on all the methods we
+        # call on the report
+        queryset = super().get_queryset().prefetch_related(
+            "image_set",
+            "comment_set__image_set"
+        ).select_related(
+            "reported_category",
+            "reported_species",
+            "actual_species",
+            "actual_species__severity",
+            "reported_species__severity",
+            "actual_species__category",
+            "reported_species__category"
+        )
+
+        if not self.user.is_active:
+            # only show public reports, or reports that they were invited to,
+            # or reports that are in their session variable
+            queryset = queryset.filter(
+                Q(is_public=True) |
+                Q(pk__in=Invite.objects.filter(user=self.user)) |
+                Q(pk__in=self.report_ids)
+            )
+
+        # the is_archived field has an initial value on the form, which we want
+        # to pre-filter with
         is_archived = self.cleaned_data.get("is_archived")
         if is_archived == "archived":
             queryset = queryset.filter(is_archived=True)
@@ -64,33 +122,47 @@ class ReportSearchForm(SearchForm):
     def search(self):
         results = super().search()
         if self.cleaned_data.get("querystring"):
-            results = results.query(
+            query = results.query(
                 "query_string",
                 query=self.cleaned_data.get("querystring", ""),
                 lenient=True,
             )
 
+            # if the query isn't valid, fall back on a simple_query_string
+            # query
+            if not self.is_valid_query(query):
+                results = results.query(
+                    "simple_query_string",
+                    query=self.cleaned_data.get("querystring", ""),
+                    lenient=True,
+                )
+            else:
+                results = query
+
+        sort_by = self.cleaned_data.get("sort_by")
+        if sort_by:
+            results = results.sort(sort_by)
+
+        # collect all the species and filter by that
+        species = []
+        for category in self.categories:
+            species.extend(map(int, self.cleaned_data.get("category-%d" % category.pk, [])))
+        if species:
+            results = results.filter("terms", species_id=species)
+
         is_public = self.cleaned_data.get("is_public")
-        if is_public == "public":
-            results = results.filter("term", is_public=True)
-        elif is_public == "notpublic":
-            results = results.filter("term", is_public=False)
+        if is_public is not None:
+            results = results.filter("term", is_public=is_public == "public")
 
         is_archived = self.cleaned_data.get("is_archived")
-        if is_archived == "archived":
-            results = results.filter("term", is_archived=True)
-        elif is_archived == "notarchived":
-            results = results.filter("term", is_archived=False)
+        if is_archived is not None:
+            results = results.filter("term", is_archived=is_archived == "archived")
 
         claimed_by = self.cleaned_data.get("claimed_by")
         if claimed_by == "me":
             results = results.filter("term", claimed_by=self.user.email)
         elif claimed_by == "nobody":
             results = results.filter("missing", field="claimed_by")
-
-        sort_by = self.cleaned_data.get("sort_by")
-        if sort_by:
-            results = results.sort(sort_by)
 
         return results
 
