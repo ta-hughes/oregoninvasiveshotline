@@ -171,7 +171,11 @@ class ReportForm(forms.ModelForm):
     """
     Form for the public to submit reports
     """
-    questions = forms.CharField(label="Do you have additional questions for the invasive species expert who will review this report?", widget=forms.Textarea)
+    questions = forms.CharField(
+        label="Do you have additional questions for the invasive species expert who will review this report?",
+        widget=forms.Textarea,
+        required=False
+    )
     first_name = forms.CharField()
     last_name = forms.CharField()
     prefix = forms.CharField(required=False)
