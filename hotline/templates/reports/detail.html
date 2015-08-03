@@ -26,7 +26,7 @@
             {% for comment in comments %}
                 <div class="media" id="comment-{{ comment.pk }}">
                     <div class="media-left">
-                        <img src="holder.js/60x60" class="pull-left" />
+                        <img src="{{ comment.created_by.get_avatar_url }}" class="pull-left" />
                     </div>
                     <div class="media-body">
                         {{ comment.body }}
@@ -143,7 +143,7 @@
         {% if report.claimed_by %}
             <div class="credit clearfix sidebar-block">
                 <h4>Expert Reviewer</h4>
-                <img src="holder.js/60x60" class="pull-left" />
+                <img src="{{ report.claimed_by.get_avatar_url }}" class="pull-left" />
                 <p><strong><a href="#">{{ report.claimed_by.get_proper_name }}</a></strong> <br />{{ report.claimed_by.affiliations|linebreaksbr }}</p>
             </div>
         {% endif %}

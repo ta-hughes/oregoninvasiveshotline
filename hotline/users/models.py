@@ -32,6 +32,9 @@ class User(AbstractBaseUser):
         else:
             return self.email
 
+    def get_avatar_url(self):
+        return reverse("users-avatar", args=[self.pk])
+
     def get_authentication_url(self, request, next=None):
         signer = Signer("user-authentication")
         sig = signer.sign(self.email)
