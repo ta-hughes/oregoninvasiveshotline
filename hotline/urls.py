@@ -2,6 +2,7 @@ from django.conf import settings
 from django.conf.urls import include, patterns, url
 from django.conf.urls.static import static
 from django.contrib import admin
+from django.contrib.flatpages import views as flatpages
 from django.views.generic import TemplateView
 
 from .comments import views as comments
@@ -29,6 +30,8 @@ urlpatterns = patterns(
     url(r'^reports/list/?$', reports.list_, name='reports-list'),
 
     url(r'^comments/edit/(?P<comment_id>\d+)?$', comments.edit, name='comments-edit'),
+
+    url(r'^(?P<url>.*/)$', include('django.contrib.flatpages.urls')),
 
     # Here we define all the URL routes for the users app. Technically, you
     # could put these routes in the app itself, but for non-reusable apps, we

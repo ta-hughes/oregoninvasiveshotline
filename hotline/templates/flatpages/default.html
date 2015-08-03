@@ -1,0 +1,6 @@
+{% extends 'base.html' %}
+{% load markdown %}
+{% block title %}{{ flatpage.title }}{% endblock %}
+{% block content %}
+  {{ flatpage.content|md|safe }}
+{% endblock %}

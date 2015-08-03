@@ -107,6 +107,10 @@ DATABASES = {
 
 LOGGING_CONFIG = 'arcutils.logging.basic'
 
+#
+# Flatpages
+#
+SITE_ID=1
 
 #
 # Elaticsearch
@@ -141,10 +145,13 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
+    'django.contrib.flatpages',
     'django.contrib.gis',
     'permissions',
     'arcutils',
     'elasticmodels',
+    'hotline',
     'hotline.users',
     'hotline.species',
     'hotline.regions',
@@ -159,6 +166,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'cloak.middleware.CloakMiddleware',
     # 'djangocas.middleware.CASMiddleware',
