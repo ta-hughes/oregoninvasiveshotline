@@ -186,13 +186,8 @@ $('#add-comment a').click(function(e){
     $('#add-comment a').click()
 {% endif %}
 google.maps.event.addDomListener(window, 'load', function(){;
-    var mapOptions = {
-        center: {
-            lat: {{ report.point.y }}, lng: {{ report.point.x }}
-        },
-        streetViewControl: false,
-        zoom: 5
-    };
+    var mapOptions = getDefaultMapOptions();
+    mapOptions.center = {lat: {{ report.point.y }}, lng: {{ report.point.x }}}
     var map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
 
     var marker = new google.maps.Marker({

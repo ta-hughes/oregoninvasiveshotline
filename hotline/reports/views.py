@@ -73,7 +73,13 @@ def create(request):
             messages.success(request, "Report submitted successfully")
             request.session.setdefault("report_ids", []).append(report.pk)
             request.session.modified = True
-            return redirect("reports-detail", report.pk)
+            response = redirect("reports-detail", report.pk)
+            # the template sets some cookies in JS that we want to clear when
+            # the report is submitted. This means the next time they go to this
+            # page, the map will be initialized with the defaults
+            response.delete_cookie("center", request.get_full_path())
+            response.delete_cookie("zoom", request.get_full_path())
+            return response
     else:
         formset = ImageFormSet(queryset=Image.objects.none())
         form = ReportForm()

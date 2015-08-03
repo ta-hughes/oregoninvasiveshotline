@@ -182,6 +182,20 @@ class ReportForm(forms.ModelForm):
     suffix = forms.CharField(required=False)
     email = forms.EmailField()
 
+    class Meta:
+        model = Report
+        fields = [
+            'reported_category',
+            'reported_species',
+            'description',
+            'location',
+            'point',
+            'has_specimen',
+        ]
+        widgets = {
+            'point': forms.widgets.HiddenInput
+        }
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['reported_species'].empty_label = "Unknown"
@@ -221,17 +235,6 @@ class ReportForm(forms.ModelForm):
         )
 
         return self.instance
-
-    class Meta:
-        model = Report
-        fields = [
-            'reported_category',
-            'reported_species',
-            'description',
-            'location',
-            'point',
-            'has_specimen',
-        ]
 
 
 class PublicForm(forms.ModelForm):

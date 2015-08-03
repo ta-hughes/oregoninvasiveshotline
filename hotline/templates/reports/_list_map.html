@@ -9,14 +9,7 @@ google.maps.event.addDomListener(window, 'load', function(){;
     if(reports.length == 0){
         return;
     }
-    var mapOptions = {
-        center: {
-            lat: 0, lng: 0
-        },
-        zoom: 4,
-        streetViewControl: false,
-    };
-    var map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+    var map = new google.maps.Map(document.getElementById('map-canvas'), getDefaultMapOptions());
 
     // we need to save all the "info windows" we create, so we can close them
     // all when a balloon is clicked (so only one window opens at a time)
