@@ -106,7 +106,10 @@ def detail(request, report_id):
         # as that user, force them to re-login
         return login_required(lambda request: None)(request)
 
-    if report.pk in request.session.get("report_ids", []) and not report.created_by.is_active and report.created_by_id != request.user.pk:
+    if (report.pk in request.session.get("report_ids", []) and
+            not report.created_by.is_active and
+            report.created_by_id != request.user.pk and
+            not request.user.is_active):
         # if the user submitted the report, allow them to masquerade as that
         # user for the life of this request
         request.user = report.created_by
