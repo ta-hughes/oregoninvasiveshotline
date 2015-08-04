@@ -27,6 +27,7 @@ class Report(models.Model):
     has_specimen = models.BooleanField(default=False)
 
     point = models.PointField(srid=4326)
+    county = models.ForeignKey('counties.County', null=True)
 
     created_by = models.ForeignKey("users.User", related_name="reports")
     created_on = models.DateTimeField(auto_now_add=True)

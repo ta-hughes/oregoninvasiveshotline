@@ -10,6 +10,7 @@ from django.template.loader import render_to_string
 from elasticmodels.forms import SearchForm
 
 from hotline.comments.models import Comment
+from hotline.counties.models import County
 from hotline.species.models import Category, Severity, Species
 from hotline.users.models import User
 
@@ -217,6 +218,7 @@ class ReportForm(forms.ModelForm):
             user.save()
 
         self.instance.created_by = user
+        self.instance.county = County.objects.filter(the_geom__intersects=self.instance.point).first()
         super().save(*args, **kwargs)
 
         # if the submitter left a question, add it as a comment

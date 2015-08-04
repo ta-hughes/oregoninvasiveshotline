@@ -147,10 +147,10 @@ INSTALLED_APPS = (
     'elasticmodels',
     'hotline.users',
     'hotline.species',
-    'hotline.regions',
     'hotline.reports',
     'hotline.images',
     'hotline.comments',
+    'hotline.counties',
 )
 
 MIDDLEWARE_CLASSES = (

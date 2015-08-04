@@ -47,6 +47,7 @@ class ReportIndex(Index):
 
     description = StringField(analyzer=name)
     location = StringField(analyzer=name)
+    county = StringField(analyzer="standard", attr="county.name")
 
     claimed_by = StringField(index="not_analyzed", attr="claimed_by.email")
     claimed_by_id = IntegerField(attr="claimed_by.pk")
@@ -59,7 +60,8 @@ class ReportIndex(Index):
             "reported_category",
             "actual_species",
             "claimed_by",
-        )
+            "county",
+        ).defer("county__the_geom")
 
     def prepare_email(self, model):
         return None if model.claimed_by is None else model.claimed_by.email.lower()
