@@ -13,6 +13,7 @@
             <input type="submit" value="Search" name="submit" />
             <button onclick="window.location = '{% url 'reports-list' %}'; return false">Reset</button>
         </div>
+        {% include 'reports/_category_form.html' %}
     </div>
     <br />
     {% if reports %}
