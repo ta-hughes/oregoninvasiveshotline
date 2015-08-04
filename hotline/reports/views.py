@@ -5,7 +5,6 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
-from django.template.loader import render_to_string
 from django.utils.functional import curry
 
 from hotline.comments.forms import CommentForm
@@ -38,18 +37,7 @@ def list_(request):
 
     reports_json = []
     for report in reports:
-        image_url = report.image_url()
-        reports_json.append({
-            "lat": report.point.y,
-            "lng": report.point.x,
-            "icon": report.icon_url(),
-            "title": str(report),
-            "image_url": image_url,
-            "content": render_to_string("reports/_popover.html", {
-                "report": report,
-                "image_url": image_url,
-            }),
-        })
+        reports_json.append(report.to_json())
 
     return render(request, template, {
         "reports": reports,

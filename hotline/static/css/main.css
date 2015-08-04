@@ -86,20 +86,16 @@ small {
 }
 
 #headline {
-    /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#577716+0,3a7a16+100 */
-    background: #577716; /* Old browsers */
-    background: -moz-linear-gradient(top,  #577716 0%, #3a7a16 100%); /* FF3.6+ */
-    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#577716), color-stop(100%,#3a7a16)); /* Chrome,Safari4+ */
-    background: -webkit-linear-gradient(top,  #577716 0%,#3a7a16 100%); /* Chrome10+,Safari5.1+ */
-    background: -o-linear-gradient(top,  #577716 0%,#3a7a16 100%); /* Opera 11.10+ */
-    background: -ms-linear-gradient(top,  #577716 0%,#3a7a16 100%); /* IE10+ */
-    background: linear-gradient(to bottom,  #577716 0%,#3a7a16 100%); /* W3C */
-    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#577716', endColorstr='#3a7a16',GradientType=0 ); /* IE6-9 */
+    background: #577716;
 }
 
 #headline-info {
     color:#fff;
     font-size:18px;
+}
+
+#headline-map {
+    padding-right:0px;
 }
 
 #headline-buttons {
@@ -163,6 +159,17 @@ small {
     padding-right:2%;
     margin-left:0;
     margin-right:0;
+}
+
+@media (max-width: 992px){
+    .midline-block, .midline-block.longest {
+        width:100%;
+        display:block;
+        margin-left:0;
+        margin-right:0;
+        border:none;
+        padding:0;
+    }
 }
 
 .formset-row-deleted {

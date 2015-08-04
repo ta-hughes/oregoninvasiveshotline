@@ -61,6 +61,20 @@ class Report(models.Model):
 
         return self.category.name
 
+    def to_json(self):
+        image_url = self.image_url()
+        return {
+            "lat": self.point.y,
+            "lng": self.point.x,
+            "icon": self.icon_url(),
+            "title": str(self),
+            "image_url": image_url,
+            "content": render_to_string("reports/_popover.html", {
+                "report": self,
+                "image_url": image_url,
+            }),
+        }
+
     def icon_url(self):
         """
         This view generates on the fly a PNG image from a SVG, which can be used as

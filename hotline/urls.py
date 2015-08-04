@@ -2,11 +2,11 @@ from django.conf import settings
 from django.conf.urls import include, patterns, url
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.views.generic import TemplateView
 
 from .comments import views as comments
 from .reports import views as reports
 from .users import views as users
+from .views import home
 
 admin.autodiscover()
 
@@ -21,8 +21,7 @@ urlpatterns = patterns(
 
     # the homepage goes straight to a template. But you may want to change this
     # into a normal view function
-    url(r'^$', TemplateView.as_view(template_name="home.html"), name='home'),
-
+    url(r'^$', home, name="home"),
     url(r'^reports/create/?$', reports.create, name='reports-create'),
     url(r'^reports/detail/(?P<report_id>\d+)?$', reports.detail, name='reports-detail'),
     url(r'^reports/claim/(?P<report_id>\d+)?$', reports.claim, name='reports-claim'),
