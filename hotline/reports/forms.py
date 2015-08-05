@@ -151,12 +151,12 @@ class ReportSearchForm(SearchForm):
         if species:
             results = results.filter("terms", species_id=species)
 
-        is_public = self.cleaned_data.get("is_public")
-        if is_public is not None:
+        is_public = self.cleaned_data.get("is_public", "")
+        if is_public is not "":
             results = results.filter("term", is_public=is_public == "public")
 
-        is_archived = self.cleaned_data.get("is_archived")
-        if is_archived is not None:
+        is_archived = self.cleaned_data.get("is_archived", "")
+        if is_archived is not "":
             results = results.filter("term", is_archived=is_archived == "archived")
 
         claimed_by = self.cleaned_data.get("claimed_by")
