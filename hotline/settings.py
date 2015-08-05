@@ -149,6 +149,7 @@ INSTALLED_APPS = (
     'hotline.species',
     'hotline.reports',
     'hotline.images',
+    'hotline.notifications',
     'hotline.comments',
     'hotline.counties',
 )

@@ -4,6 +4,7 @@ from django.conf.urls.static import static
 from django.contrib import admin
 
 from .comments import views as comments
+from .notifications import views as notifications
 from .reports import views as reports
 from .users import views as users
 from .views import home
@@ -29,9 +30,8 @@ urlpatterns = patterns(
 
     url(r'^comments/edit/(?P<comment_id>\d+)?$', comments.edit, name='comments-edit'),
 
-    # Here we define all the URL routes for the users app. Technically, you
-    # could put these routes in the app itself, but for non-reusable apps, we
-    # keep them in the main urlconfs file
+    url(r'^notifications/create/?$', notifications.create, name='notifications-create'),
+
     url(r'^users/home/?$', users.home, name='users-home'),
     url(r'^users/detail/(?P<user_id>\d+)?$', users.detail, name='users-detail'),
     url(r'^users/list/?$', users.list_, name='users-list'),

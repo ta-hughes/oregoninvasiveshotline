@@ -11,6 +11,7 @@ from elasticmodels.forms import SearchForm
 
 from hotline.comments.models import Comment
 from hotline.counties.models import County
+from hotline.notifications.models import UserNotificationQuery
 from hotline.species.models import Category, Severity, Species
 from hotline.users.models import User
 
@@ -19,10 +20,18 @@ from .models import Invite, Report
 
 
 class ReportSearchForm(SearchForm):
+    """
+    This form handles searching of reports by managers and anonymous users alike.
+
+    Form data that is submitted can be used to create a "UserNotificationQuery"
+    object in the database, which captures the input to this form as a
+    QueryDict string. So be careful if you start renaming fields, since that
+    will break any UserNotificationQuery rows that rely on that field.
+    """
     q = None  # the default SearchForm has a q field with we don't want to use
 
     querystring = forms.CharField(required=False, widget=forms.widgets.TextInput(attrs={
-        "placeholder": "county:Washington AND species:Brome"
+        "placeholder": "county:Washington AND category:Aquatic"
     }), label="Search")
 
     sort_by = forms.ChoiceField(choices=[
@@ -235,6 +244,8 @@ class ReportForm(forms.ModelForm):
             "noreply@pdx.edu",
             [user.email]
         )
+
+        UserNotificationQuery.notify(self.instance, request)
 
         return self.instance
 
