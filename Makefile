@@ -22,9 +22,7 @@ init:
 	dropdb --if-exists $(PROJECT_NAME)
 	createdb $(PROJECT_NAME)
 	psql -c "CREATE EXTENSION postgis" $(PROJECT_NAME)
-	$(MANAGE) migrate
-	$(MANAGE) check
-	# create a dummy user
+	$(MANAGE) reload
 	$(MANAGE) loaddata dummy_user.json category.json severity.json species.json counties.json
 
 clean:
@@ -41,6 +39,7 @@ test:
 reload:
 	$(MANAGE) migrate
 	$(MANAGE) collectstatic --noinput
+	$(MANAGE) rebuild_index --clopen --noinput
 	touch $(PROJECT_NAME)/wsgi.py
 
 $(VENV_DIR):
