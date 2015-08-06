@@ -22,7 +22,7 @@ init:
 	dropdb --if-exists $(PROJECT_NAME)
 	createdb $(PROJECT_NAME)
 	psql -c "CREATE EXTENSION postgis" $(PROJECT_NAME)
-	$(MANAGE) reload
+	@$(MAKE) reload
 	$(MANAGE) loaddata dummy_user.json category.json severity.json species.json counties.json
 
 clean:
