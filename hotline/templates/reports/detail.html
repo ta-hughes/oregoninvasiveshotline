@@ -4,12 +4,23 @@
 
 <div class="row">
     <div class="col-md-8">
-        <h3><img src="{{ report.icon_url }}" title="{{ report.category.name }} - {{ report.species.severity }}" alt="{{ report.category.name }} - {{ report.species.severity }}" /> {{ report.species.name|default:report.reported_category }} <small>{% if report.species.scientific_name %}({{ report.species.scientific_name }}){% endif %}</small> on {{ report.created_on|date:"M j, Y" }}</h3>
-        {% if report.is_misidentified %}
-            <p class="misidentified">Mistakenly reported as {{ report.reported_species }}</p>
-        {% endif %}
+        <div class="report-heading clearfix">
+            <img src="{{ report.icon_url }}" title="{{ report.category.name }} - {{ report.species.severity }}" alt="{{ report.category.name }} - {{ report.species.severity }}" /> 
+            <h3>{{ report.species.name|default:report.reported_category }} <small>{% if report.species.scientific_name %}({{ report.species.scientific_name }}){% endif %}</small> on {{ report.created_on|date:"M j, Y" }}</h3>
+            {% if report.is_misidentified %}
+                <p class="misidentified">Mistakenly reported as {{ report.reported_species }}</p>
+            {% endif %}
+        </div>
 
-        <p><em>Reporter's Description:</em> {{ report.description|linebreaksbr }}</p>
+        <p class="pull-right">
+            {% if report.has_specimen %}
+                <small><em>Submitter has sample</em></small>
+            {% else %}
+                <small><em>Submitter does not have a specimen</em></small>
+            {% endif %}
+        </p>
+        <h4>Description of specimen</h4>
+        <blockquote>{{ report.description|linebreaksbr }}</blockquote>
 
         {% if images %}
             <div class="galleria">
@@ -21,7 +32,8 @@
 
         {% endif %}
 
-        <h3>Commentary</h3>
+        <hr />
+        <h4>Commentary</h4>
         <div class="comment-list">
             {% for comment in comments %}
                 <div class="media" id="comment-{{ comment.pk }}">
@@ -31,7 +43,13 @@
                     <div class="media-body">
                         {{ comment.body }}
                         <p class="text-right">
-                            <cite>{{ comment.created_by }}</cite>
+                            {% if user.is_active %}
+                                <cite>{{ comment.created_by }}</cite>
+                            {% elif user|can_create_comment:report %}
+                                <cite>{{ comment.created_by }}</cite>
+                            {% else %}
+                                <cite>Reporter</cite>
+                            {% endif %}
                             &ndash; {{ comment.created_on }}
                             {% if user|can_edit_comment:comment %}
                                 <a href="{% url 'comments-edit' comment.pk %}">Edit</a>
@@ -151,6 +169,9 @@
         <div class="location sidebar-block">
             <h4>Location</h4>
             <div id="map-canvas" style="height:200px"></div>
+            {% if report.location %}
+                <blockquote>{{ report.location|linebreaksbr }}</blockquote>
+            {% endif %}
         </div>
 
         <div class="related sidebar-block">

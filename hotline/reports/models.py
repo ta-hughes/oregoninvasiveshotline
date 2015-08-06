@@ -24,7 +24,7 @@ class Report(models.Model):
 
     description = models.TextField(verbose_name="Please provide a description of your find")
     location = models.TextField(verbose_name="Please provide a description of the area where species was found")
-    has_specimen = models.BooleanField(default=False)
+    has_specimen = models.BooleanField(default=False, verbose_name="Do you have a physical specimen?")
 
     point = models.PointField(srid=4326)
     county = models.ForeignKey('counties.County', null=True)

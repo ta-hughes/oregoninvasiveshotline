@@ -49,12 +49,12 @@
                     </tr>
                     <tr>
                         {% if report.image_url %}
-                            <td><em>Region:</em> {{ report.county|default:"foo" }}</td>
+                            <td><em>Region:</em> {{ report.county|default:"?" }}</td>
                             <td class="text-right"><em title="Early Detection and Rapid Response">EDRR Status:</em> {{ report.get_edrr_status_display|default:"None" }}</td>
                         {% else %}
                             <td colspan="3">
                                 <div class="pull-left">
-                                    <em>Region:</em> {{ report.county|default:"foo" }}
+                                    <em>Region:</em> {{ report.county|default:"?" }}
                                 </div>
                                 <div class="pull-right">
                                     <em title="Early Detection and Rapid Response">EDRR Status:</em> {{ report.get_edrr_status_display|default:"None" }}

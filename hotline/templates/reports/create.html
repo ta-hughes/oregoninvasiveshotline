@@ -39,6 +39,7 @@
 
     <fieldset>
         <legend>Identification</legend>
+        {{ form.has_specimen|bootstrap }}
         {{ form.reported_category|bootstrap }}
         <div id="reported-species">
             {{ form.reported_species|bootstrap }}
