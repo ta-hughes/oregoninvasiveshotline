@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% load permissions %}
+{% block content %}
+<div class="row">
+    {% if user|can_modify_page %}
+        <div class="col-md-2">
+            <a href="{% url 'pages-create' %}" class="btn btn-primary"><strong>Create</strong> a new Page</a>
+        </div>
+    {% endif %}
+</div>
+<hr />
+<div class="row">
+    <div class="col-md-2">
+        <ul>
+            {% for page in pages %}
+              <li><a href="{{ page.url }}">{{ page.title }}</a></li>
+            {% empty %}
+              <li>No Pages</li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div class="col-md-8">
+        <p>Here is a list of this sites current markdown-supported static pages.</p>
+    </div>
+</div>
+{% endblock %}
