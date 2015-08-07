@@ -10,6 +10,7 @@ from .notifications import views as notifications
 from .reports import views as reports
 from .users import views as users
 from .views import home
+from .flatpages import views as pages
 
 admin.autodiscover()
 
@@ -34,7 +35,12 @@ urlpatterns = patterns(
 
     url(r'^notifications/create/?$', notifications.create, name='notifications-create'),
 
-    url(r'^(?P<url>.*/)$', include('django.contrib.flatpages.urls')),
+    # flat pages get their urls figured out for them
+    url(r'^pages/list/?$', pages._list, name='pages-list'),
+    url(r'^pages/create/?$', pages.create, name='pages-create'),
+    url(r'^pages/edit/(?P<page_url>[a-zA-Z0-9_.-/]+)?$', pages.edit, name='pages-edit'),
+    url(r'^pages/delete/(?P<page_url>[a-zA-Z0-9_.-/]+)?$', pages.delete, name='pages-delete'),
+    url(r'^pages/?', include('django.contrib.flatpages.urls')),
 
     # Here we define all the URL routes for the users app. Technically, you
     # could put these routes in the app itself, but for non-reusable apps, we
