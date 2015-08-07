@@ -15,12 +15,11 @@ from hotline.images.models import Image
 from hotline.species.models import category_id_to_species_id_json
 
 from .forms import (
-    ArchiveForm,
     ConfirmForm,
     InviteForm,
-    PublicForm,
     ReportForm,
     ReportSearchForm,
+    SettingsForm,
 )
 from .models import Invite, Report
 from .perms import can_manage_report, can_view_private_report, permissions
@@ -112,8 +111,7 @@ def detail(request, report_id):
     image_formset = None
     invite_form = None
     confirm_form = None
-    archive_form = None
-    public_form = None
+    settings_form = None
     # this tells us which form was filled out since there are many on the page
     submit_flag = request.POST.get("submit_flag")
 
@@ -145,25 +143,15 @@ def detail(request, report_id):
         else:
             confirm_form = ConfirmForm(instance=report)
 
-        # Marking the report as public...
-        if request.POST and submit_flag == PublicForm.SUBMIT_FLAG:
-            public_form = PublicForm(request.POST, instance=report)
-            if public_form.is_valid():
-                public_form.save()
+        # Marking the report settings
+        if request.POST and submit_flag == SettingsForm.SUBMIT_FLAG:
+            settings_form = SettingsForm(request.POST, instance=report)
+            if settings_form.is_valid():
+                settings_form.save()
                 messages.success(request, "Updated!")
                 return redirect(request.get_full_path())
         else:
-            public_form = PublicForm(instance=report)
-
-        # Marking the report as archived...
-        if request.POST and submit_flag == ArchiveForm.SUBMIT_FLAG:
-            archive_form = ArchiveForm(request.POST, instance=report)
-            if archive_form.is_valid():
-                archive_form.save()
-                messages.success(request, "Updated!")
-                return redirect(request.get_full_path())
-        else:
-            archive_form = ArchiveForm(instance=report)
+            settings_form = SettingsForm(instance=report)
 
         # Inviting experts...
         if request.POST and submit_flag == InviteForm.SUBMIT_FLAG:
@@ -203,8 +191,7 @@ def detail(request, report_id):
         # all the forms
         "image_formset": image_formset,
         "comment_form": comment_form,
-        "public_form": public_form,
-        "archive_form": archive_form,
+        "settings_form": settings_form,
         "invite_form": invite_form,
         "confirm_form": confirm_form,
     })

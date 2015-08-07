@@ -35,7 +35,7 @@ class Report(models.Model):
     claimed_by = models.ForeignKey("users.User", null=True, default=None, related_name="claimed_reports")
 
     # these are copied over from the original site
-    edrr_status = models.IntegerField(choices=[
+    edrr_status = models.IntegerField(verbose_name="EDDR Status", choices=[
         (0, '',),
         (1, 'No Response/Action Required',),
         (2, 'Local expert notified',),

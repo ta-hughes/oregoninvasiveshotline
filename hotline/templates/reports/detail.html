@@ -12,11 +12,16 @@
             {% endif %}
         </div>
 
-        <p class="pull-right">
+        <p class="report-status-info">
             {% if report.has_specimen %}
                 <small><em>Submitter has sample</em></small>
             {% else %}
                 <small><em>Submitter does not have a specimen</em></small>
+            {% endif %}
+
+            {% if report.edrr_status %}
+                <br />
+                <small title="Early Detection and Rapid Response"><strong>EDRR Status:</strong> {{ report.get_edrr_status_display }}</small>
             {% endif %}
         </p>
         <h4>Description of specimen</h4>
@@ -28,8 +33,6 @@
                     <img src="{{ image.image.url }}" alt="{{ image.name }}" />
                 {% endfor %}
             </div>
-        {% else %}
-
         {% endif %}
 
         <hr />
@@ -72,15 +75,21 @@
         {% if report.claimed_by and report.claimed_by == user %}
             <div class="report-management clearfix sidebar-block">
                 <h4>Report Management</h4>
-                <ul class="nav nav-tabs report-management-icons" id="management-tabs">
-                    <li class="active"><a data-toggle="tab" href="#confirm"><span class="glyphicon glyphicon-ok"></span></a></li>
-                    <li><a data-toggle="tab" href="#public"><span class="glyphicon glyphicon-eye-open"></span></a></li>
-                    <li><a data-toggle="tab" href="#invite"><span class="glyphicon glyphicon-phone-alt"></span> {% if invites %}<small>({{ invites|length }})</small>{% endif %}</a></li>
-                    <li><a data-toggle="tab" href="#archive"><span class="glyphicon glyphicon-oil"></span></a></li>
+                <ul class="nav nav-tabs" id="management-tabs">
+                    <li class="active"><a data-toggle="tab" href="#confirm"><span class="glyphicon glyphicon-grain"></span> Species</a></li>
+                    <li><a data-toggle="tab" href="#public"><span class="glyphicon glyphicon-pencil"></span> Settings</a></li>
+                    <li><a data-toggle="tab" href="#invite"><span class="glyphicon glyphicon-phone-alt"></span> Invite {% if invites %}<small>({{ invites|length }})</small>{% endif %}</a></li>
                 </ul>
 
                 <div class="tab-content">
                     <div class="confirm-form tab-pane active" id="confirm">
+                        <p>
+                            {% if report.actual_species %}
+                                <strong class="text-success">The species is confirmed</strong>
+                            {% else  %}
+                                <strong class="text-warning">The species is unconfirmed</strong>
+                            {% endif %}
+                        </p>
                         <form method="post">
                             {% csrf_token %}
                             {% if confirm_form.errors %}
@@ -91,6 +100,7 @@
                                     {% endif %}
                                 </div>
                             {% endif %}
+                            {{ confirm_form.edrr_status|bootstrap }}
                             {{ confirm_form.category|bootstrap }}
                             <div id="reported-species">
                                 {{ confirm_form.actual_species|bootstrap }}
@@ -109,16 +119,19 @@
                     </div>
                     <div class="public-form tab-pane" id="public">
                         <form method="post">
+                            <label>Change settings</label>
                             {% csrf_token %}
-                            {{ public_form|bootstrap }}
-                            <input type="hidden" name="submit_flag" value="{{ public_form.SUBMIT_FLAG }}" />
+                            {{ settings_form|bootstrap }}
+                            <input type="hidden" name="submit_flag" value="{{ settings_form.SUBMIT_FLAG }}" />
                             <input type="submit" value="Submit" name="submit" />
                         </form>
                     </div>
                     <div class="public-form tab-pane" id="invite">
-                        {% if invites %}
-                            <p>You have already invited: {{ invites|join:", " }}</p>
-                        {% endif %}
+                        <p>Invite an expert to review this report.
+                            {% if invites %}
+                                You have already invited: {{ invites|join:", " }}.
+                            {% endif %}
+                        </p>
                         <form method="post">
                             {% if invite_form.errors %}
                                 <div class="alert alert-danger">
@@ -131,14 +144,6 @@
                             {% csrf_token %}
                             {{ invite_form|bootstrap }}
                             <input type="hidden" name="submit_flag" value="{{ invite_form.SUBMIT_FLAG }}" />
-                            <input type="submit" value="Submit" name="submit" />
-                        </form>
-                    </div>
-                    <div class="archive-form tab-pane" id="archive">
-                        <form method="post">
-                            {% csrf_token %}
-                            {{ archive_form|bootstrap }}
-                            <input type="hidden" name="submit_flag" value="{{ archive_form.SUBMIT_FLAG }}" />
                             <input type="submit" value="Submit" name="submit" />
                         </form>
                     </div>
@@ -158,7 +163,7 @@
                 </form>
             </div>
         {% endif %}
-        {% if report.claimed_by %}
+        {% if report.claimed_by and report.claimed_by != user %}
             <div class="credit clearfix sidebar-block">
                 <h4>Expert Reviewer</h4>
                 <img src="{{ report.claimed_by.get_avatar_url }}" class="pull-left" />

@@ -206,10 +206,6 @@ small {
     margin-top:50px;
 }
 
-.report-management-icons {
-    font-size:18px;
-}
-
 .report-management a {
     color:#aaa;
     text-align:center;
@@ -399,4 +395,9 @@ blockquote {
 .location blockquote {
     margin-top:5px;
     font-size:12px;
+}
+
+.report-status-info {
+    float:right;
+    padding-left:10px;
 }

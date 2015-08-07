@@ -18,7 +18,7 @@ from hotline.images.models import Image
 from hotline.species.models import Category, Severity, Species
 from hotline.users.models import User
 
-from .forms import ArchiveForm, ConfirmForm, InviteForm, PublicForm, ReportForm
+from .forms import ConfirmForm, InviteForm, ReportForm, SettingsForm
 from .models import Invite, Report
 
 
@@ -283,8 +283,7 @@ class DetailViewTest(TestCase):
             "image_formset",
             "invite_form",
             "confirm_form",
-            "archive_form",
-            "public_form"
+            "settings_form"
         ]
         for form in forms:
             self.assertEqual(None, response.context[form])
@@ -301,8 +300,7 @@ class DetailViewTest(TestCase):
             "image_formset",
             "invite_form",
             "confirm_form",
-            "archive_form",
-            "public_form"
+            "settings_form"
         ]
         for form in forms:
             self.assertNotEqual(None, response.context[form])
@@ -314,7 +312,7 @@ class DetailViewTest(TestCase):
         user.save()
         self.client.login(email=user.email, password="foo")
 
-        form_classes = [ConfirmForm, ArchiveForm, PublicForm]
+        form_classes = [ConfirmForm, SettingsForm]
         for form_class in form_classes:
             with patch("hotline.reports.views.%s" % form_class.__name__, SUBMIT_FLAG="foo") as m:
                 data = {

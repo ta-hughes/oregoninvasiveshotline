@@ -250,23 +250,15 @@ class ReportForm(forms.ModelForm):
         return self.instance
 
 
-class PublicForm(forms.ModelForm):
-    SUBMIT_FLAG = "PUBLIC"
+class SettingsForm(forms.ModelForm):
+    SUBMIT_FLAG = "SETTINGS"
 
     class Meta:
         model = Report
         fields = [
-            'is_public'
-        ]
-
-
-class ArchiveForm(forms.ModelForm):
-    SUBMIT_FLAG = "ARCHIVE"
-
-    class Meta:
-        model = Report
-        fields = [
-            'is_archived'
+            'is_public',
+            'is_archived',
+            'edrr_status',
         ]
 
 
@@ -276,7 +268,7 @@ class InviteForm(forms.Form):
     """
     SUBMIT_FLAG = "INVITE"
 
-    emails = forms.CharField()
+    emails = forms.CharField(label="Email addresses (comma separated)")
     body = forms.CharField(widget=forms.Textarea, required=False)
 
     def clean_emails(self):
