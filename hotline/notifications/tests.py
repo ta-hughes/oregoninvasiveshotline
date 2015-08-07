@@ -50,8 +50,8 @@ class UserNotificationQueryTest(ESTestCase, TestCase):
         user = make(User)
         # we subscribe to the same thing twice, just to ensure that only one
         # email is sent to the user, when a report matches
-        make(UserNotificationQuery, query="querystring=foobarius", user=user)
-        make(UserNotificationQuery, query="querystring=foobarius", user=user)
+        make(UserNotificationQuery, query="querystring=category:foobarius", user=user)
+        make(UserNotificationQuery, query="querystring=category:foobarius", user=user)
 
         # this report doesn't have the words "foobarius" in it, so no email
         # should be sent
@@ -65,7 +65,7 @@ class UserNotificationQueryTest(ESTestCase, TestCase):
 
         # this report does have the word foobarius in it, so it should trigger
         # an email to be sent
-        report = make(Report, location="foobarius")
+        report = make(Report, reported_category__name="foobarius")
         request = Mock(build_absolute_uri=Mock(return_value=""))
         UserNotificationQuery.notify(report, request=request)
         thread.call_args[1]['target'](*thread.call_args[1]['args'])
