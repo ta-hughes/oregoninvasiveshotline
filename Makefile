@@ -26,6 +26,7 @@ init:
 	$(MANAGE) check
 	# create a dummy user
 	$(MANAGE) loaddata dummy_user.json category.json severity.json species.json
+	psql $(PROJECT_NAME) < pages_backup.sql 
 
 clean:
 	find . -iname "*.pyc" -delete
