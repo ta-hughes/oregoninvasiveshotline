@@ -13,15 +13,19 @@
         </div>
 
         <p class="report-status-info">
+            {% if user|can_create_comment:report %}
+                <strong>Submitted by:</strong> {{ report.created_by.first_name }} {{ report.created_by.last_name }} ({{ report.created_by.email }})<br />
+            {% endif %}
+
             {% if report.has_specimen %}
-                <small><em>Submitter has sample</em></small>
+                <em>Submitter has sample</em>
             {% else %}
-                <small><em>Submitter does not have a specimen</em></small>
+                <em>Submitter does not have a specimen</em>
             {% endif %}
 
             {% if report.edrr_status %}
                 <br />
-                <small title="Early Detection and Rapid Response"><strong>EDRR Status:</strong> {{ report.get_edrr_status_display }}</small>
+                <strong title="Early Detection and Rapid Response">EDRR Status:</strong> {{ report.get_edrr_status_display }}
             {% endif %}
         </p>
         <h4>Description of specimen</h4>
@@ -45,15 +49,13 @@
                     </div>
                     <div class="media-body">
                         {{ comment.body }}
-                        <p class="text-right">
-                            {% if user.is_active %}
-                                <cite>{{ comment.created_by }}</cite>
-                            {% elif user|can_create_comment:report %}
-                                <cite>{{ comment.created_by }}</cite>
+                        <p class="text-right comment-meta">
+                            {% if user.is_active or user|can_create_comment:report %}
+                                <cite>{{ comment.created_by }} {% if comment_form.visibility %}({{ comment.get_visibility_display.split.0|lower }}){% endif %}</cite>
                             {% else %}
                                 <cite>Reporter</cite>
                             {% endif %}
-                            &ndash; {{ comment.created_on }}
+                            <br /> {{ comment.created_on }}
                             {% if user|can_edit_comment:comment %}
                                 <a href="{% url 'comments-edit' comment.pk %}">Edit</a>
                             {% endif %}
@@ -149,26 +151,33 @@
                     </div>
                 </div>
             </div>
-        {% elif user|can_claim_report:report %}
+        {% elif user|can_claim_report:report and not report.claimed_by %}
             <div class="alert alert-warning text-center sidebar-block">
                 <form method="post" action="{% url 'reports-claim' report.pk %}" style="display:inline">
                     {% csrf_token %}
-                    {% if report.claimed_by %}
-                        This report is claimed...
-                        <button class="btn btn-warning btn-xs" type="submit">steal it!</button>
-                    {% else %}
-                        This report is unclaimed...
-                        <button class="btn btn-warning btn-xs" type="submit">Claim it!</button>
-                    {% endif %}
+                    This report is unclaimed...
+                    <button class="btn btn-warning btn-xs" type="submit">Claim it!</button>
                 </form>
             </div>
         {% endif %}
+
         {% if report.claimed_by and report.claimed_by != user %}
             <div class="credit clearfix sidebar-block">
                 <h4>Expert Reviewer</h4>
                 <img src="{{ report.claimed_by.get_avatar_url }}" class="pull-left" />
                 <p><strong><a href="#">{{ report.claimed_by.get_proper_name }}</a></strong> <br />{{ report.claimed_by.affiliations|linebreaksbr }}</p>
             </div>
+        {% endif %}
+
+        {% if report.claimed_by and user|can_claim_report:report and report.claimed_by != user %}
+            <div class="alert alert-warning text-center sidebar-block">
+                <form method="post" action="{% url 'reports-claim' report.pk %}" style="display:inline">
+                    {% csrf_token %}
+                    This report is claimed...
+                    <button class="btn btn-warning btn-xs" type="submit">steal it!</button>
+                </form>
+            </div>
+
         {% endif %}
 
         <div class="location sidebar-block">

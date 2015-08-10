@@ -251,6 +251,11 @@ small {
     background-color:#F9F9F9;
 }
 
+.comment-meta {
+    font-size:11px;
+    padding-top:5px;
+}
+
 #images {
     margin-bottom:20px;
 }
@@ -400,6 +405,11 @@ blockquote {
 .report-status-info {
     float:right;
     padding-left:10px;
+    font-size:11px;
+}
+
+.table-striped2>tbody>tr:nth-of-type(even) {
+    background-color: #f9f9f9;
 }
 
 .getcontent-edit {
