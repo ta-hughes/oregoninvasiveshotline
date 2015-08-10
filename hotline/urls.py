@@ -6,11 +6,11 @@ from django.contrib.flatpages import views as flatpages
 from django.views.generic import TemplateView
 
 from .comments import views as comments
+from .flatpages import views as pages
 from .notifications import views as notifications
 from .reports import views as reports
 from .users import views as users
 from .views import home
-from .flatpages import views as pages
 
 admin.autodiscover()
 
