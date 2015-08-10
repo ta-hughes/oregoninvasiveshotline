@@ -9,6 +9,7 @@ from hotline.flatpages.forms import FlatterPageForm
 
 from .perms import permissions
 
+
 def _list(request):
     """
 
@@ -19,14 +20,17 @@ def _list(request):
         'pages': pages,
     })
 
+
 @permissions.can_modify_page
 def create(request):
     return _edit(request, page_url=None)
+
 
 @permissions.can_modify_page
 def edit(request, page_url):
     print(page_url)
     return _edit(request, page_url)
+
 
 def _edit(request, page_url):
 
@@ -57,6 +61,7 @@ def _edit(request, page_url):
         'form': form,
         'page_url': url,
     })
+
 
 @permissions.can_modify_page
 def delete(request, page_url):

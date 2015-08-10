@@ -110,7 +110,7 @@ LOGGING_CONFIG = 'arcutils.logging.basic'
 #
 # Flatpages
 #
-SITE_ID=1
+SITE_ID = 1
 
 #
 # Elaticsearch

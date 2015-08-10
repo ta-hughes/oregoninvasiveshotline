@@ -1,9 +1,9 @@
 from django import forms
-from django.contrib.flatpages.models import FlatPage
 from django.contrib.flatpages.forms import FlatpageForm
 from django.utils.translation import ugettext
 
 reserved = ['edit', 'create', 'list', 'delete']
+
 
 class FlatterPageForm(FlatpageForm):
 
@@ -19,4 +19,3 @@ class FlatterPageForm(FlatpageForm):
                     code='duplicate_url',
                 )
         return url
-
