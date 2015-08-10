@@ -1,9 +1,9 @@
 coverage==3.7.1
 Django==1.8.3
-django-arcutils==1.1.1
+git+https://github.com/PSU-OIT-ARC/django-arcutils.git#egg=django-arcutils
 django-cloak==1.0.0
 django-perms==1.2.1
-elasticmodels==0.1.0
+git+https://github.com/PSU-OIT-ARC/elasticmodels.git#egg=elasticmodels
 elasticsearch==1.6.0
 elasticsearch-dsl==0.0.4
 flake8==2.4.1
