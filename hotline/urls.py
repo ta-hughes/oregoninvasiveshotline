@@ -4,7 +4,7 @@ from django.conf.urls.static import static
 from django.contrib import admin
 
 from .comments import views as comments
-from .flatpages import views as pages
+from .pages import views as pages
 from .notifications import views as notifications
 from .reports import views as reports
 from .users import views as users
@@ -34,10 +34,10 @@ urlpatterns = patterns(
     url(r'^notifications/create/?$', notifications.create, name='notifications-create'),
 
     # flat pages get their urls figured out for them
-    url(r'^pages/list/?$', pages._list, name='pages-list'),
+    url(r'^pages/list/?$', pages.list_, name='pages-list'),
     url(r'^pages/create/?$', pages.create, name='pages-create'),
-    url(r'^pages/edit/(?P<page_url>[a-zA-Z0-9_.-/]+)?$', pages.edit, name='pages-edit'),
-    url(r'^pages/delete/(?P<page_url>[a-zA-Z0-9_.-/]+)?$', pages.delete, name='pages-delete'),
+    url(r'^pages/edit/(?P<page_id>\d+)?$', pages.edit, name='pages-edit'),
+    url(r'^pages/delete/(?P<page_id>\d+)?$', pages.delete, name='pages-delete'),
     url(r'^pages/?', include('django.contrib.flatpages.urls')),
 
     # Here we define all the URL routes for the users app. Technically, you

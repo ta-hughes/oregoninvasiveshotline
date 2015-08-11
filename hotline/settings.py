@@ -151,7 +151,7 @@ INSTALLED_APPS = (
     'permissions',
     'arcutils',
     'elasticmodels',
-    'hotline',
+    'hotline.pages',
     'hotline.users',
     'hotline.species',
     'hotline.reports',

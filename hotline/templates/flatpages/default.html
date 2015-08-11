@@ -6,7 +6,7 @@
 {% block title %}{{ flatpage.title }}{% endblock %}
 {% block content %}
 {% if user.is_authenticated and user.is_staff %}
-    <a href="{% url 'pages-edit' flatpage.url %}" class="btn btn-warning">Edit</a>
+    <a href="{% url 'pages-edit' flatpage.id %}" class="btn btn-warning">Edit</a>
 {% endif %}
 {{ flatpage.content|md|safe }}
 {% endblock %}

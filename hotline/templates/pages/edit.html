@@ -21,8 +21,8 @@
   <div class="row">
     <div class="col-md-12">
       <a href="{% url 'pages-list' %}" class="btn btn-warning">Cancel</a>
-      {% if page_url %}
-        <a href="{% url 'pages-delete' page_url %}" class="btn btn-danger">Delete</a>
+      {% if page_id %}
+        <a href="{% url 'pages-delete' page_id %}" class="btn btn-danger">Delete</a>
       {% endif %}
       <input type="submit" name="Submit" class="btn btn-primary" />
     </div>
