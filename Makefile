@@ -23,7 +23,7 @@ init:
 	createdb $(PROJECT_NAME)
 	psql -c "CREATE EXTENSION postgis" $(PROJECT_NAME)
 	@$(MAKE) reload
-	$(MANAGE) loaddata dummy_user.json category.json severity.json species.json counties.json flatpages.json
+	$(MANAGE) loaddata dummy_user.json category.json severity.json species.json counties.json pages.json
 
 clean:
 	find . -iname "*.pyc" -delete
