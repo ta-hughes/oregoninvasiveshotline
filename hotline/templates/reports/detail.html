@@ -48,7 +48,7 @@
                         <img src="{{ comment.created_by.get_avatar_url }}" class="pull-left" />
                     </div>
                     <div class="media-body">
-                        {{ comment.body }}
+                        {{ comment.body|linebreaksbr }}
                         <p class="text-right comment-meta">
                             {% if user.is_active or user|can_create_comment:report %}
                                 <cite>{{ comment.created_by }} {% if comment_form.visibility %}({{ comment.get_visibility_display.split.0|lower }}){% endif %}</cite>
@@ -208,7 +208,9 @@ var category_id_to_species_id = {{ category_id_to_species_id|safe }};
 <script>
 if($('.galleria').length){
     Galleria.loadTheme('{{ STATIC_URL }}galleria/themes/classic/galleria.classic.min.js');
-    Galleria.run('.galleria');
+    Galleria.run('.galleria', {
+        "lightbox": true
+    });
 }
 
 $('#add-comment a').click(function(e){
