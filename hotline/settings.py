@@ -167,7 +167,6 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'cloak.middleware.CloakMiddleware',
     # 'djangocas.middleware.CASMiddleware',

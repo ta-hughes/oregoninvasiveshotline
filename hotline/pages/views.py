@@ -1,35 +1,22 @@
-from arcutils import will_be_deleted_with
-from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
+from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.flatpages.models import FlatPage
+from django.shortcuts import get_object_or_404, redirect, render
 
-from hotline.pages.forms import FlatterPageForm
+from .forms import FlatterPageForm
+from . import HIDDEN_PAGE_PREFIX
 
-from .perms import permissions
 
-
+@staff_member_required
 def list_(request):
-    """
-
-    """
-    pages = FlatPage.objects.all()
-
+    pages = FlatPage.objects.exclude(url__startswith=HIDDEN_PAGE_PREFIX)
     return render(request, "pages/list.html", {
         'pages': pages,
     })
 
 
-@permissions.can_modify_page
-def create(request):
-    return _edit(request, page_id=None)
-
-
-@permissions.can_modify_page
-def edit(request, page_id):
-    return _edit(request, page_id)
-
-
-def _edit(request, page_id):
+@staff_member_required
+def edit(request, page_id=None):
     if page_id is None:
         page = None
     else:
@@ -39,8 +26,8 @@ def _edit(request, page_id):
         form = FlatterPageForm(request.POST, instance=page)
         if form.is_valid():
             form.save()
-            return redirect('pages-list')
-
+            messages.success(request, "Saved")
+            return redirect(request.GET.get("next", 'pages-list'))
     else:
         form = FlatterPageForm(instance=page)
 
@@ -50,7 +37,7 @@ def _edit(request, page_id):
     })
 
 
-@permissions.can_modify_page
+@staff_member_required
 def delete(request, page_id):
     page = get_object_or_404(FlatPage, pk=page_id)
     if request.method == "POST":
@@ -58,9 +45,6 @@ def delete(request, page_id):
         messages.success(request, "Page deleted!")
         return redirect('pages-list')
 
-    related_objects = list(will_be_deleted_with(page))
-
-    return render(request, "delete.html", {
-        "object": page,
-        "related_objects": related_objects,
+    return render(request, "pages/delete.html", {
+        "page": page,
     })

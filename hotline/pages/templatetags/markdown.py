@@ -1,6 +1,6 @@
+import markdown
 from django import template
 from django.utils.html import mark_safe
-import markdown
 
 register = template.Library()
 

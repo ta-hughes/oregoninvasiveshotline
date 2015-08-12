@@ -4,7 +4,6 @@ from django.conf.urls.static import static
 from django.contrib import admin
 
 from .comments import views as comments
-from .pages import views as pages
 from .notifications import views as notifications
 from .reports import views as reports
 from .users import views as users
@@ -33,13 +32,6 @@ urlpatterns = patterns(
 
     url(r'^notifications/create/?$', notifications.create, name='notifications-create'),
 
-    # flat pages get their urls figured out for them
-    url(r'^pages/list/?$', pages.list_, name='pages-list'),
-    url(r'^pages/create/?$', pages.create, name='pages-create'),
-    url(r'^pages/edit/(?P<page_id>\d+)?$', pages.edit, name='pages-edit'),
-    url(r'^pages/delete/(?P<page_id>\d+)?$', pages.delete, name='pages-delete'),
-    url(r'^pages/?', include('django.contrib.flatpages.urls')),
-
     # Here we define all the URL routes for the users app. Technically, you
     # could put these routes in the app itself, but for non-reusable apps, we
     # keep them in the main urlconfs file
@@ -57,6 +49,8 @@ urlpatterns = patterns(
     url(r'^login/$', users.login, name='login'),
     url(r'', include('django.contrib.auth.urls')),
 
+    url(r'pages/', include('hotline.pages.urls')),
+
     # these routes allow you to masquerade as a user, and login as them from the command line
     url(r'^cloak/', include('cloak.urls'))
 )
@@ -64,3 +58,5 @@ urlpatterns = patterns(
 if settings.DEBUG:  # pragma: no cover
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static("htmlcov", document_root="htmlcov", show_indexes=True)
+
+urlpatterns += (url(r'', include('django.contrib.flatpages.urls')),)

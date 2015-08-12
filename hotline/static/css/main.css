@@ -401,3 +401,15 @@ blockquote {
     float:right;
     padding-left:10px;
 }
+
+.getcontent-edit {
+    background-color:#000;
+    color:#fff;
+    font-size:10px;
+    font-weight:normal;
+}
+
+.getcontent-edit:hover {
+    text-decoration:underline;
+    color:#fff;
+}
