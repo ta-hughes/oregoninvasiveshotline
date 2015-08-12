@@ -20,6 +20,7 @@ class Comment(Visibility, models.Model):
 
     class Meta:
         db_table = "comment"
+        ordering = ["created_on", "pk"]
 
     def get_absolute_url(self):
         return reverse("reports-detail", args=[self.report_id]) + "#comment-" + str(self.pk)
