@@ -55,6 +55,7 @@ class Report(models.Model):
 
     class Meta:
         db_table = "report"
+        ordering = ['-pk']
 
     def __str__(self):
         if self.species:
