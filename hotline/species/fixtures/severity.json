@@ -3,7 +3,7 @@
     "pk": 1,
     "fields": {
         "name": "native",
-        "color": "#537716"
+        "color": "#999999"
     },
     "model": "species.severity"
 },
