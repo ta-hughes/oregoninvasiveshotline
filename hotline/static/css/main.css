@@ -404,8 +404,11 @@ blockquote {
 
 .report-status-info {
     float:right;
-    padding-left:10px;
+    padding:5px;
+    margin-left:5px;
+    margin-bottom:5px;
     font-size:11px;
+    background-color:#fcf8e3;
 }
 
 .table-striped2>tbody>tr:nth-of-type(even) {
