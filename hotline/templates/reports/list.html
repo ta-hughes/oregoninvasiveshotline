@@ -19,13 +19,13 @@
     {% if reports %}
         <div class="row">
             <div class="col-md-12">
-                <div id="map-canvas" style="height:400px"></div>
+                <div id="map-canvas" style="height:550px"></div>
             </div>
             <div class="col-md-12">
                 <p class="pull-right reports-table-subscribe"><a href="{% url 'notifications-create' %}?{{ request.GET.urlencode }}">Subscribe to this search</a></p>
                 <p class="reports-table-sort comma-list">Sort By:
                     {% for subwidget in form.sort_by %}
-                        <span class="comma"><a href="{% add_get sort_by=subwidget.choice_value %}">{{ subwidget.choice_label }}</a></span>
+                        <span class="comma"><a class="{% if subwidget.choice_value == form.cleaned_data.sort_by %}strong{% endif %}" href="{% add_get sort_by=subwidget.choice_value %}">{{ subwidget.choice_label }}</a></span>
                     {% endfor %}
                 </p>
                 <table class="table reports-table double-zebra">
