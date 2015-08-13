@@ -423,3 +423,19 @@ blockquote {
     text-decoration:underline;
     color:#fff;
 }
+
+.account-links {
+    float:right;
+}
+
+.account-links a {
+    padding: 10px 5px;
+    display:inline-block;
+}
+
+@media (max-width: 992px){
+    .account-links {
+        float:none;
+        text-align:center;
+    }
+}
