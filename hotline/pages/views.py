@@ -3,8 +3,8 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.flatpages.models import FlatPage
 from django.shortcuts import get_object_or_404, redirect, render
 
-from .forms import FlatterPageForm
 from . import HIDDEN_PAGE_PREFIX
+from .forms import FlatterPageForm
 
 
 @staff_member_required
