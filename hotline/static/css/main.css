@@ -320,6 +320,8 @@ small {
 
 .reports-table-img {
     width:1px;
+    vertical-align:middle !important;
+    text-align:center;
 }
 
 .reports-table-sort, .reports-table-subscribe {
@@ -441,4 +443,10 @@ blockquote {
         float:none;
         text-align:center;
     }
+}
+
+.reports-table {
+    display:block;
+    height:500px;
+    overflow-x:auto;
 }

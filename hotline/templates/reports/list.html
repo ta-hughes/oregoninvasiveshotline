@@ -1,4 +1,7 @@
 {% extends "base.html" %}
+{% block title %}
+Report List
+{% endblock %}
 {% block content %}
 <form class="reports-table-form">
     <div class="form-inline">
@@ -33,11 +36,9 @@
                         {% for report in reports %}
                             <tr>
                                 <td rowspan="2" class="reports-table-img">
-                                    {% if report.image_url %}
-                                        <a href="{% url 'reports-detail' report.pk %}">
-                                            <img src="{{ report.image_url }}" />
-                                        </a>
-                                    {% endif %}
+                                    <a href="#map-canvas" class="report-location-click" data-report-index="{{ forloop.counter0 }}">
+                                        <img src="{{ report.image_url|default:report.icon_url }}" />
+                                    </a>
                                 </td>
                                 <td colspan="3" class="reports-table-title">
                                     <a href="{% url 'reports-detail' report.pk %}">
