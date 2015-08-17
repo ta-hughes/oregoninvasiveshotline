@@ -351,7 +351,7 @@ class ConfirmForm(forms.ModelForm):
         actual_species = self.cleaned_data.get("actual_species")
         severity = self.cleaned_data.get("severity")
 
-        if not (bool(new_species) ^ bool(actual_species)):
+        if bool(new_species) & bool(actual_species):
             raise forms.ValidationError("Either choose a species or create a new one.", code="species_contradiction")
 
         if new_species and not severity:
@@ -367,5 +367,7 @@ class ConfirmForm(forms.ModelForm):
             species = Species(name=new_species, severity=severity, category=self.cleaned_data['category'])
             species.save()
             self.instance.actual_species = species
+        elif not self.cleaned_data.get("actual_species"):
+            self.instance.actual_species = None
 
         return super().save(*args, **kwargs)
