@@ -11,6 +11,7 @@ from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 
 from hotline.reports.models import Invite, Report
+from hotline.notifications.models import UserNotificationQuery 
 
 from .forms import LoginForm, UserForm
 from .models import User
@@ -100,9 +101,12 @@ def home(request):
     if user.is_authenticated() and user.is_active:
         unclaimed_reports = Report.objects.filter(claimed_by=None, is_public=False, is_archived=False)
 
+    subscribed = UserNotificationQuery.objects.filter(user=user)
+
     return render(request, "users/home.html", {
         "invited_to": invited_to,
         "reported": reported,
+        "subscribed": subscribed,
         "open_and_claimed": open_and_claimed,
         "unclaimed_reports": unclaimed_reports,
         "reported_querystring": reported_querystring
