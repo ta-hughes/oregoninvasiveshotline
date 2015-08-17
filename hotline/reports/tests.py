@@ -560,3 +560,19 @@ class ReportListView(ESTestCase, TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn("Foobarius Foobar", response.content.decode())
         self.assertNotIn(str(other_reports[0]), response.content.decode())
+
+
+class SettingsFormTest(TestCase):
+    def test_is_public_field_disabled_for_is_confidential_species(self):
+        report = make(Report, actual_species__is_confidential=True)
+        form = SettingsForm(instance=report, data={
+            # even though this was submitted with a True-y value, the form
+            # should override it so it is always False
+            "is_public": 1,
+            "edrr_status": 0,
+        })
+        self.assertTrue(form.fields['is_public'].widget.attrs['disabled'])
+        self.assertTrue(form.is_valid())
+        form.save()
+        # even though the data spoofed the is_public flag as True, it should still be false
+        self.assertFalse(report.is_public)

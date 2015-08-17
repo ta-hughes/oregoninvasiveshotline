@@ -251,6 +251,12 @@ class ReportForm(forms.ModelForm):
 
 
 class SettingsForm(forms.ModelForm):
+    """
+    Handles setting some flags on the report
+
+    The is_public flag is only enabled if the actual species associated with
+    the report is *not* marked as is_confidential
+    """
     SUBMIT_FLAG = "SETTINGS"
 
     class Meta:
@@ -260,6 +266,17 @@ class SettingsForm(forms.ModelForm):
             'is_archived',
             'edrr_status',
         ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance.actual_species and self.instance.actual_species.is_confidential:
+            self.fields['is_public'].widget.attrs['disabled'] = True
+            self.fields['is_public'].help_text = "This species is marked as confidential, so you cannot make this report public."
+
+    def clean_is_public(self):
+        if self.instance.actual_species and self.instance.actual_species.is_confidential:
+            return False
+        return self.cleaned_data['is_public']
 
 
 class InviteForm(forms.Form):
