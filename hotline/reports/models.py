@@ -28,7 +28,15 @@ class Report(models.Model):
     reported_species = models.ForeignKey("species.Species", null=True, default=None, related_name="+")
 
     description = models.TextField(verbose_name="Please provide a description of your find")
-    location = models.TextField(verbose_name="Please provide a description of the area where species was found")
+    location = models.TextField(
+        verbose_name="Please provide a description of the area where species was found",
+        help_text="""
+            For example name the road, trail or specific landmarks
+            near the site whether the species was found. Describe the geographic
+            location, such as in a ditch, on a hillside or in a streambed. If you
+            happen to have taken GPS coordinates, enter them here.
+        """
+    )
     has_specimen = models.BooleanField(default=False, verbose_name="Do you have a physical specimen?")
 
     point = models.PointField(srid=4326)

@@ -41,7 +41,7 @@
             {% endif %}
         </p>
         <h4>Description of specimen</h4>
-        <blockquote>{{ report.description|linebreaksbr }}</blockquote>
+        <blockquote>{{ report.description|default:"No description provided"|linebreaksbr }}</blockquote>
 
         {% if images %}
             <div class="galleria">
