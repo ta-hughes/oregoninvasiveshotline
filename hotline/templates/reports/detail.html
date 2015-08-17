@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load permissions %}
+{% load markdown %}
 {% block content %}
 
 <div class="row">
@@ -194,6 +195,20 @@
                     This report is claimed...
                     <button class="btn btn-warning btn-xs" type="submit">steal it!</button>
                 </form>
+            </div>
+        {% endif %}
+
+        {% if report.actual_species.remedy %}
+            <div class="clearfix sidebar-block">
+                <h4>Remedy</h4>
+                {{ report.actual_species.remedy|md }}
+            </div>
+        {% endif %}
+
+        {% if report.actual_species.resources %}
+            <div class="clearfix sidebar-block">
+                <h4>Resources</h4>
+                {{ report.actual_species.resources|md }}
             </div>
         {% endif %}
     </div>

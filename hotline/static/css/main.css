@@ -203,7 +203,8 @@ small {
 }
 
 .sidebar-block {
-    margin-top:50px;
+    margin-top:20px;
+    overflow-y:auto;
 }
 
 .report-management a {
