@@ -1,11 +1,11 @@
 from django.contrib import messages
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 
 from hotline.perms import permissions
 
-from .forms import UserNotificationQueryForm
+from .forms import UserNotificationQueryForm, UserSubscriptionDeleteForm
 from .models import UserNotificationQuery
 
 
@@ -23,5 +23,21 @@ def create(request):
         form = UserNotificationQueryForm(instance=instance)
 
     return render(request, "notifications/create.html", {
+        "form": form,
+    })
+
+@permissions.is_active
+def list_(request):
+    subscriptions = UserNotificationQuery.objects.filter(user=request.user)
+
+    if request.method == "POST":
+        form = UserSubscriptionDeleteForm(request.POST, user=request.user)
+        if form.is_valid():
+            form.save()
+            return redirect("notifications-list")
+    else:
+        form = UserSubscriptionDeleteForm(user=request.user)
+
+    return render(request, "notifications/list.html", {
         "form": form,
     })

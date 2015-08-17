@@ -32,6 +32,7 @@ urlpatterns = patterns(
     url(r'^comments/edit/(?P<comment_id>\d+)?$', comments.edit, name='comments-edit'),
 
     url(r'^notifications/create/?$', notifications.create, name='notifications-create'),
+    url(r'^notifications/list/?$', notifications.list_, name='notifications-list'),
 
     # Here we define all the URL routes for the users app. Technically, you
     # could put these routes in the app itself, but for non-reusable apps, we

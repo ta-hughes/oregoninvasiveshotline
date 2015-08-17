@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% load notifications %}
+{% block content %}
+<div class="row">
+  <div class="col-md-8">
+    <h1>Searches you have subscribed to</h1>
+    <p>Here is a list of searches you have subscribed to. Once a search is deleted, it cannot be recovered. However, deleting a seach will not modify any information within the search.</p>
+  </div>
+</div>
+<div class="row">
+  <div class="col-md-8">
+    {% if form.errors %}
+        <div class="alert alert-warning">{{ form.errors }}</div>
+    {% endif %}
+    <form method="post">
+      <table class="table table-striped">
+        {% csrf_token %}
+        <tr><th>Delete</th><th>Name</th></tr>
+        {% for choice in form.subscriptions %}
+            <tr>
+                <td>
+                    {{ choice.tag }}
+                </td>
+                <td>
+                    <a href="{% url 'reports-list' %}?{{ choice|notification_url }}">{{ choice.choice_label }}</a>
+                </td>
+            </tr>
+        {% empty %}
+            <tr><td></td><td>You haven't subscribed to any searches yet!</td></tr>
+        {% endfor %}
+      </table>
+      <a href="{% url 'users-home' %}" class="btn btn-warning">Cancel</a>
+      {% if form.subscriptions %}
+        <input class="btn btn-danger" name="Delete-Selected" type="submit" value="Delete Selected">
+      {% endif %}
+    </form>
+  </div>
+</div>
+{% endblock %}

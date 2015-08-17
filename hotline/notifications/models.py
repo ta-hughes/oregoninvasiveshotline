@@ -52,6 +52,9 @@ class UserNotificationQuery(models.Model):
 
         threading.Thread(target=runnable, args=(cls, report, request)).start()
 
+    def __str__(self):
+        return self.name
+
 
 class Notification(models.Model):
     """
