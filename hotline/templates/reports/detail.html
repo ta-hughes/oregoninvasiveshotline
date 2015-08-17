@@ -97,7 +97,7 @@
 
         {% if report.claimed_by and report.claimed_by == user %}
             <div class="report-management clearfix sidebar-block">
-                <h4>Report Management</h4>
+                <h4>Report Management {% if report.claimed_by == user %}<small><a href="{% url 'reports-unclaim' report.pk %}">(unclaim)</a></small>{% endif %}</h4>
                 <ul class="nav nav-tabs" id="management-tabs">
                     <li class="active"><a data-toggle="tab" href="#confirm"><span class="glyphicon glyphicon-grain"></span> Species</a></li>
                     <li><a data-toggle="tab" href="#public"><span class="glyphicon glyphicon-pencil"></span> Settings</a></li>

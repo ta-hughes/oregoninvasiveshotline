@@ -576,3 +576,25 @@ class SettingsFormTest(TestCase):
         form.save()
         # even though the data spoofed the is_public flag as True, it should still be false
         self.assertFalse(report.is_public)
+
+
+class UnclaimViewTest(TestCase):
+    def test_only_person_who_claimed_report_can_unclaim_it(self):
+        report = make(Report)
+        # to set it back to False
+        user = prepare(User, is_active=True)
+        user.set_password("foo")
+        user.save()
+        self.client.login(email=user.email, password="foo")
+
+        response = self.client.get(reverse("reports-unclaim", args=[report.pk]))
+        self.assertEqual(response.status_code, 403)
+
+        report.claimed_by = user
+        report.save()
+        response = self.client.get(reverse("reports-unclaim", args=[report.pk]))
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.post(reverse("reports-unclaim", args=[report.pk]))
+        report.refresh_from_db()
+        self.assertEqual(None, report.claimed_by)

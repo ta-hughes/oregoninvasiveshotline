@@ -211,3 +211,16 @@ def claim(request, report_id):
     return render(request, "reports/claim.html", {
         "report": report,
     })
+
+
+@permissions.can_unclaim_report
+def unclaim(request, report_id):
+    report = get_object_or_404(Report, pk=report_id)
+    if request.method == "POST":
+        report.claimed_by = None
+        report.save()
+        return redirect("reports-detail", report.pk)
+
+    return render(request, "reports/unclaim.html", {
+        "report": report,
+    })
