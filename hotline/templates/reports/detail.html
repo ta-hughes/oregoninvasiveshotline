@@ -1,6 +1,9 @@
 {% extends "base.html" %}
 {% load permissions %}
 {% load markdown %}
+{% block title %}
+Report #{{ report.pk }} - {{ report }}
+{% endblock %}
 {% block content %}
 
 <div class="row">
