@@ -1,4 +1,5 @@
 from django import template
+
 from hotline.notifications.models import UserNotificationQuery
 
 register = template.Library()

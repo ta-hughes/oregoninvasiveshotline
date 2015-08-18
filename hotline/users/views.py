@@ -10,8 +10,8 @@ from django.core.signing import BadSignature
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 
-from hotline.reports.models import Invite, Report
 from hotline.notifications.models import UserNotificationQuery
+from hotline.reports.models import Invite, Report
 
 from .forms import LoginForm, UserForm
 from .models import User
