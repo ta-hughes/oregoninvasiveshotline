@@ -101,7 +101,7 @@ def home(request):
     if user.is_authenticated() and user.is_active:
         unclaimed_reports = Report.objects.filter(claimed_by=None, is_public=False, is_archived=False)
 
-    subscribed = UserNotificationQuery.objects.filter(user=user)
+    subscribed = UserNotificationQuery.objects.filter(user_id=user.pk)
 
     return render(request, "users/home.html", {
         "invited_to": invited_to,
