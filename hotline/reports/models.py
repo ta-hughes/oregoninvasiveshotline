@@ -124,7 +124,7 @@ class Report(models.Model):
                 f.flush()
                 subprocess.call(["convert", "-background", "none", "-crop", icon_size + "+0+0", f.name, icon_location])
 
-        return settings.MEDIA_URL + "/generated_icons/%s.png" % key
+        return settings.MEDIA_URL + "generated_icons/%s.png" % key
 
     def image_url(self):
         """
