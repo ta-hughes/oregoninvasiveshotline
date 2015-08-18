@@ -18,6 +18,11 @@ class UserSubscriptionDeleteForm(forms.Form):
         initial = UserNotificationQuery.objects.filter(user=self.user)
         self.fields['subscriptions'].queryset = initial
 
+    def iter_items(self):
+        subscriptions = list(self['subscriptions'])
+        for model, choice in zip(self.fields['subscriptions'].queryset, subscriptions):
+            yield model, choice
+
     def save(self, *args, **kwargs):
         for field in self.cleaned_data['subscriptions']:
             field.delete()

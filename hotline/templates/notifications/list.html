@@ -26,16 +26,16 @@
                 </tr>
             </thead>
             <tbody>
-                {% for choice in form.subscriptions %}
+                {% for model, choice in form.iter_items %}
                 <tr>
                     <td>
                         {{ choice.tag }}
                     </td>
                     <td>
-                        <a href="{% url 'reports-list' %}?{{ choice|notification_url }}">{{ choice.choice_label|truncatechars:50 }}</a>
+                        <a href="{% url 'reports-list' %}?{{ model.query }}">{{ choice.choice_label|truncatechars:50 }}</a>
                     </td>
                     <td>
-                        {{ choice|notification_url|truncatechars:75 }}
+                        {{ model.query|truncatechars:50 }}
                     </td>
                 </tr>
                 {% empty %}
