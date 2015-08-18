@@ -33,6 +33,7 @@ def list_(request):
         form = UserSubscriptionDeleteForm(request.POST, user=request.user)
         if form.is_valid():
             form.save()
+            messages.success(request, "Saved")
             return redirect("notifications-list")
     else:
         form = UserSubscriptionDeleteForm(user=request.user)

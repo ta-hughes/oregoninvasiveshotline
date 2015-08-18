@@ -12,8 +12,8 @@ class UserNotificationQueryForm(forms.ModelForm):
 class UserSubscriptionDeleteForm(forms.Form):
     subscriptions = forms.ModelMultipleChoiceField(required=True, widget=forms.CheckboxSelectMultiple, queryset=None)
 
-    def __init__(self, *args, **kwargs):
-        self.user = kwargs.pop('user')
+    def __init__(self, *args, user, **kwargs):
+        self.user = user
         super().__init__(*args, **kwargs)
         initial = UserNotificationQuery.objects.filter(user=self.user)
         self.fields['subscriptions'].queryset = initial
