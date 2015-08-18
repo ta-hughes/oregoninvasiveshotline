@@ -29,7 +29,6 @@ def create(request):
 
 @permissions.is_active
 def list_(request):
-    subscriptions = UserNotificationQuery.objects.filter(user=request.user)
     if request.method == "POST":
         form = UserSubscriptionDeleteForm(request.POST, user=request.user)
         if form.is_valid():
