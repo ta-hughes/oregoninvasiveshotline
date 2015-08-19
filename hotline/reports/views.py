@@ -36,6 +36,19 @@ def list_(request):
     else:
         template = "reports/list_public.html"
 
+    # all that awesome tabs stuff
+    user = request.user
+    tab = request.GET.get('tabs') if request.GET.get('tabs') is not None else "search"
+
+    invited_to = [invite.report for invite in Invite.objects.filter(user_id=user.pk).select_related("report")]
+    reported = Report.objects.filter(Q(pk__in=request.session.get("report_ids", [])) | Q(created_by_id=user.pk))
+    reported_querystring = "created_by_id:(%s)" % (" ".join(map(str, set(reported.values_list("created_by_id", flat=True)))))
+    open_and_claimed = Report.objects.filter(claimed_by_id=user.pk, is_public=False, is_archived=False).exclude(claimed_by=None)
+
+    unclaimed_reports = []
+    if user.is_authenticated() and user.is_active:
+        unclaimed_reports = Report.objects.filter(claimed_by=None, is_public=False, is_archived=False)
+
     form = ReportSearchForm(request.GET, user=request.user, report_ids=request.session.get("report_ids", []))
 
     # handle the case where they want to export the reports
@@ -51,7 +64,13 @@ def list_(request):
     return render(request, template, {
         "reports": reports,
         "form": form,
-        "reports_json": json.dumps(reports_json)
+        "reports_json": json.dumps(reports_json),
+        "tab": tab,
+        "invited_to": invited_to,
+        "reported": reported,
+        "open_and_claimed": open_and_claimed,
+        "unclaimed_reports": unclaimed_reports,
+        "reported_querystring": reported_querystring
     })
 
 
