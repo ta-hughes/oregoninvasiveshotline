@@ -14,25 +14,7 @@ Account Home
     {% endif %}
     <a href="{% url 'logout' %}">Logout</a>
 </div>
-<ul class="nav nav-tabs">
-    <li><a class="#home" href="#default">Home</a>
-    {% if invited_to %}
-        <li class="active"><a href="#invited-to-review">Invited To ({{ invited_to|length }})</a></li>
-    {% endif %}
-    {% if reported %}
-        <li><a href="{% url 'reports-list' %}?sort_by=-created_on&querystring={{ reported_querystring }}">Reported ({{ reported|length }})</a></li>
-    {% endif %}
-    {% if open_and_claimed %}
-        <li><a href="{% url 'reports-list' %}?sort_by=-created_on&is_public=notpublic&is_archived=notarchived&claimed_by=me">Open and Claimed ({{ open_and_claimed|length }})</a></li>
-    {% endif %}
-    {% if unclaimed_reports %}
-        <li><a href="{% url 'reports-list' %}?sort_by=-created_on&is_public=notpublic&is_archived=notarchived&claimed_by=nobody">Unclaimed ({{ unclaimed_reports|length }})</a></li>
-    {% endif %}
-    {% if subscribed %}
-        <li><a href="{% url 'notifications-list' %}">Subscribed Searches ({{ subscribed|length }})</a></li>
-    {% endif %}
-</ul>
-
+{% include "nav_tabs.html" with active="home" %}
 <div class="tab-content">
     <div class="tab-pane active" id="default">
         <h4>Hello {{ user.first_name|default:"Unamed User" }},</h4>
