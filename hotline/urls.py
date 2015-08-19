@@ -39,12 +39,12 @@ urlpatterns = patterns(
     url(r'^severities/create/?$', permissions.is_staff(species.SeverityCreateView.as_view()), name='severities-create'),
 
     url(r'^reports/create/?$', reports.create, name='reports-create'),
-    url(r'^reports/detail/(?P<report_id>\d+)?$', reports.detail, name='reports-detail'),
-    url(r'^reports/claim/(?P<report_id>\d+)?$', reports.claim, name='reports-claim'),
-    url(r'^reports/unclaim/(?P<report_id>\d+)?$', reports.unclaim, name='reports-unclaim'),
+    url(r'^reports/detail/(?P<report_id>\d+)/?$', reports.detail, name='reports-detail'),
+    url(r'^reports/claim/(?P<report_id>\d+)/?$', reports.claim, name='reports-claim'),
+    url(r'^reports/unclaim/(?P<report_id>\d+)/?$', reports.unclaim, name='reports-unclaim'),
     url(r'^reports/list/?$', reports.list_, name='reports-list'),
 
-    url(r'^comments/edit/(?P<comment_id>\d+)?$', comments.edit, name='comments-edit'),
+    url(r'^comments/edit/(?P<comment_id>\d+)/?$', comments.edit, name='comments-edit'),
 
     url(r'^notifications/create/?$', notifications.create, name='notifications-create'),
 
