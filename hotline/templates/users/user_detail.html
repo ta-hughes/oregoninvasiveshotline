@@ -2,7 +2,7 @@
 {% block content %}
 
 <div class="pull-right">
-    {% if user == object %}
+    {% if current_user == object %}
         <a class="btn btn-primary" href="{% url 'password_change' %}">Change Password</a>
         <a class="btn btn-primary" href="{% url 'users-edit' user.pk %}">Edit Profile</a>
     {% endif %}

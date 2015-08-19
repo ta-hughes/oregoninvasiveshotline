@@ -187,7 +187,7 @@ Report #{{ report.pk }} - {{ report }}
             <div class="credit clearfix sidebar-block">
                 <h4>Expert Reviewer</h4>
                 <img src="{{ report.claimed_by.get_avatar_url }}" class="pull-left" />
-                <p><strong><a href="#">{{ report.claimed_by.get_proper_name }}</a></strong> <br />{{ report.claimed_by.affiliations|linebreaksbr }}</p>
+                <p><strong><a href="{% url 'users-detail' report.claimed_by.pk %}">{{ report.claimed_by.get_proper_name }}</a></strong> <br />{{ report.claimed_by.affiliations|linebreaksbr }}</p>
             </div>
         {% endif %}
 
