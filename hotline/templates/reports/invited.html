@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+{% include "nav_tabs.html" with tab="invited_to" %}
+<div class="tab-content">
+    {% if not invited_to %}
+    <div class="tab-pane active" id="default">
+        <h4>Hello {{ user.first_name|default:"Unamed User" }},</h4>
+        <p>If you have any reports in your queues, you'll see them in the tabs above.</p>
+    </div>
+    {% else %}
+    <div class="tab-pane active" id="invited_to">
+        <h3>Reports You've Been Invited to Review</h3>
+        <table class="table table-striped">
+            {% for report in invited_to %}
+                <tr>
+                    <td><a href="{% url 'reports-detail' report.pk %}">{{ report.species|default:report.category }}</a> on {{ report.created_on }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
