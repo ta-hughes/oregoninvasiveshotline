@@ -24,6 +24,10 @@ small {
     font-weight:normal;
 }
 
+.nowrap {
+    white-space:nowrap;
+}
+
 .comma-list .comma:after {
     content:","
 }

@@ -2,6 +2,7 @@ import json
 from collections import defaultdict
 
 from django.db import models
+from django.core.validators import RegexValidator
 
 
 def category_id_to_species_id_json():
@@ -37,7 +38,9 @@ class Severity(models.Model):
     """
     severity_id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=255)
-    color = models.CharField(max_length=7, help_text="An HTML color of the form '#rrggbb'")
+    color = models.CharField(max_length=7, help_text="An HTML color of the form '#rrggbb'", validators=[
+        RegexValidator(r"#[0-9A-Fa-f]{6}")
+    ])
 
     class Meta:
         db_table = "severity"
@@ -53,9 +56,9 @@ class Species(models.Model):
     """
     species_id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=255)
-    scientific_name = models.CharField(max_length=255)
-    remedy = models.TextField()
-    resources = models.TextField()
+    scientific_name = models.CharField(max_length=255, blank=True)
+    remedy = models.TextField(blank=True)
+    resources = models.TextField(blank=True)
 
     is_confidential = models.BooleanField(default=False, help_text="""
         A species can be marked as confidential if making a report about it public would cause harm

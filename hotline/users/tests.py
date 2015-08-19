@@ -20,7 +20,13 @@ class DetailViewTest(TestCase):
     Tests for the detail view
     """
     def test_permission(self):
-        self.assertTrue(permissions.entry_for_view(detail, 'can_view_user'))
+        user = make(User, is_active=False)
+        response = self.client.get(reverse("users-detail", args=[user.pk]))
+        self.assertEqual(response.status_code, 404)
+
+        user = make(User, is_active=True)
+        response = self.client.get(reverse("users-detail", args=[user.pk]))
+        self.assertEqual(response.status_code, 200)
 
     def test_get(self):
         user = prepare(User)

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block content %}
+<a class="btn btn-primary pull-right" href="{% url 'severities-create' %}">Create a new severity</a>
+<h3>Severities</h3>
+<table class="table table-condensed table-striped">
+    <thead>
+        <tr>
+            <th>Action</th>
+            <th>Name</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for severity in object_list %}
+            <tr>
+                <td>
+                    <a href="{% url 'severities-detail' severity.pk %}">Edit</a>
+                    <a href="{% url 'severities-delete' severity.pk %}">Delete</a>
+                </td>
+                <td>{{ severity.name }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

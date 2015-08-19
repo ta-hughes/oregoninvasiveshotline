@@ -152,12 +152,12 @@ def delete(request, user_id):
 
     related_objects = list(will_be_deleted_with(user))
 
-    return render(request, "users/delete.html", {
+    return render(request, "delete.html", {
         # we don't call this template variable "user" because that collides
         # with the "user" variable which references the currently logged in
         # user
         "object": user,
-        "related_objects": related_objects,
+        "will_be_deleted_with": related_objects,
     })
 
 

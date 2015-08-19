@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block content %}
+<a class="pull-right btn btn-primary" href="{% url 'categories-create' %}">Create a new category</a>
+<h3>Categories</h3>
+<table class="table table-condensed table-striped">
+    <thead>
+        <tr>
+            <th>Action</th>
+            <th>Name</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for category in object_list %}
+            <tr>
+                <td>
+                    <a href="{% url 'categories-detail' category.pk %}">Edit</a>
+                    <a href="{% url 'categories-delete' category.pk %}">Delete</a>
+                </td>
+                <td>{{ category.name }}</td>
+            </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

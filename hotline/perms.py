@@ -10,3 +10,8 @@ permissions = PermissionsRegistry()
 @permissions.register
 def is_active(user):
     return user.is_active
+
+
+@permissions.register
+def is_staff(user):
+    return user.is_staff

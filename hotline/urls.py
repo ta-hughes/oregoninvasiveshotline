@@ -7,7 +7,9 @@ from .comments import views as comments
 from .notifications import views as notifications
 from .reports import views as reports
 from .users import views as users
+from .species import views as species
 from .views import home
+from .perms import permissions
 
 admin.autodiscover()
 
@@ -19,10 +21,23 @@ urlpatterns = patterns(
 
     # the django admin interface is always nice to have
     url(r'^admin/', include(admin.site.urls)),
-
-    # the homepage goes straight to a template. But you may want to change this
-    # into a normal view function
     url(r'^$', home, name="home"),
+    url(r'^adminpanel/?$', species.admin_panel, name='admin-panel'),
+    url(r'^species/list/?$', permissions.is_staff(species.SpeciesList.as_view()), name='species-list'),
+    url(r'^species/detail/(?P<pk>[0-9]+)/?$', permissions.is_staff(species.SpeciesDetailView.as_view()), name='species-detail'),
+    url(r'^species/delete/(?P<pk>[0-9]+)/?$', permissions.is_staff(species.SpeciesDeleteView.as_view()), name='species-delete'),
+    url(r'^species/create/?$', permissions.is_staff(species.SpeciesCreateView.as_view()), name='species-create'),
+
+    url(r'^categories/list/?$', permissions.is_staff(species.CategoryList.as_view()), name='categories-list'),
+    url(r'^categories/detail/(?P<pk>[0-9]+)/?$', permissions.is_staff(species.CategoryDetailView.as_view()), name='categories-detail'),
+    url(r'^categories/delete/(?P<pk>[0-9]+)/?$', permissions.is_staff(species.CategoryDeleteView.as_view()), name='categories-delete'),
+    url(r'^categories/create/?$', permissions.is_staff(species.CategoryCreateView.as_view()), name='categories-create'),
+
+    url(r'^severities/list/?$', permissions.is_staff(species.SeverityList.as_view()), name='severities-list'),
+    url(r'^severities/detail/(?P<pk>[0-9]+)/?$', permissions.is_staff(species.SeverityDetailView.as_view()), name='severities-detail'),
+    url(r'^severities/delete/(?P<pk>[0-9]+)/?$', permissions.is_staff(species.SeverityDeleteView.as_view()), name='severities-delete'),
+    url(r'^severities/create/?$', permissions.is_staff(species.SeverityCreateView.as_view()), name='severities-create'),
+
     url(r'^reports/create/?$', reports.create, name='reports-create'),
     url(r'^reports/detail/(?P<report_id>\d+)?$', reports.detail, name='reports-detail'),
     url(r'^reports/claim/(?P<report_id>\d+)?$', reports.claim, name='reports-claim'),
