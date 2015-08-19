@@ -1,32 +1,28 @@
 {% extends "base.html" %}
-{% load notifications %}
 {% block content %}
-<div class="col-md-12">
-    <h1>Searches you have subscribed to</h1>
-    <p>Here is a list of searches you have subscribed to. Once a search is deleted, it cannot be recovered. However, deleting a seach will not modify any information within the search.</p>
-</div>
-<div class="col-md-12">
-    {% if form.errors %}
+<h3>Searches you have subscribed to</h3>
+<p>Here is a list of searches you have subscribed to. When a newly submitted report matches one of these searches you will get an email notification about it.</p>
+{% if form.errors %}
     <div class="alert alert-warning">{{ form.errors }}</div>
-    {% endif %}
-    <form method="post">
-        <table class="table table-striped">
-            {% csrf_token %}
-            <thead>
-                <tr>
-                    <th>
-                        {% if form.subscriptions %}
+{% endif %}
+<form method="post">
+    <table class="table table-striped">
+        {% csrf_token %}
+        <thead>
+            <tr>
+                <th>
+                    {% if form.subscriptions %}
                         <button class="btn btn-danger btn-xs" name="Delete-Selected" type="submit" Onclick="return confirm('Are you sure you want to delete this search? This action cannot be undone!');"><span class="glyphicon glyphicon-trash"></span></button> Delete
-                        {% else %}
-                            Delete
-                        {% endif %}
-                    </th>
-                    <th>Name</th>
-                    <th>Search Query</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for model, choice in form.iter_items %}
+                    {% else %}
+                        Delete
+                    {% endif %}
+                </th>
+                <th>Name</th>
+                <th>Search Query</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for model, choice in form.iter_items %}
                 <tr>
                     <td>
                         {{ choice.tag }}
@@ -38,12 +34,13 @@
                         {{ model.query|truncatechars:50 }}
                     </td>
                 </tr>
-                {% empty %}
-                <tr><td></td><td>You haven't subscribed to any searches yet!</td></tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </form>
-</div>
-<div class="col-md-12"><button class="btn btn-primary btn-sm" onClick="history.back();"><span class="glyphicon glyphicon-arrow-left"></span> Back</button></div>
+            {% empty %}
+                <tr>
+                    <td colspan="3" class="text-center">You haven't subscribed to any searches yet! Go to the <a href="{% url 'reports-list' %}">reports</a> page to do that.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</form>
+<a href="{% url 'users-home' %}" class="btn btn-default btn-sm" ><span class="glyphicon glyphicon-arrow-left"></span> Back</a>
 {% endblock %}
