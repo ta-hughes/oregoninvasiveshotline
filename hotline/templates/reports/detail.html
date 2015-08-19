@@ -66,10 +66,12 @@ Report #{{ report.pk }} - {{ report }}
                     <div class="media-body">
                         {{ comment.body|linebreaksbr }}
                         <p class="text-right comment-meta">
-                            {% if user.is_active or user|can_create_comment:report %}
+                            {% if user.is_active or user|can_create_comment:report or comment.created_by.is_active %}
                                 <cite>{{ comment.created_by }} {% if comment_form.visibility %}({{ comment.get_visibility_display.split.0|lower }}){% endif %}</cite>
-                            {% else %}
+                            {% elif comment.created_by_id == report.created_by_id %}
                                 <cite>Reporter</cite>
+                            {% else %}
+                                <cite>{{ comment.created_by }}</cite>
                             {% endif %}
                             <br /> {{ comment.created_on }}
                             {% if user|can_edit_comment:comment %}
@@ -186,7 +188,7 @@ Report #{{ report.pk }} - {{ report }}
         {% elif report.claimed_by and report.claimed_by != user %}
             <div class="credit clearfix sidebar-block">
                 <h4>Expert Reviewer</h4>
-                <img src="{{ report.claimed_by.get_avatar_url }}" class="pull-left" />
+                <img src="{{ report.claimed_by.get_avatar_url }}" class="pull-left" width="64" height="64" />
                 <p><strong><a href="{% url 'users-detail' report.claimed_by.pk %}">{{ report.claimed_by.get_proper_name }}</a></strong> <br />{{ report.claimed_by.affiliations|linebreaksbr }}</p>
             </div>
         {% endif %}
