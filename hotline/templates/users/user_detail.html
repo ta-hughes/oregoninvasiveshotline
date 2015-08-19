@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="pull-right">
+    {% if user == object %}
+        <a class="btn btn-primary" href="{% url 'password_change' %}">Change Password</a>
+        <a class="btn btn-primary" href="{% url 'users-edit' user.pk %}">Edit Profile</a>
+    {% endif %}
+</div>
+
+<div id="avatar_box" class="pull-left">
+    <div id="avatar-image">
+        <img src="{{ object.get_avatar_url }}" />
+    </div>
+    {% if current_user.is_active %}
+        <p>{{ object.email }}</p>
+        <p><em>Active:</em> {{ object.is_active }}</p>
+        <p><em>Staff:</em> {{ object.is_staff }}</p>
+    {% endif %}
+    <p><em>Joined:</em> {{ object.date_joined|date:"E d, Y" }}</p>
+</div>
+
+<h3>{{ object.prefix }} {{ object.first_name }} {{ object.last_name }} {{ object.suffix }}</h3>
+{% if object.biography %}
+    <p><strong>Biography:</strong> {{ object.biography|linebreaksbr }}</p>
+{% endif %}
+{% if object.affiliations %}
+    <p><strong>Affiliations:</strong> {{ object.affiliations|linebreaksbr }}</p>
+{% endif %}
+{% endblock %}
