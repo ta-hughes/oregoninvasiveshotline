@@ -40,6 +40,10 @@ small {
     background-color:#fff;
 }
 
+#id_q {
+    width:400px;
+}
+
 #header {
     text-align:center;
     padding-bottom:20px;

@@ -35,6 +35,8 @@ class User(AbstractBaseUser):
             return self.email
 
     def get_avatar_url(self):
+        if self.photo:
+            return self.photo.url
         return reverse("users-avatar", args=[self.pk])
 
     def get_authentication_url(self, request, next=None):
@@ -76,3 +78,6 @@ class User(AbstractBaseUser):
         allowed to cloak as another user
         """
         return self.is_staff
+
+
+from .indexes import *  # noqa isort:skip

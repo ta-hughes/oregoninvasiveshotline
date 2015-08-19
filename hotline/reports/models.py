@@ -13,6 +13,7 @@ from django.template import Context
 from django.template.loader import get_template, render_to_string
 
 from hotline.users.models import User
+from hotline.utils import resize_image
 
 
 class Report(models.Model):
@@ -136,25 +137,8 @@ class Report(models.Model):
         for image in itertools.chain(self.image_set.all(), *(comment.image_set.all() for comment in self.comment_set.all())):
             if image.visibility == image.PUBLIC:
                 output_path = os.path.join(settings.MEDIA_ROOT, "generated_thumbnails", str(image.pk) + ".png")
-                thumbnail_size = "64x64"
                 if not os.path.exists(output_path):
-                    subprocess.call([
-                        "convert",
-                        image.image.path,
-                        "-thumbnail",
-                        # the > below means don't enlarge images that fit in the 64x64 box
-                        thumbnail_size + ">",
-                        "-background",
-                        "transparent",
-                        "-gravity",
-                        "center",
-                        # fill the 64x64 box with the background color (which
-                        # is transparent) so all the thumbnails are exactly the
-                        # same size
-                        "-extent",
-                        thumbnail_size,
-                        output_path
-                    ])
+                    resize_image(image.image.path, output_path, width=64, height=64)
                 return settings.MEDIA_URL + os.path.relpath(output_path, settings.MEDIA_ROOT)
 
         return None

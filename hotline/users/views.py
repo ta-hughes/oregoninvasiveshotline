@@ -12,7 +12,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 
 from hotline.reports.models import Invite, Report
 
-from .forms import LoginForm, UserForm
+from .forms import LoginForm, UserForm, UserSearchForm
 from .models import User
 from .perms import can_list_users, permissions
 
@@ -133,20 +133,13 @@ def list_(request):
     """
     List out all the users in the system
     """
-    users = User.objects.all()
-    paginator = Paginator(users, settings.ITEMS_PER_PAGE)
-    page = request.GET.get('page')
-    try:
-        users = paginator.page(page)
-    except PageNotAnInteger:
-        # If page is not an integer, deliver first page.
-        users = paginator.page(1)
-    except EmptyPage:
-        # If page is out of range (e.g. 9999), deliver last page of results.
-        users = paginator.page(paginator.num_pages)
+
+    form = UserSearchForm(request.GET)
+    users = form.results(page=request.GET.get("page"))
 
     return render(request, "users/list.html", {
         "users": users,
+        "form": form,
     })
 
 
@@ -191,7 +184,8 @@ def _edit(request, user=None):
     Handle creating or editing a user
     """
     if request.POST:
-        form = UserForm(request.POST, user=request.user, instance=user)
+        form = UserForm(request.POST, request.FILES, user=request.user, instance=user)
+
         if form.is_valid():
             is_new = user is None or user.pk is None
             user = form.save()

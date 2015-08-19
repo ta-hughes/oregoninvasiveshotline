@@ -2,8 +2,26 @@ from django import forms
 from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
 from django.template.loader import render_to_string
+from elasticmodels.forms import SearchForm
+
+from hotline.utils import resize_image
 
 from .models import User
+from .indexes import UserIndex
+
+
+class UserSearchForm(SearchForm):
+    is_manager = forms.BooleanField(initial=True, required=False)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, index=UserIndex, **kwargs)
+
+    def get_queryset(self):
+        queryset = super().get_queryset().order_by("last_name", "first_name")
+        if self.cleaned_data.get('is_manager'):
+            queryset = queryset.filter(is_active=True)
+
+        return queryset
 
 
 class LoginForm(forms.Form):
@@ -42,6 +60,9 @@ class UserForm(forms.ModelForm):
             'email',
             'first_name',
             'last_name',
+            'biography',
+            'affiliations',
+            'photo',
             'is_active',
             'is_staff',
         )
@@ -75,4 +96,14 @@ class UserForm(forms.ModelForm):
         if password is not None:
             self.instance.set_password(password)
 
-        return super().save(*args, **kwargs)
+
+        instance = super().save(*args, **kwargs)
+
+        # if we got a new photo resize it and convert it to a png
+        if self.cleaned_data.get("photo"):
+            output_path = instance.photo.path + ".png"
+            resize_image(instance.photo.path, output_path, width=256, height=256)
+            self.instance.photo = instance.photo.name + ".png"
+            self.instance.save()
+
+        return instance

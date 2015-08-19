@@ -61,7 +61,7 @@ Report #{{ report.pk }} - {{ report }}
             {% for comment in comments %}
                 <div class="media" id="comment-{{ comment.pk }}">
                     <div class="media-left">
-                        <img src="{{ comment.created_by.get_avatar_url }}" class="pull-left" />
+                        <img src="{{ comment.created_by.get_avatar_url }}" class="pull-left" width="64" height="64" />
                     </div>
                     <div class="media-body">
                         {{ comment.body|linebreaksbr }}
