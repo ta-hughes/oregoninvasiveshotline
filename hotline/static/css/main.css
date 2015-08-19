@@ -348,7 +348,7 @@ small {
 
 @media (min-width: 992px){
     #id_querystring {
-        min-width:350px;
+        min-width:345px;
     }
 }
 
