@@ -13,7 +13,12 @@ from .models import UserNotificationQuery
 
 @permissions.is_active
 def create(request):
-    query = request.GET.urlencode()
+    query = request.GET.copy()
+    try:
+        query.pop("tabs")
+    except KeyError:
+        pass # no keyword called tabs, so that's fine.
+    query = query.urlencode()
     instance = UserNotificationQuery(user=request.user, query=query)
     if request.method == "POST":
         form = UserNotificationQueryForm(request.POST, instance=instance)
