@@ -6,8 +6,8 @@ from elasticmodels.forms import SearchForm
 
 from hotline.utils import resize_image
 
-from .models import User
 from .indexes import UserIndex
+from .models import User
 
 
 class UserSearchForm(SearchForm):
@@ -95,7 +95,6 @@ class UserForm(forms.ModelForm):
         password = self.cleaned_data.pop("password", None)
         if password is not None:
             self.instance.set_password(password)
-
 
         instance = super().save(*args, **kwargs)
 

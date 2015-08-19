@@ -11,8 +11,6 @@ from hotline.reports.models import Invite, Report
 
 from .forms import LoginForm, UserForm
 from .models import User
-from .perms import permissions
-from .views import Detail
 
 
 class DetailViewTest(TestCase):

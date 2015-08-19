@@ -1,5 +1,6 @@
 import subprocess
 
+
 def resize_image(input_path, output_path, width, height):
     thumbnail_size = "%dx%d" % (width, height)
     return subprocess.call([

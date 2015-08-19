@@ -5,11 +5,11 @@ from django.contrib import admin
 
 from .comments import views as comments
 from .notifications import views as notifications
-from .reports import views as reports
-from .users import views as users
-from .species import views as species
-from .views import home
 from .perms import permissions
+from .reports import views as reports
+from .species import views as species
+from .users import views as users
+from .views import home
 
 admin.autodiscover()
 

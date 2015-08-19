@@ -1,8 +1,8 @@
 import json
 from collections import defaultdict
 
-from django.db import models
 from django.core.validators import RegexValidator
+from django.db import models
 
 
 def category_id_to_species_id_json():

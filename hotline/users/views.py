@@ -5,7 +5,6 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import login as django_login
 from django.contrib.auth.views import login as django_login_view
-from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.core.signing import BadSignature
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render

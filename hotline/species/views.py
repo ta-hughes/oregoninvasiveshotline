@@ -1,11 +1,11 @@
 from arcutils import will_be_deleted_with
 from django.contrib.messages.views import SuccessMessageMixin
-from django.core.urlresolvers import reverse_lazy, reverse
+from django.core.urlresolvers import reverse, reverse_lazy
 from django.shortcuts import render
 from django.views.generic import CreateView, DeleteView, ListView, UpdateView
 
-from hotline.species.models import Category, Severity, Species
 from hotline.perms import permissions
+from hotline.species.models import Category, Severity, Species
 
 
 class SpeciesList(ListView):
