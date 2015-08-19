@@ -151,7 +151,7 @@ def delete(request, user_id):
         messages.success(request, "User deleted!")
         return redirect("users-list")
 
-    related_objects = will_be_deleted_with(user)
+    related_objects = list(will_be_deleted_with(user))
 
     return render(request, "users/delete.html", {
         # we don't call this template variable "user" because that collides

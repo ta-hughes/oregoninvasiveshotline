@@ -7,7 +7,7 @@
 
     <p><strong><em>This action cannot be undone!</em></strong></p>
 
-    {% if related_objects.keys|length %}
+    {% if related_objects %}
         <p>Related objects that will be deleted:</p>
         <ul>
             {% for cls, items in related_objects %}
@@ -20,7 +20,7 @@
     <form method="post" id="delete-form">
         {% csrf_token %}
         <button class="btn btn-default" onclick="window.history.go(-1); return false">Cancel</button>
-        <button type="submit" name="finish" class="pull-right btn btn-danger" onclick="return confirm('Click OK if you are really sure')">Permanently Delete Preparation and All Related Objects</button>
+        <button type="submit" name="finish" class="pull-right btn btn-danger" onclick="return confirm('Click OK if you are really sure')">Permanently Delete {{ object|model_name }} and All Related Objects</button>
     </form>
 </div>
 
