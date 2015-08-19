@@ -43,6 +43,7 @@ urlpatterns = patterns(
     url(r'^reports/claim/(?P<report_id>\d+)/?$', reports.claim, name='reports-claim'),
     url(r'^reports/unclaim/(?P<report_id>\d+)/?$', reports.unclaim, name='reports-unclaim'),
     url(r'^reports/list/?$', reports.list_, name='reports-list'),
+    url(r'^reports/invited/?$', reports.invited, name="reports-invited"),
 
     url(r'^comments/edit/(?P<comment_id>\d+)/?$', comments.edit, name='comments-edit'),
 
@@ -53,7 +54,6 @@ urlpatterns = patterns(
     # could put these routes in the app itself, but for non-reusable apps, we
     # keep them in the main urlconfs file
     url(r'^users/home/?$', users.home, name='users-home'),
-    url(r'^users/detail/(?P<pk>[0-9]+)/?$', users.Detail.as_view(), name='users-detail'),
     url(r'^users/list/?$', users.list_, name='users-list'),
     url(r'^users/create/?$', users.create, name='users-create'),
     url(r'^users/edit/(?P<user_id>\d+)/?$', users.edit, name='users-edit'),
