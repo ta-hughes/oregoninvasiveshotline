@@ -26,7 +26,10 @@ Account Home
         <li><a href="{% url 'reports-list' %}?sort_by=-created_on&is_public=notpublic&is_archived=notarchived&claimed_by=me">Open and Claimed ({{ open_and_claimed|length }})</a></li>
     {% endif %}
     {% if unclaimed_reports %}
-        <li><a href="{% url 'reports-list' %}?sort_by=-created_on&is_public=notpublic&is_archived=notarchived&claimed_by=nobody">Unclaimed ({{ unclaimed_reports|length }})</span></a></li>
+        <li><a href="{% url 'reports-list' %}?sort_by=-created_on&is_public=notpublic&is_archived=notarchived&claimed_by=nobody">Unclaimed ({{ unclaimed_reports|length }})</a></li>
+    {% endif %}
+    {% if subscribed %}
+        <li><a href="{% url 'notifications-list' %}">Subscribed Searches ({{ subscribed|length }})</a></li>
     {% endif %}
 </ul>
 
