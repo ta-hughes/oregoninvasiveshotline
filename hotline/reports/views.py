@@ -17,6 +17,7 @@ from hotline.comments.models import Comment
 from hotline.comments.perms import can_create_comment
 from hotline.images.forms import get_image_formset
 from hotline.images.models import Image
+from hotline.notifications.models import UserNotificationQuery
 from hotline.species.models import category_id_to_species_id_json
 
 from .forms import (
@@ -39,7 +40,7 @@ def list_(request):
     # all that awesome tabs stuff
     user = request.user
     tab = request.GET.get('tabs') if request.GET.get('tabs') is not None else "search"
-
+    subscribed = UserNotificationQuery.objects.filter(user_id=user.pk)
     invited_to = [invite.report for invite in Invite.objects.filter(user_id=user.pk).select_related("report")]
     reported = Report.objects.filter(Q(pk__in=request.session.get("report_ids", [])) | Q(created_by_id=user.pk))
     reported_querystring = "created_by_id:(%s)" % (" ".join(map(str, set(reported.values_list("created_by_id", flat=True)))))
@@ -68,6 +69,7 @@ def list_(request):
         "tab": tab,
         "invited_to": invited_to,
         "reported": reported,
+        "subscribed": subscribed,
         "open_and_claimed": open_and_claimed,
         "unclaimed_reports": unclaimed_reports,
         "reported_querystring": reported_querystring
