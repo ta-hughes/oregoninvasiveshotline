@@ -33,6 +33,7 @@ Report List
                     {% for subwidget in form.sort_by %}
                         <span class="comma"><a class="{% if subwidget.choice_value == form.cleaned_data.sort_by %}strong{% endif %}" href="{% add_get sort_by=subwidget.choice_value %}">{{ subwidget.choice_label }}</a></span>
                     {% endfor %}
+                    <div class="hidden">{{ form.sort_by }}</div>
                 </p>
                 <table class="table reports-table double-zebra">
                     <tbody>
