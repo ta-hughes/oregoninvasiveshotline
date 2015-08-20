@@ -1,7 +1,6 @@
 import os
 from fnmatch import fnmatch
 
-from django.conf.global_settings import TEMPLATE_CONTEXT_PROCESSORS as TCP
 from django.contrib.messages import constants as messages
 from django.core.urlresolvers import reverse_lazy
 from mommy_spatial_generators import MOMMY_SPATIAL_FIELDS
@@ -21,7 +20,6 @@ BASE_DIR = lambda *path: DJANGO_DIR("../", *path)
 # SECURITY WARNING: don't run with debug turned on in production!
 # make this True in dev
 DEBUG = variable("DEBUG", default=False)
-TEMPLATE_DEBUG = DEBUG
 DEFAULT_FROM_EMAIL = SERVER_EMAIL = 'no-reply@pdx.edu'
 
 
@@ -205,16 +203,23 @@ MEDIA_ROOT = BASE_DIR("media")
 # Templates
 #
 
-TEMPLATE_CONTEXT_PROCESSORS = TCP + (
-    'django.core.context_processors.request',
-)
-
-TEMPLATE_DIRS = (
-    # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
-    DJANGO_DIR("templates"),
-)
+TEMPLATES = [{
+    'BACKEND': 'django.template.backends.django.DjangoTemplates',
+    'DIRS': [DJANGO_DIR("templates")],
+    'APP_DIRS': True,
+    'OPTIONS': {
+        'debug': DEBUG,
+        'context_processors': [
+            'django.template.context_processors.debug',
+            'django.template.context_processors.request',
+            'django.contrib.auth.context_processors.auth',
+            'django.contrib.messages.context_processors.messages',
+            'django.template.context_processors.media',
+            'django.template.context_processors.static',
+            'django.template.context_processors.tz',
+        ],
+    },
+}]
 
 #
 # Test specific stuff
