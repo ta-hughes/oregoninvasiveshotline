@@ -455,9 +455,18 @@ blockquote {
 }
 
 .reports-table {
-    display:block;
+    width:100%;
+}
+
+.reports-table tbody {
+    display:block !important;
+    overflow-y:auto;
+    overflow-x:hidden;
     height:500px;
-    overflow-x:auto;
+}
+
+.reports-table .reports-table-title {
+    width:100%;
 }
 
 #avatar_box {

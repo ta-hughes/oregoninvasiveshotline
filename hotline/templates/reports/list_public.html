@@ -22,7 +22,7 @@ Report List
     <div class="col-md-5 {% if not reports %}hidden{% endif %}">
         <p class="reports-table-sort comma-list">Sort By:
             {% for subwidget in form.sort_by %}
-                <span class="comma"><a href="{% add_get sort_by=subwidget.choice_value %}">{{ subwidget.choice_label }}</a></span>
+                <span class="comma"><a class="{% if subwidget.choice_value == form.cleaned_data.sort_by %}strong{% endif %}" href="{% add_get sort_by=subwidget.choice_value %}">{{ subwidget.choice_label }}</a></span>
             {% endfor %}
         </p>
         <table class="table reports-table double-zebra">
@@ -34,7 +34,7 @@ Report List
                                 <img src="{{ report.image_url|default:report.icon_url }}" />
                             </a>
                         </td>
-                        <td colspan="2" style="vertical-align:bottom">
+                        <td colspan="2" style="vertical-align:bottom; width:100%">
                             <a class="strong" href="{% url 'reports-detail' report.pk %}">
                                 <small>#{{ report.pk }}:</small>
                                 {{ report.species.name|default:report.category }}
