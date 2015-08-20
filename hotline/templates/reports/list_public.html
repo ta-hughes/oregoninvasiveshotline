@@ -3,20 +3,26 @@
 Report List
 {% endblock %}
 {% block content %}
+<form class="form-inline">
+    {{ form.querystring|bootstrap }}
+    <input type="submit" value="Search" name="submit" />
+    <button onclick="window.location = '{% url 'reports-list' %}'; return false">Reset</button>
+    <a href="#" class="expander">Advanced</a>
+    <div class="tab-contents" style="display:none">
+        <div class="tab">
+            {% include 'reports/_category_form.html' %}
+        </div>
+    </div>
+</form>
 <div class="row">
     <div class="col-md-7">
+        <br />
         {% if reports %}
             <div id="map-canvas" style="height:550px"></div>
         {% else %}
             <div class="alert alert-warning">No matching reports found!</div>
         {% endif %}
         <br />
-        <form class="form-inline">
-            {{ form.querystring|bootstrap }}
-            <input type="submit" value="Search" name="submit" />
-            <button onclick="window.location = '{% url 'reports-list' %}'; return false">Reset</button>
-            {% include 'reports/_category_form.html' %}
-        </form>
     </div>
     <div class="col-md-5 {% if not reports %}hidden{% endif %}">
         <p class="reports-table-sort comma-list">Sort By:
@@ -56,4 +62,26 @@ Report List
     </div>
 </div>
 {% include 'reports/_list_map.html' with reports_json=reports_json %}
+<script>
+    $(document).ready(function(){
+        $(".expander").click(function(e){
+            e.preventDefault();
+            var closed = $(".tab-contents").is(":hidden");
+            if(closed == true)
+                $(this).parent().find(".tab-contents").show();
+            else
+                $(this).parent().find(".tab-contents").hide();
+
+                $.cookie('open', closed, { path: '/'});
+        });
+
+        var openToggle = $.cookie('open');
+        if( openToggle == 'true'){
+            $('.expander').parent().find(".tab-contents").show();
+        }
+        else {
+            $('.expander').parent().find(".tab-contents").hide();
+        }
+    });
+</script>
 {% endblock %}
