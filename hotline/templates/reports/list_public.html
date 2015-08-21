@@ -7,11 +7,9 @@ Report List
     {{ form.querystring|bootstrap }}
     <input type="submit" value="Search" name="submit" />
     <button onclick="window.location = '{% url 'reports-list' %}'; return false">Reset</button>
-    <a href="#" class="expander">Advanced</a>
-    <div class="tab-contents" style="display:none">
-        <div class="tab">
-            {% include 'reports/_category_form.html' %}
-        </div>
+    <a href="#" id="expander">Advanced</a>
+    <div id="expander-content" style="display:none">
+        {% include 'reports/_category_form.html' %}
     </div>
 </form>
 <div class="row">
@@ -64,23 +62,24 @@ Report List
 {% include 'reports/_list_map.html' with reports_json=reports_json %}
 <script>
     $(document).ready(function(){
-        $(".expander").click(function(e){
+        $("#expander").click(function(e){
             e.preventDefault();
-            var closed = $(".tab-contents").is(":hidden");
-            if(closed == true)
-                $(this).parent().find(".tab-contents").show();
-            else
-                $(this).parent().find(".tab-contents").hide();
-
-                $.cookie('open', closed, { path: '/'});
+            var closed = $("#expander-content").is(":hidden");
+            if(closed == true){
+                $("#expander-content").show();
+            } else {
+                $("#expander-content").hide();
+            }
+            Cookies.set('open', closed, {path: window.location.pathname})
         });
 
-        var openToggle = $.cookie('open');
+        var openToggle = Cookies.get('open')
+        console.log(openToggle);
         if( openToggle == 'true'){
-            $('.expander').parent().find(".tab-contents").show();
+            $("#expander-content").show();
         }
         else {
-            $('.expander').parent().find(".tab-contents").hide();
+            $("#expander-content").hide();
         }
     });
 </script>
