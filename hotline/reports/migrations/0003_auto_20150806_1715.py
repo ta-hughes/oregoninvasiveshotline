@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='report',
             name='edrr_status',
-            field=models.IntegerField(default=0, verbose_name='EDDR Status', choices=[(0, ''), (1, 'No Response/Action Required'), (2, 'Local expert notified'), (3, 'Population assessed'), (4, 'Population treated'), (5, 'Ongoing monitoring'), (6, 'Controlled at site')]),
+            field=models.IntegerField(default=0, verbose_name='EDRR Status', choices=[(0, ''), (1, 'No Response/Action Required'), (2, 'Local expert notified'), (3, 'Population assessed'), (4, 'Population treated'), (5, 'Ongoing monitoring'), (6, 'Controlled at site')]),
         ),
         migrations.AlterField(
             model_name='report',
