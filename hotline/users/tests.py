@@ -34,6 +34,16 @@ class DetailViewTest(TestCase):
         self.client.get(reverse("users-detail", args=[user.pk]))
 
 
+class EditViewTest(TestCase):
+
+    def test_get(self):
+        user = prepare(User)
+        user.set_password("test")
+        user.save()
+        self.client.login(email=user.email, password="test")
+        self.client.get(reverse("users-edit", args=[user.pk]))
+
+
 class AuthenticateViewTest(TestCase):
     def test_bad_signature_redirects_to_home(self):
         response = self.client.get(reverse("users-authenticate") + "?sig=asfd")
