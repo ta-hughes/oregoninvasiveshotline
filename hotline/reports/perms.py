@@ -7,13 +7,13 @@ def can_view_private_report(user, report):
     if user.is_anonymous():
         return False
 
-    if Invite.objects.filter(report=report, user_id=user.pk).exists():
-        return True
-
     if report.created_by == user:
         return True
 
     if user.is_active:
+        return True
+
+    if Invite.objects.filter(report=report, user_id=user.pk).exists():
         return True
 
 
