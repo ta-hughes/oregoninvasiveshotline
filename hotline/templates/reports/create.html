@@ -6,7 +6,9 @@ Report an Invader
 <h3>Report an Invader</h3>
 
 <p>Use this form to report a potential invasive species you've found in Oregon or to request help in identifying an unknown species. The information you provide will assist invasive species experts in positively identifying your find. Please try to be as complete and detailed as possible.</p>
-<form method="post" enctype="multipart/form-data">
+
+<p><em>* indicates the field is required</em></p>
+<form method="post" enctype="multipart/form-data" id="reports-form">
     {% if form.errors or formset.errors %}
         <div class="alert alert-danger">
             Please correct the errors below.
@@ -16,11 +18,14 @@ Report an Invader
     <fieldset>
         <legend>Your Contact Info</legend>
         <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-4">
                 {{ form.first_name|bootstrap }}
             </div>
-            <div class="col-md-6">
+            <div class="col-md-4">
                 {{ form.last_name|bootstrap }}
+            </div>
+            <div class="col-md-4">
+                {{ form.phone|bootstrap }}
             </div>
         </div>
         {{ form.email|bootstrap }}

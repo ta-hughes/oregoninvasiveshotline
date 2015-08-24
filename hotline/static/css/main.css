@@ -506,3 +506,7 @@ blockquote {
         border:none;
     }
 }
+
+#reports-form .required:after {
+    content:"*"
+}

@@ -11,6 +11,7 @@ class User(AbstractBaseUser):
     email = models.EmailField(max_length=255, unique=True)
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
+    phone = models.CharField(max_length=255, default="", blank=True)
     prefix = models.CharField(max_length=255)
     suffix = models.CharField(max_length=255)
     date_joined = models.DateTimeField(auto_now_add=True)

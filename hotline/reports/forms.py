@@ -191,6 +191,7 @@ class ReportForm(forms.ModelForm):
     prefix = forms.CharField(required=False)
     suffix = forms.CharField(required=False)
     email = forms.EmailField()
+    phone = forms.CharField(required=False)
 
     class Meta:
         model = Report
@@ -222,6 +223,7 @@ class ReportForm(forms.ModelForm):
                 last_name=self.cleaned_data['last_name'],
                 prefix=self.cleaned_data.get('prefix', ""),
                 suffix=self.cleaned_data.get('suffix', ""),
+                phone=self.cleaned_data.get('phone', ""),
                 is_active=False
             )
             user.save()

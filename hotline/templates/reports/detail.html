@@ -12,7 +12,7 @@ Report #{{ report.pk }} - {{ report }}
             <img src="{{ report.icon_url }}" title="{{ report.category.name }} - {{ report.species.severity }}" alt="{{ report.category.name }} - {{ report.species.severity }}" /> 
             <h3>{{ report.species.name|default:report.reported_category }} <small>{% if report.species.scientific_name %}({{ report.species.scientific_name }}){% endif %}</small> on {{ report.created_on|date:"M j, Y" }}</h3>
             {% if report.is_misidentified %}
-                <p class="misidentified">Mistakenly reported as {{ report.reported_species }}</p>
+                <p class="misidentified">Originally reported as {{ report.reported_species }}</p>
             {% endif %}
         </div>
 
@@ -24,7 +24,7 @@ Report #{{ report.pk }} - {{ report }}
             {% endif %}
 
             {% if user|can_create_comment:report %}
-                <strong>Submitted by:</strong> {{ report.created_by.first_name }} {{ report.created_by.last_name }} ({{ report.created_by.email }})<br />
+                <strong>Submitted by:</strong> {{ report.created_by.first_name }} {{ report.created_by.last_name }} ({{ report.created_by.email }}) {% if report.created_by.phone %}{{ report.created_by.phone }}{% endif %}<br />
             {% endif %}
 
             {% if report.edrr_status %}
