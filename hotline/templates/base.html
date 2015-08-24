@@ -48,20 +48,9 @@ We need to load the permissions template library so we can access the permission
                         <a href="{% url 'reports-list' %}">Browse Map</a>
                         <a class="btn btn-warning" href="{% url 'reports-create' %}">Report Now</a>
                         {% if user.is_authenticated and user.is_active %}
-                        <div class="btn-group">  
-                          <button type="button" class="btn btn-default dropdown-toggle"
-                          data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> My
-                          Account <span class="caret"></span>
-                          </button>
-                          <ul class="dropdown-menu">
-                            <li><a href="{% url 'users-home' %}">Profile</a></li>
-                            <li><a href="{% url 'users-edit' user.pk %}">Edit Profile</a></li>
-                            <li><a href="{% url 'password_change' %}">Change Password</a></li>
-                            <li><a href="{% url 'logout' %}">Logout</a></li>
-                          </ul>
-                        </div>
+                            <a class="strong" href="{% url 'users-home' %}">My Account</a></li>
                         {% elif request.session.report_ids or user.is_authenticated %}
-                            <strong><a href="{% url 'users-home' %}">My Reports</a></strong>
+                            <a class="strong" href="{% url 'users-home' %}">My Reports</a>
                         {% else %}
                             <a href="{% url 'login' %}">Login</a>
                         {% endif %}

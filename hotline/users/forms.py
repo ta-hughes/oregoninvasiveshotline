@@ -88,6 +88,12 @@ class UserForm(forms.ModelForm):
             # only staff members can control the is_staff field
             self.fields.pop("is_staff", None)
 
+        # only active users should be allowed to fill out these fields
+        if not user.is_active:
+            self.fields.pop("photo")
+            self.fields.pop("biography")
+            self.fields.pop("affiliations")
+
     def save(self, *args, **kwargs):
         """
         Save the form, and set the password, if it has been set
