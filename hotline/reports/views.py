@@ -18,7 +18,12 @@ from hotline.comments.perms import can_create_comment
 from hotline.images.forms import get_image_formset
 from hotline.images.models import Image
 from hotline.notifications.models import UserNotificationQuery
-from hotline.species.models import category_id_to_species_id_json
+from hotline.species.models import (
+    Category,
+    Severity,
+    Species,
+    category_id_to_species_id_json,
+)
 
 from .forms import (
     ConfirmForm,
@@ -73,6 +78,29 @@ def list_(request):
         "open_and_claimed": open_and_claimed,
         "unclaimed_reports": unclaimed_reports,
         "reported_querystring": reported_querystring
+    })
+
+
+def help(request):
+    """
+    Renders a page with info about searching, and a list of all the possible
+    icons for the map
+    """
+    # generate all the possible icon URLs
+    icons = []
+    for category in Category.objects.all():
+        for severity in Severity.objects.all():
+            report = Report()
+            report.reported_category = category
+            report.reported_species = Species.objects.filter(severity=severity).first()
+            icons.append({
+                "icon_url": report.icon_url,
+                "category": category.name,
+                "severity": severity.name
+            })
+
+    return render(request, "reports/help.html", {
+        "icons": icons,
     })
 
 

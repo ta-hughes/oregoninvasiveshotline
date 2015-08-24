@@ -7,6 +7,7 @@ from django.core.urlresolvers import reverse
 from django.core.validators import validate_email
 from django.db.models import Q
 from django.template.loader import render_to_string
+from django.utils.safestring import mark_safe
 from elasticmodels.forms import SearchForm
 
 from hotline.comments.models import Comment
@@ -32,7 +33,7 @@ class ReportSearchForm(SearchForm):
 
     querystring = forms.CharField(required=False, widget=forms.widgets.TextInput(attrs={
         "placeholder": "county:Washington AND category:Aquatic"
-    }), label="Search")
+    }), label=mark_safe("Search <a target='_blank' class='help' href='help'>[?]</a>"))
 
     sort_by = forms.ChoiceField(choices=[
         ("_score", "Relevance"),

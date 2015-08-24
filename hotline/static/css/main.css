@@ -510,3 +510,13 @@ blockquote {
 #reports-form .required:after {
     content:"*"
 }
+
+.help {
+    color:#DD30C1;
+    font-family:arial;
+}
+
+.report-page .container-fluid {
+    background-color:#fff;
+    border-top:5px solid #3a7a16;
+}
