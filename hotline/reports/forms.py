@@ -192,6 +192,7 @@ class ReportForm(forms.ModelForm):
     suffix = forms.CharField(required=False)
     email = forms.EmailField()
     phone = forms.CharField(required=False)
+    has_completed_ofpd = forms.BooleanField(required=False)
 
     class Meta:
         model = Report
@@ -211,6 +212,7 @@ class ReportForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['reported_species'].empty_label = "Unknown"
         self.fields['reported_species'].required = False
+        self.fields['has_completed_ofpd'].label = User._meta.get_field("has_completed_ofpd").verbose_name
 
     def save(self, *args, request, **kwargs):
         # first thing we need to do is create or find the right User object
@@ -224,6 +226,7 @@ class ReportForm(forms.ModelForm):
                 prefix=self.cleaned_data.get('prefix', ""),
                 suffix=self.cleaned_data.get('suffix', ""),
                 phone=self.cleaned_data.get('phone', ""),
+                has_completed_ofpd=self.cleaned_data.get("has_completed_ofpd"),
                 is_active=False
             )
             user.save()
