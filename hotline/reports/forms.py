@@ -130,13 +130,10 @@ class ReportSearchForm(SearchForm):
                 Q(pk__in=self.report_ids)
             )
 
-        # the is_archived field has an initial value on the form, which we want
-        # to pre-filter with
+        # filter by the is_archived field
         is_archived = self.cleaned_data.get("is_archived")
-        if is_archived == "archived":
-            queryset = queryset.filter(is_archived=True)
-        elif is_archived == "notarchived":
-            queryset = queryset.filter(is_archived=False)
+        if is_archived:
+            queryset = queryset.filter(is_archived=is_archived == "archived")
 
         # collect all the species and filter by that
         species = []
@@ -149,8 +146,8 @@ class ReportSearchForm(SearchForm):
             )
 
         # filter by the is_public field
-        is_public = self.cleaned_data.get("is_public", "")
-        if is_public is not "":
+        is_public = self.cleaned_data.get("is_public")
+        if is_public:
             queryset = queryset.filter(is_public=is_public == "public")
 
         # filter by the claimed_by field
