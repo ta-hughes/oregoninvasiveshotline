@@ -126,7 +126,7 @@ class ReportSearchForm(SearchForm):
             # or reports that are in their session variable
             queryset = queryset.filter(
                 Q(is_public=True) |
-                Q(pk__in=Invite.objects.filter(user_id=self.user.pk)) |
+                Q(pk__in=Invite.objects.filter(user_id=self.user.pk).values_list("report_id", flat=True)) |
                 Q(pk__in=self.report_ids)
             )
 
