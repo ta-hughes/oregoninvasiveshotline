@@ -30,7 +30,7 @@ class FlatterPageForm(FlatpageForm):
         # if a 404 is raised when we try to resolve the URL, or it resolves
         # back to the flatpage we're editing, the URL is ok
         try:
-            if resolve(url).func == flatpage and FlatPage.objects.filter(url=url).first() == self.instance:
+            if resolve(url).func == flatpage and FlatPage.objects.filter(url=url).first() in [None, self.instance]:
                 raise Http404()
         except Http404:
             pass  # the URL doesn't cause a collision, so we're good to go
