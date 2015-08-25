@@ -1,6 +1,22 @@
 import subprocess
 
+from django.conf import settings
+from django.contrib.sites.models import Site
 from django.db.models import Q
+
+
+# The sites framework is dumb. I don't want to hardcode the hostname of the
+# site in the database. To avoid doing that, we monkey patch
+# Site.objects.get_current so it uses our custom function that always returns a
+# Site object with the proper domain
+def get_current(request=None, _get_current=Site.objects.get_current):
+    if request is not None:
+        # fake a Site object, since we are too lazy to keep the database updated
+        return Site(domain=request.get_host(), name=request.get_host(), pk=getattr(settings, "SITE_ID", 1))
+    else:
+        return _get_current(request)
+
+Site.objects.get_current = get_current
 
 
 def resize_image(input_path, output_path, width, height):
