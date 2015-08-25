@@ -17,13 +17,13 @@ from hotline.comments.models import Comment
 from hotline.comments.perms import can_create_comment
 from hotline.images.forms import get_image_formset
 from hotline.images.models import Image
-from hotline.notifications.models import UserNotificationQuery
 from hotline.species.models import (
     Category,
     Severity,
     Species,
     category_id_to_species_id_json,
 )
+from hotline.utils import get_tab_counts
 
 from .forms import (
     ConfirmForm,
@@ -42,20 +42,13 @@ def list_(request):
     else:
         template = "reports/list_public.html"
 
+    report_ids = request.session.get("report_ids", [])
     # all that awesome tabs stuff
     user = request.user
     tab = request.GET.get('tabs') if request.GET.get('tabs') is not None else "search"
-    subscribed = UserNotificationQuery.objects.filter(user_id=user.pk)
-    invited_to = [invite.report for invite in Invite.objects.filter(user_id=user.pk).select_related("report")]
-    reported = Report.objects.filter(Q(pk__in=request.session.get("report_ids", [])) | Q(created_by_id=user.pk))
-    reported_querystring = "created_by_id:(%s)" % (" ".join(map(str, set(reported.values_list("created_by_id", flat=True)))))
-    open_and_claimed = Report.objects.filter(claimed_by_id=user.pk, is_public=False, is_archived=False).exclude(claimed_by=None)
+    tab_context = get_tab_counts(user, report_ids)
 
-    unclaimed_reports = []
-    if user.is_authenticated() and user.is_active:
-        unclaimed_reports = Report.objects.filter(claimed_by=None, is_public=False, is_archived=False)
-
-    form = ReportSearchForm(request.GET, user=request.user, report_ids=request.session.get("report_ids", []))
+    form = ReportSearchForm(request.GET, user=request.user, report_ids=report_ids)
 
     # handle the case where they want to export the reports
     if request.user.is_active and request.GET.get("export") in ['kml', 'csv']:
@@ -67,18 +60,12 @@ def list_(request):
     for report in reports:
         reports_json.append(report.to_json())
 
-    return render(request, template, {
+    return render(request, template, dict({
         "reports": reports,
         "form": form,
         "reports_json": json.dumps(reports_json),
         "tab": tab,
-        "invited_to": invited_to,
-        "reported": reported,
-        "subscribed": subscribed,
-        "open_and_claimed": open_and_claimed,
-        "unclaimed_reports": unclaimed_reports,
-        "reported_querystring": reported_querystring
-    })
+    }, **tab_context))
 
 
 def help(request):
@@ -325,27 +312,4 @@ def unclaim(request, report_id):
 
     return render(request, "reports/unclaim.html", {
         "report": report,
-    })
-
-
-def invited(request):
-    user = request.user
-    subscribed = UserNotificationQuery.objects.filter(user_id=user.pk)
-    invited_to = [invite.report for invite in Invite.objects.filter(user_id=user.pk).select_related("report")]
-    reported = Report.objects.filter(Q(pk__in=request.session.get("report_ids", [])) | Q(created_by_id=user.pk))
-    reported_querystring = "created_by_id:(%s)" % (" ".join(map(str, set(reported.values_list("created_by_id", flat=True)))))
-    open_and_claimed = Report.objects.filter(claimed_by_id=user.pk, is_public=False, is_archived=False).exclude(claimed_by=None)
-
-    unclaimed_reports = []
-    if user.is_authenticated() and user.is_active:
-        unclaimed_reports = Report.objects.filter(claimed_by=None, is_public=False, is_archived=False)
-
-    return render(request, 'reports/invited.html', {
-        "user": user,
-        "invited_to": invited_to,
-        "reported": reported,
-        "subscribed": subscribed,
-        "open_and_claimed": open_and_claimed,
-        "unclaimed_reports": unclaimed_reports,
-        "reported_querystring": reported_querystring
     })

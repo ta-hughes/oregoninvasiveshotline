@@ -6,12 +6,11 @@ from django.contrib import messages
 from django.contrib.auth import login as django_login
 from django.contrib.auth.views import login as django_login_view
 from django.core.signing import BadSignature
-from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import DetailView
 
-from hotline.notifications.models import UserNotificationQuery
 from hotline.reports.models import Invite, Report
+from hotline.utils import get_tab_counts
 
 from .forms import LoginForm, UserForm, UserSearchForm
 from .models import User
@@ -92,26 +91,11 @@ def home(request):
         messages.error(request, "You are not allowed to be here")
         return redirect("home")
 
-    invited_to = [invite.report for invite in Invite.objects.filter(user_id=user.pk).select_related("report")]
-    reported = Report.objects.filter(Q(pk__in=request.session.get("report_ids", [])) | Q(created_by_id=user.pk))
-    reported_querystring = "created_by_id:(%s)" % (" ".join(map(str, set(reported.values_list("created_by_id", flat=True)))))
-    open_and_claimed = Report.objects.filter(claimed_by_id=user.pk, is_public=False, is_archived=False).exclude(claimed_by=None)
+    tab_context = get_tab_counts(request.user, request.session.get("report_ids", []))
 
-    unclaimed_reports = []
-    if user.is_authenticated() and user.is_active:
-        unclaimed_reports = Report.objects.filter(claimed_by=None, is_public=False, is_archived=False)
-
-    subscribed = UserNotificationQuery.objects.filter(user_id=user.pk)
-
-    return render(request, "users/home.html", {
+    return render(request, "users/home.html", dict({
         "user": user,
-        "invited_to": invited_to,
-        "reported": reported,
-        "subscribed": subscribed,
-        "open_and_claimed": open_and_claimed,
-        "unclaimed_reports": unclaimed_reports,
-        "reported_querystring": reported_querystring
-    })
+    }, **tab_context))
 
 
 class Detail(DetailView):

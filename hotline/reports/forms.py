@@ -31,6 +31,12 @@ class ReportSearchForm(SearchForm):
     """
     q = None  # the default SearchForm has a q field with we don't want to use
 
+    source = forms.ChoiceField(required=False, label="Extra Criteria", choices=[
+        ("", "None"),
+        ("invited", "Invited to Review"),
+        ("reported", "Reported by Me")
+    ])
+
     querystring = forms.CharField(required=False, widget=forms.widgets.TextInput(attrs={
         "placeholder": "county:Washington AND category:Aquatic"
     }), label=mark_safe("Search <a target='_blank' class='help' href='help'>[?]</a>"))
@@ -66,11 +72,15 @@ class ReportSearchForm(SearchForm):
         super().__init__(*args, index=ReportIndex, **kwargs)
 
         # only certain fields on this form can be used by members of the public
-        public_fields = ['querystring', 'sort_by']
+        public_fields = ['querystring', 'sort_by', 'source']
         if not user.is_active:
             for name in self.fields.keys():
                 if name not in public_fields:
                     self.fields.pop(name)
+
+        # the invited choice doesn't make sense if you aren't authenticated
+        if user.is_anonymous():
+            self.fields['source'].choices = [choice for choice in self.fields['source'].choices if choice[0] != "invited"]
 
         # create a MultipleChoiceField listing the species, for each category
         groups = itertools.groupby(
@@ -128,6 +138,35 @@ class ReportSearchForm(SearchForm):
         elif is_archived == "notarchived":
             queryset = queryset.filter(is_archived=False)
 
+        # collect all the species and filter by that
+        species = []
+        for category in self.categories:
+            species.extend(map(int, self.cleaned_data.get("category-%d" % category.pk, [])))
+        if species:
+            queryset = queryset.filter(
+                (Q(actual_species_id__in=species) & ~Q(actual_species_id=None)) |
+                (Q(reported_species_id__in=species) & Q(actual_species_id=None))
+            )
+
+        # filter by the is_public field
+        is_public = self.cleaned_data.get("is_public", "")
+        if is_public is not "":
+            queryset = queryset.filter(is_public=is_public == "public")
+
+        # filter by the claimed_by field
+        claimed_by = self.cleaned_data.get("claimed_by")
+        if claimed_by == "me":
+            queryset = queryset.filter(claimed_by_id=self.user.pk)
+        elif claimed_by == "nobody":
+            queryset = queryset.filter(claimed_by_id=None)
+
+        # filter by the source field
+        source = self.cleaned_data.get("source")
+        if source == "invited":
+            queryset = queryset.filter(pk=Invite.objects.filter(user_id=self.user.pk).values_list("report_id", flat=True))
+        elif source == "reported":
+            queryset = queryset.filter(Q(created_by_id=self.user.pk) | Q(pk__in=self.report_ids))
+
         return queryset
 
     def search(self):
@@ -153,27 +192,6 @@ class ReportSearchForm(SearchForm):
         sort_by = self.cleaned_data.get("sort_by")
         if sort_by:
             results = results.sort(sort_by)
-
-        # collect all the species and filter by that
-        species = []
-        for category in self.categories:
-            species.extend(map(int, self.cleaned_data.get("category-%d" % category.pk, [])))
-        if species:
-            results = results.filter("terms", species_id=species)
-
-        is_public = self.cleaned_data.get("is_public", "")
-        if is_public is not "":
-            results = results.filter("term", is_public=is_public == "public")
-
-        is_archived = self.cleaned_data.get("is_archived", "")
-        if is_archived is not "":
-            results = results.filter("term", is_archived=is_archived == "archived")
-
-        claimed_by = self.cleaned_data.get("claimed_by")
-        if claimed_by == "me":
-            results = results.filter("term", claimed_by=self.user.email)
-        elif claimed_by == "nobody":
-            results = results.filter("missing", field="claimed_by")
 
         return results
 

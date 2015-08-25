@@ -87,7 +87,7 @@ class UserHomeViewTest(TestCase):
         session.save()
 
         response = self.client.get(reverse("users-home"))
-        self.assertTrue(set([r1, r2]) == set(response.context['reported']))
+        self.assertEqual(2, response.context['reported'])
 
 
 class UserFormTest(TestCase):
