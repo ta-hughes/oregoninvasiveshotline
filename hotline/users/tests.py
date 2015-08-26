@@ -1,3 +1,4 @@
+import hashlib
 import urllib.parse
 from unittest.mock import Mock, patch
 
@@ -11,6 +12,7 @@ from hotline.reports.models import Invite, Report
 
 from .forms import LoginForm, UserForm
 from .models import User
+from .utils import RubyPasswordHasher
 
 
 class DetailViewTest(TestCase):
@@ -244,3 +246,15 @@ class LoginViewTest(TestCase):
         })
         self.assertTrue(len(mail.outbox), 1)
         self.assertRedirects(response, reverse("login"))
+
+
+class UtilsTest(TestCase):
+
+    def setUp(self):
+        self.hasher = RubyPasswordHasher()
+
+    def test_encoding(self):
+        password = "foobar"
+        encoded = hashlib.sha256(password.encode("utf-8")).hexdigest() # duplicate original encoding scheme
+        new = self.hasher.encode(encoded, self.hasher.salt())
+        self.assertTrue(self.hasher.verify(password, new))
