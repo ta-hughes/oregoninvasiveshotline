@@ -57,5 +57,10 @@ class RubyPasswordHasher(BasePasswordHasher):
         ])
 
     def must_update(self, encoded):
-        algorithm, iterations, salt, hash = encoded.split('$', 3)
-        return int(iterations) != self.iterations
+        try:
+            algorithm, iterations, salt, hash = encoded.split('$', 3)
+            return int(iterations) != self.iterations or algorithm != self.algorithm
+        except ValueError:
+            return True
+            # needs more than one value to unpack, aka this is only a sha256 hash
+            # so yeah it definitely should be updated.

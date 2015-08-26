@@ -252,9 +252,19 @@ class UtilsTest(TestCase):
 
     def setUp(self):
         self.hasher = RubyPasswordHasher()
+        self.password = "foobar"
+        self.encoded = hashlib.sha256(self.password.encode("utf-8")).hexdigest() # duplicate original encoding scheme
 
     def test_encoding(self):
-        password = "foobar"
-        encoded = hashlib.sha256(password.encode("utf-8")).hexdigest() # duplicate original encoding scheme
-        new = self.hasher.encode(encoded, self.hasher.salt())
-        self.assertTrue(self.hasher.verify(password, new))
+        new = self.hasher.encode(self.encoded, self.hasher.salt())
+        self.assertTrue(self.hasher.verify(self.password, new))
+
+    def test_salt(self):
+        # LOL
+        salty = 8
+        salt = self.hasher.salt()
+        self.assertEqual(len(salt), salty)
+        self.assertNotIn('$', salt)
+
+    def test_must_update(self):
+        self.assertTrue(self.hasher.must_update(self.encoded))
