@@ -4,6 +4,7 @@ from collections import OrderedDict
 
 from django.contrib.auth.hashers import BasePasswordHasher, mask_hash
 from django.utils.crypto import get_random_string, pbkdf2
+from django.utils.translation import ugettext_noop as _
 
 
 class RubyPasswordHasherInvalidHashException(Exception):
@@ -38,7 +39,7 @@ class RubyPasswordHasher(BasePasswordHasher):
         if not iterations:
             iterations = self.iterations
         hashed = hashlib.sha256(password.encode("utf-8")).hexdigest()
-        hash = pbkdf2(password, salt, iterations, digest=self.digest)
+        hash = pbkdf2(hashed, salt, iterations, digest=self.digest)
         hash = base64.b64encode(hash).decode('ascii').strip()
         return "%s$%d$%s$%s" % (self.algorithm, iterations, salt, hash)
 
