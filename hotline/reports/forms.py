@@ -98,6 +98,16 @@ class ReportSearchForm(SearchForm):
                 widget=forms.widgets.CheckboxSelectMultiple
             )
 
+        # if they haven't entered anything into the search box, don't show the
+        # "Relevance" option
+        if not self.cleaned_data.get("querystring"):
+            self.fields['sort_by'].choices = self.fields['sort_by'].choices[1:]
+
+        # if they did enter a querystring, but haven't chosen anything to sort
+        # by, sort by the relevance by default
+        if self.cleaned_data.get("querystring") and not self.cleaned_data.get("sort_by"):
+            self.cleaned_data['sort_by'] = "_score"
+
     def iter_categories(self):
         """
         Just makes it easier to look through the category fields
