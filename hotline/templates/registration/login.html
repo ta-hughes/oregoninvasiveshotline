@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load pages %}
 {% block title %}
 Login
 {% endblock %}
@@ -7,9 +8,7 @@ Login
 <div class="row">
     <div class="col-md-4 col-md-offset-1">
         <h3>Public Login</h3>
-        <p>Are you a citizen who has made a report to the Oregon Invasives
-        Species Hotline? Were you invited to review a report? If so, enter your
-        email address below to get your login link.</p>
+        <p>{% getcontent 'login' default='Would you like to view or edit your reports to the Oregon Invasives Species Hotline, or were you invited to review a report? If so, enter your email address below to get your login link.' %}</p>
         <form action="" method="post">
             {% csrf_token %}
             {{ other_form|bootstrap }}

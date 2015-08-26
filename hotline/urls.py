@@ -64,7 +64,7 @@ urlpatterns = patterns(
 
     # these url routes are useful for password reset functionality and logging in and out
     # https://github.com/django/django/blob/master/django/contrib/auth/urls.py
-    url(r'^login/$', users.login, name='login'),
+    url(r'^login/?$', users.login, name='login'),
     url(r'', include('django.contrib.auth.urls')),
 
     url(r'pages/', include('hotline.pages.urls')),
