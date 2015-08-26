@@ -14,8 +14,8 @@
     </div>
     {% if current_user.is_active %}
         <p>{{ object.email }}</p>
-        <p><em>Active:</em> {{ object.is_active }}</p>
-        <p><em>Staff:</em> {{ object.is_staff }}</p>
+        <p><em>Manager:</em> {{ object.is_active }}</p>
+        <p><em>Admin:</em> {{ object.is_staff }}</p>
     {% endif %}
     <p><em>Joined:</em> {{ object.date_joined|date:"E d, Y" }}</p>
 </div>
