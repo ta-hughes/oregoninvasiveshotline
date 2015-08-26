@@ -74,20 +74,20 @@ def help(request):
     icons for the map
     """
     # generate all the possible icon URLs
-    icons = []
+    categories = OrderedDict()
+    severities = Severity.objects.all()
     for category in Category.objects.all():
-        for severity in Severity.objects.all():
+        for severity in severities:
             report = Report()
             report.reported_category = category
             report.reported_species = Species.objects.filter(severity=severity).first()
-            icons.append({
+            categories.setdefault(category, []).append({
                 "icon_url": report.icon_url,
-                "category": category.name,
                 "severity": severity.name
             })
 
     return render(request, "reports/help.html", {
-        "icons": icons,
+        "categories": categories,
     })
 
 

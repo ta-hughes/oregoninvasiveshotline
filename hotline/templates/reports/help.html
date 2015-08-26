@@ -16,7 +16,7 @@
             <ul>
                 <li>category <kbd>category:Aquatic</kbd></li>
                 <li>species <kbd>species:Beetle</kbd></li>
-                <li>description <kbd>description:Large</kbd></li>
+                <li>description <kbd>description:(large infestation)</kbd></li>
                 <li>location <kbd>location:backyard</kbd></li>
                 <li>county <kbd>county:Washington</kbd></li>
                 <li>created_on <kbd>created_on:[2012-01-01 TO 2012-12-31]</kbd></li>
@@ -24,9 +24,26 @@
         </div>
         <div class="col-md-6">
             <h3>Legend</h3>
-            {% for icon in icons %}
-                <p><img src="{{ icon.icon_url }}"> {{ icon.category }} / {{ icon.severity }}</p>
-            {% endfor %}
+            <table class="table table-striped map-legend">
+                {% for category, icons in categories.items %}
+                    {% if forloop.counter0 == 0 %}
+                        <thead>
+                            <tr>
+                                <th>Category</th>
+                                {% for icon in icons %}
+                                    <th>{{ icon.severity }}</th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                    {% endif %}
+                    <tr>
+                        <td>{{ category }}</td>
+                        {% for icon in icons %}
+                            <td class="text-center"><img src="{{ icon.icon_url }}"></td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </table>
         </div>
     </div>
 </div>

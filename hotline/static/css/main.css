@@ -24,6 +24,11 @@ small {
     font-weight:normal;
 }
 
+kbd {
+    background:#fff;
+    color:#000;
+}
+
 .nowrap {
     white-space:nowrap;
 }
@@ -519,4 +524,12 @@ blockquote {
 .report-page .container-fluid {
     background-color:#fff;
     border-top:5px solid #3a7a16;
+}
+
+.map-legend tbody>tr>td {
+    vertical-align:middle;
+}
+
+.map-legend thead>tr>th {
+    text-align:center;
 }
