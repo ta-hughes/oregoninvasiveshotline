@@ -36,7 +36,7 @@ class SpeciesDetailView(SuccessMessageMixin, UpdateView):
 class SpeciesDeleteView(SuccessMessageMixin, DeleteView):
     model = Species
     success_message = "Species deleted successfully."
-    success_url = reverse_lazy('species_list')
+    success_url = reverse_lazy('species-list')
 
     template_name = "delete.html"
     template_name_suffix = ""
@@ -66,7 +66,7 @@ class CategoryCreateView(SuccessMessageMixin, CreateView):
 class CategoryDeleteView(SuccessMessageMixin, DeleteView):
     model = Category
     success_message = "Category deleted successfully."
-    success_url = reverse_lazy('category_list')
+    success_url = reverse_lazy('category-list')
 
     template_name = "delete.html"
     template_name_suffix = ""
