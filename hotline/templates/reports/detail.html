@@ -242,6 +242,10 @@ $('#add-comment a').click(function(e){
     $('#create-comment').slideDown();
 });
 
+$('#id_new_species').keydown(function(){
+    $('#id_reported_species').val("");
+});
+
 {% if comment_form.is_bound %}
     $('#add-comment a').click()
 {% endif %}
