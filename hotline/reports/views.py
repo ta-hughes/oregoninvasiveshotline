@@ -25,13 +25,7 @@ from hotline.species.models import (
 )
 from hotline.utils import get_tab_counts
 
-from .forms import (
-    ConfirmForm,
-    InviteForm,
-    ReportForm,
-    ReportSearchForm,
-    SettingsForm,
-)
+from .forms import InviteForm, ManagementForm, ReportForm, ReportSearchForm
 from .models import Invite, Report
 from .perms import can_manage_report, can_view_private_report, permissions
 
@@ -202,8 +196,7 @@ def detail(request, report_id):
     comment_form = None
     image_formset = None
     invite_form = None
-    confirm_form = None
-    settings_form = None
+    management_form = None
     # this tells us which form was filled out since there are many on the page
     submit_flag = request.POST.get("submit_flag")
 
@@ -226,24 +219,14 @@ def detail(request, report_id):
     # handle all the management forms
     if can_manage_report(request.user, report):
         # Confirming the report form...
-        if request.POST and submit_flag == ConfirmForm.SUBMIT_FLAG:
-            confirm_form = ConfirmForm(request.POST, instance=report)
-            if confirm_form.is_valid():
-                confirm_form.save()
+        if request.POST and submit_flag == ManagementForm.SUBMIT_FLAG:
+            management_form = ManagementForm(request.POST, instance=report)
+            if management_form.is_valid():
+                management_form.save()
                 messages.success(request, "Updated!")
                 return redirect(request.get_full_path())
         else:
-            confirm_form = ConfirmForm(instance=report)
-
-        # Marking the report settings
-        if request.POST and submit_flag == SettingsForm.SUBMIT_FLAG:
-            settings_form = SettingsForm(request.POST, instance=report)
-            if settings_form.is_valid():
-                settings_form.save()
-                messages.success(request, "Updated!")
-                return redirect(request.get_full_path())
-        else:
-            settings_form = SettingsForm(instance=report)
+            management_form = ManagementForm(instance=report)
 
         # Inviting experts...
         if request.POST and submit_flag == InviteForm.SUBMIT_FLAG:
@@ -283,9 +266,8 @@ def detail(request, report_id):
         # all the forms
         "image_formset": image_formset,
         "comment_form": comment_form,
-        "settings_form": settings_form,
         "invite_form": invite_form,
-        "confirm_form": confirm_form,
+        "management_form": management_form,
     })
 
 

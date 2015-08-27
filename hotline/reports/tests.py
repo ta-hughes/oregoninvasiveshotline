@@ -20,7 +20,7 @@ from hotline.images.models import Image
 from hotline.species.models import Category, Severity, Species
 from hotline.users.models import User
 
-from .forms import ConfirmForm, InviteForm, ReportForm, SettingsForm
+from .forms import InviteForm, ManagementForm, ReportForm
 from .models import Invite, Report
 from .views import _export
 
@@ -285,8 +285,7 @@ class DetailViewTest(TestCase):
             "comment_form",
             "image_formset",
             "invite_form",
-            "confirm_form",
-            "settings_form"
+            "management_form",
         ]
         for form in forms:
             self.assertEqual(None, response.context[form])
@@ -302,8 +301,7 @@ class DetailViewTest(TestCase):
             "comment_form",
             "image_formset",
             "invite_form",
-            "confirm_form",
-            "settings_form"
+            "management_form",
         ]
         for form in forms:
             self.assertNotEqual(None, response.context[form])
@@ -315,16 +313,14 @@ class DetailViewTest(TestCase):
         user.save()
         self.client.login(email=user.email, password="foo")
 
-        form_classes = [ConfirmForm, SettingsForm]
-        for form_class in form_classes:
-            with patch("hotline.reports.views.%s" % form_class.__name__, SUBMIT_FLAG="foo") as m:
-                data = {
-                    "submit_flag": ["foo"],
-                }
-                response = self.client.post(reverse("reports-detail", args=[report.pk]), data)
-                m.assert_called_once_with(data, instance=report)
-                self.assertTrue(m().save.called)
-                self.assertRedirects(response, reverse("reports-detail", args=[report.pk]))
+        with patch("hotline.reports.views.ManagementForm", SUBMIT_FLAG="foo") as m:
+            data = {
+                "submit_flag": ["foo"],
+            }
+            response = self.client.post(reverse("reports-detail", args=[report.pk]), data)
+            m.assert_called_once_with(data, instance=report)
+            self.assertTrue(m().save.called)
+            self.assertRedirects(response, reverse("reports-detail", args=[report.pk]))
 
         # the InviteForm is slightly more complicated, so we need a special case for that
         with patch("hotline.reports.views.InviteForm", SUBMIT_FLAG="foo", save=Mock(return_value=Mock(already_invited=1))) as m:
@@ -400,11 +396,11 @@ class ReportFormTest(TestCase):
         self.assertEqual(Comment.objects.get(report=report).body, "hello world")
 
 
-class ConfirmFormTest(TestCase):
+class ManagementFormTest(TestCase):
     def test_species_and_category_initialized(self):
         species = make(Species)
         report = make(Report, reported_species=species, reported_category=species.category)
-        form = ConfirmForm(instance=report)
+        form = ManagementForm(instance=report)
         self.assertEqual(form.initial['category'], species.category)
         self.assertEqual(form.initial['actual_species'], species)
 
@@ -414,7 +410,7 @@ class ConfirmFormTest(TestCase):
         the category and species fields to be something particular
         """
         report = make(Report)
-        form = ConfirmForm(instance=report)
+        form = ManagementForm(instance=report)
         self.assertEqual(form.fields['category'].widget.attrs['id'], 'id_reported_category')
         self.assertEqual(form.fields['actual_species'].widget.attrs['id'], 'id_reported_species')
 
@@ -424,14 +420,14 @@ class ConfirmFormTest(TestCase):
             "new_species": "Yeti",
             "actual_species": make(Species).pk
         }
-        form = ConfirmForm(data, instance=report)
+        form = ManagementForm(data, instance=report)
         self.assertFalse(form.is_valid())
         self.assertTrue(form.has_error(NON_FIELD_ERRORS, code="species_contradiction"))
 
         data = {
             "new_species": "Yeti",
         }
-        form = ConfirmForm(data, instance=report)
+        form = ManagementForm(data, instance=report)
         self.assertFalse(form.is_valid())
         self.assertFalse(form.has_error(NON_FIELD_ERRORS, code="species_contradiction"))
 
@@ -440,7 +436,7 @@ class ConfirmFormTest(TestCase):
         data = {
             "new_species": "Yeti",
         }
-        form = ConfirmForm(data, instance=report)
+        form = ManagementForm(data, instance=report)
         self.assertFalse(form.is_valid())
         self.assertTrue(form.has_error("severity", code="required"))
 
@@ -453,11 +449,37 @@ class ConfirmFormTest(TestCase):
             "category": category.pk,
             "severity": severity.pk
         }
-        form = ConfirmForm(data, instance=report)
+        form = ManagementForm(data, instance=report)
         self.assertTrue(form.is_valid())
         form.save()
         species = Species.objects.get(name="Yeti", category=category)
         self.assertEqual(report.actual_species, species)
+
+    def test_is_public_field_disabled_for_is_confidential_species(self):
+        report = make(Report, actual_species__is_confidential=True)
+        form = ManagementForm(instance=report, data={
+            # even though this was submitted with a True-y value, the form
+            # should override it so it is always False
+            "is_public": 1,
+            "edrr_status": 0,
+            "category": make(Category).pk,
+        })
+        self.assertTrue(form.fields['is_public'].widget.attrs['disabled'])
+        self.assertTrue(form.is_valid())
+        form.save()
+        # even though the data spoofed the is_public flag as True, it should still be false
+        self.assertFalse(report.is_public)
+
+    def test_settings_the_actual_species_to_a_confidential_species_raises_an_error_if_the_report_is_public_too(self):
+        report = make(Report)
+        form = ManagementForm(instance=report, data={
+            "actual_species": make(Species, is_confidential=True).pk,
+            "is_public": 1,
+            "edrr_status": 0,
+            "category": make(Category).pk,
+        })
+        self.assertFalse(form.is_valid())
+        self.assertTrue(form.has_error(NON_FIELD_ERRORS, "species-confidential"))
 
 
 class InviteFormTest(TestCase):
@@ -563,22 +585,6 @@ class ReportListView(ESTestCase, TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn("Foobarius Foobar", response.content.decode())
         self.assertNotIn(str(other_reports[0]), response.content.decode())
-
-
-class SettingsFormTest(TestCase):
-    def test_is_public_field_disabled_for_is_confidential_species(self):
-        report = make(Report, actual_species__is_confidential=True)
-        form = SettingsForm(instance=report, data={
-            # even though this was submitted with a True-y value, the form
-            # should override it so it is always False
-            "is_public": 1,
-            "edrr_status": 0,
-        })
-        self.assertTrue(form.fields['is_public'].widget.attrs['disabled'])
-        self.assertTrue(form.is_valid())
-        form.save()
-        # even though the data spoofed the is_public flag as True, it should still be false
-        self.assertFalse(report.is_public)
 
 
 class UnclaimViewTest(TestCase):

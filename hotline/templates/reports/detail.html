@@ -108,7 +108,6 @@ Report #{{ report.pk }} - {{ report }}
                 <h4>Report Management {% if report.claimed_by == user %}<small><a href="{% url 'reports-unclaim' report.pk %}">(unclaim)</a></small>{% endif %}</h4>
                 <ul class="nav nav-tabs" id="management-tabs">
                     <li class="active"><a data-toggle="tab" href="#confirm"><span class="glyphicon glyphicon-grain"></span> Species</a></li>
-                    <li><a data-toggle="tab" href="#public"><span class="glyphicon glyphicon-pencil"></span> Settings</a></li>
                     <li><a data-toggle="tab" href="#invite"><span class="glyphicon glyphicon-phone-alt"></span> Invite {% if invites %}<small>({{ invites|length }})</small>{% endif %}</a></li>
                 </ul>
 
@@ -123,37 +122,31 @@ Report #{{ report.pk }} - {{ report }}
                         </p>
                         <form method="post">
                             {% csrf_token %}
-                            {% if confirm_form.errors %}
+                            {% if management_form.errors %}
                                 <div class="alert alert-danger">
                                     Please correct the errors below
-                                    {% if confirm_form.non_field_errors %}
-                                        {{ confirm_form.non_field_errors }}
+                                    {% if management_form.non_field_errors %}
+                                        {{ management_form.non_field_errors }}
                                     {% endif %}
                                 </div>
                             {% endif %}
-                            {{ confirm_form.edrr_status|bootstrap }}
-                            {{ confirm_form.category|bootstrap }}
+                            {{ management_form.edrr_status|bootstrap }}
+                            {{ management_form.category|bootstrap }}
                             <div id="reported-species">
-                                {{ confirm_form.actual_species|bootstrap }}
+                                {{ management_form.actual_species|bootstrap }}
                                 <p>&mdash; or &mdash; create a new species</p>
                                 <table>
                                     <tr>
-                                        <td>{{ confirm_form.new_species|bootstrap }}</td>
+                                        <td>{{ management_form.new_species|bootstrap }}</td>
                                         <td>&nbsp;</td>
-                                        <td>{{ confirm_form.severity|bootstrap }}</td>
+                                        <td>{{ management_form.severity|bootstrap }}</td>
                                     </tr>
                                 </table>
                             </div>
-                            <input type="hidden" name="submit_flag" value="{{ confirm_form.SUBMIT_FLAG }}" />
-                            <input type="submit" value="Submit" name="submit" />
-                        </form>
-                    </div>
-                    <div class="public-form tab-pane" id="public">
-                        <form method="post">
-                            <label>Change settings</label>
-                            {% csrf_token %}
-                            {{ settings_form|bootstrap }}
-                            <input type="hidden" name="submit_flag" value="{{ settings_form.SUBMIT_FLAG }}" />
+                            <hr />
+                            {{ management_form.is_public|bootstrap }}
+                            {{ management_form.is_archived|bootstrap }}
+                            <input type="hidden" name="submit_flag" value="{{ management_form.SUBMIT_FLAG }}" />
                             <input type="submit" value="Submit" name="submit" />
                         </form>
                     </div>
