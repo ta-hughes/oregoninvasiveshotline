@@ -75,12 +75,13 @@ kbd {
 }
 
 #phone {
-    position:relative;
     /* the magic numbers here place the phone number in the center of the
      * Report Now button on the menu */
-    left:45px;
-    top:5px;
+    position:absolute;
+    top:30px;
+    left:-25px;
     color:#333;
+    white-space: nowrap;
 }
 
 @media (max-width: 529px){

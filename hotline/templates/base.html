@@ -46,18 +46,19 @@ We need to load the permissions template library so we can access the permission
                     <div class="col-md-7" id="header-links">
                         <a href="/pages/learn/">Learn</a>
                         <a href="{% url 'reports-list' %}">Search Reports</a>
-                        <a class="btn btn-warning" href="{% url 'reports-create' %}">Report Now</a>
+                        <span style="position:relative">
+                            <a class="btn btn-warning" href="{% url 'reports-create' %}">Report Now</a>
+                            <!-- only show the phone on certain pages, since it is kinda ugly -->
+                            {% if request.path == "/" or request.path == "/reports/create" %}
+                                <span id="phone">or call <strong>1-866-INVADER</strong></span>
+                            {% endif %}
+                        </span>
                         {% if user.is_authenticated and user.is_active %}
                             <a class="strong" href="{% url 'users-home' %}">My Account</a></li>
                         {% elif request.session.report_ids or user.is_authenticated %}
                             <a class="strong" href="{% url 'users-home' %}">My Reports</a>
                         {% else %}
                             <a href="{% url 'login' %}">Login</a>
-                        {% endif %}
-                        <br />
-                        <!-- only show the phone on certain pages, since it is kinda ugly -->
-                        {% if request.path == "/" or request.path == "/reports/create" %}
-                            <span id="phone">or call <strong>1-866-INVADER</strong></span>
                         {% endif %}
                     </div>
                 </div>
