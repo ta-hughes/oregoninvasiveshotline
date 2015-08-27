@@ -94,6 +94,14 @@ with suspended_updates():
 
     FROM reports LEFT JOIN locations ON locations.locateable_id = reports.id AND locateable_type = 'Report'
     """)
+    old_edrr_status_to_new_edrr_status = {
+        2: 0,
+        3: 1,
+        4: 2,
+        5: 3,
+        6: 4,
+        7: 5,
+    }
     for row in dictfetchall(old):
         print(row['id'])
         report = Report.objects.filter(report_id=row['id']).first()
@@ -109,7 +117,7 @@ with suspended_updates():
         report.created_by_id = report_submitter_user_id[row['id']]
         report.created_on = row['created_at']
         report.claimed_by_id = user_id_to_user_id[row['user_id']]
-        report.edrr_status = row['edrr_status'] or 0
+        report.edrr_status = old_edrr_status_to_new_edrr_status.get(row['edrr_status'], None)
         report.actual_species_id = row['issue_id']
         report.county = County.objects.filter(the_geom__intersects=report.point).first()
         report.is_archived = row['closed'] and not row['issue_id']
@@ -129,7 +137,7 @@ with suspended_updates():
                 body=row['private_note'],
                 created_on=row['created_at'],
                 visibility=Comment.PRIVATE,
-                created_by=User.objects.filter(is_staff=True).first()
+                created_by=report.claimed_by or User.objects.filter(is_staff=True).first()
             ).save()
 
     # add comments
@@ -209,3 +217,18 @@ with suspended_updates():
             query = ("%s" % (counties_query))
 
         UserNotificationQuery(name="Imported", user_id=user_id_to_user_id[user_id], query=urllib.parse.urlencode({"querystring": query})).save()
+
+
+connections['default'].cursor().execute("""
+    SELECT setval(pg_get_serial_sequence('category', 'category_id'), coalesce(max(category_id),0) + 1, false) FROM category;
+    SELECT setval(pg_get_serial_sequence('comment', 'comment_id'), coalesce(max(comment_id),0) + 1, false) FROM comment;
+    SELECT setval(pg_get_serial_sequence('county', 'county_id'), coalesce(max(county_id),0) + 1, false) FROM county;
+    SELECT setval(pg_get_serial_sequence('image', 'image_id'), coalesce(max(image_id),0) + 1, false) FROM image;
+    SELECT setval(pg_get_serial_sequence('invite', 'invite_id'), coalesce(max(invite_id),0) + 1, false) FROM invite;
+    SELECT setval(pg_get_serial_sequence('notification', 'notification_id'), coalesce(max(notification_id),0) + 1, false) FROM notification;
+    SELECT setval(pg_get_serial_sequence('report', 'report_id'), coalesce(max(report_id),0) + 1, false) FROM report;
+    SELECT setval(pg_get_serial_sequence('species', 'species_id'), coalesce(max(species_id),0) + 1, false) FROM species;
+    SELECT setval(pg_get_serial_sequence('user', 'user_id'), coalesce(max(user_id),0) + 1, false) FROM "user";
+    SELECT setval(pg_get_serial_sequence('user_notification_query', 'user_notification_query_id'), coalesce(max(user_notification_query_id),0) + 1, false)
+    FROM user_notification_query;
+""")
