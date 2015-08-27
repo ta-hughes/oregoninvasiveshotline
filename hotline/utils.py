@@ -1,8 +1,13 @@
+import hashlib
 import subprocess
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import PasswordResetForm
+from django.contrib.auth.hashers import (
+    BasePasswordHasher,
+    constant_time_compare,
+)
 from django.contrib.sites.models import Site
 from django.db.models import Q
 
@@ -64,3 +69,23 @@ def get_users(self, email):
     return get_user_model()._default_manager.filter(email__iexact=email, is_active=True)
 
 PasswordResetForm.get_users = get_users
+
+
+class RubyPasswordHasher(BasePasswordHasher):
+    """
+    A password hasher that re-hashes the passwords from the old site so they can be used here.
+    Encryption (old): Sha256
+    """
+    algorithm = "RubyPasswordHasher"
+
+    def verify(self, password, encoded):
+        """
+        Actually, I think the only thing we have to do here is check that
+        encoded_2 == encrypted
+        instead of password == encrypted
+        """
+        algorithm, _, _, hash = encoded.split('$', 3)
+        assert algorithm == self.algorithm
+        # here's the extra step
+        hashed = hashlib.sha256(password.encode("utf-8")).hexdigest()
+        return constant_time_compare(hash, hashed)

@@ -61,7 +61,7 @@ with suspended_updates():
     report_submitter_user_id = {}
     key_to_user_id = {}
     old.execute("""
-    SELECT cardable_id, users.id AS user_id, affiliations, enabled, vcards.id, n_family, n_given, n_prefix, n_suffix, cardable_type, email
+    SELECT cardable_id, users.id AS user_id, affiliations, enabled, vcards.id, n_family, n_given, n_prefix, n_suffix, cardable_type, email, hashed_password
     FROM vcards LEFT JOIN users ON vcards.cardable_id = users.id AND cardable_type = 'User'
     ORDER BY cardable_type
     """)
@@ -77,6 +77,7 @@ with suspended_updates():
         user.suffix = row['n_suffix'] or ""
         user.is_active = user.is_active or bool(row['enabled'])
         user.affiliations = user.affiliations or (row['affiliations'] or "")
+        user.password = user.password or ("RubyPasswordHasher$0$$" + (row['hashed_password'] or ""))
         user.save()
 
         user_id_to_user_id[row['user_id']] = user.pk
