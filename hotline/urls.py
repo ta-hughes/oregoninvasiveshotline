@@ -42,6 +42,7 @@ urlpatterns = patterns(
     url(r'^reports/detail/(?P<report_id>\d+)/?$', reports.detail, name='reports-detail'),
     url(r'^reports/claim/(?P<report_id>\d+)/?$', reports.claim, name='reports-claim'),
     url(r'^reports/unclaim/(?P<report_id>\d+)/?$', reports.unclaim, name='reports-unclaim'),
+    url(r'^reports/delete/(?P<report_id>\d+)/?$', reports.delete, name='reports-delete'),
     url(r'^reports/list/?$', reports.list_, name='reports-list'),
     url(r'^reports/help/?$', reports.help, name='reports-help'),
 

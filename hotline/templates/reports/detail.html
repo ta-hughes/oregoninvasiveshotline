@@ -179,6 +179,7 @@ Report #{{ report.pk }} - {{ report }}
                     {% csrf_token %}
                     This report is unclaimed...
                     <button class="btn btn-warning btn-xs" type="submit">Claim it!</button>
+                    <a href="{% url 'reports-delete' report.pk %}" class="btn btn-default btn-xs">Delete it</a>
                 </form>
             </div>
         {% elif report.claimed_by and report.claimed_by != user %}

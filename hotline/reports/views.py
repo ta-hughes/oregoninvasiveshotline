@@ -3,6 +3,7 @@ import json
 import sys
 from collections import OrderedDict
 
+from arcutils import will_be_deleted_with
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
@@ -295,4 +296,20 @@ def unclaim(request, report_id):
 
     return render(request, "reports/unclaim.html", {
         "report": report,
+    })
+
+
+@permissions.can_delete_report
+def delete(request, report_id):
+    report = get_object_or_404(Report, pk=report_id)
+    if request.method == "POST":
+        report.delete()
+        messages.success(request, "Report deleted!")
+        return redirect("reports-list")
+
+    related_objects = list(will_be_deleted_with(report))
+
+    return render(request, "delete.html", {
+        "object": report,
+        "will_be_deleted_with": related_objects,
     })

@@ -623,3 +623,40 @@ class ExportTest(TestCase):
         response = _export(reports, format="kml")
         # this is harder to test without trying to parse the XML
         self.assertIn(reports[0].description, response.content.decode())
+
+
+class DeleteViewTest(TestCase):
+    def test_permissions(self):
+        report = make(Report)
+        response = self.client.get(reverse("reports-delete", args=[report.pk]))
+        self.assertRedirects(response, reverse("login") + "?next=" + reverse("reports-delete", args=[report.pk]))
+
+        user = prepare(User, is_active=True)
+        user.set_password("foo")
+        user.save()
+        self.client.login(email=user.email, password="foo")
+        user.is_active = False
+        user.save()
+        response = self.client.get(reverse("reports-delete", args=[report.pk]))
+        self.assertEqual(response.status_code, 403)
+
+    def test_get(self):
+        user = prepare(User, is_active=True)
+        user.set_password("foo")
+        user.save()
+        self.client.login(email=user.email, password="foo")
+        report = make(Report)
+        response = self.client.get(reverse("reports-delete", args=[report.pk]))
+        self.assertEqual(response.status_code, 200)
+
+    def test_post(self):
+        user = prepare(User, is_active=True)
+        user.set_password("foo")
+        user.save()
+        self.client.login(email=user.email, password="foo")
+        report = make(Report)
+        make(Report)
+        response = self.client.post(reverse("reports-delete", args=[report.pk]))
+        self.assertRedirects(response, reverse("reports-list"))
+        self.assertFalse(Report.objects.filter(pk=report.pk).exists())
+        self.assertEqual(Report.objects.count(), 1)

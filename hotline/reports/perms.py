@@ -3,6 +3,11 @@ from .models import Invite, Report
 
 
 @permissions.register(model=Report)
+def can_delete_report(user, report):
+    return user.is_active
+
+
+@permissions.register(model=Report)
 def can_view_private_report(user, report):
     if user.is_anonymous():
         return False
