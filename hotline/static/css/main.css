@@ -159,7 +159,7 @@ kbd {
     border-radius:50px;
 }
 
-#sponsors div {
+#sponsors a {
     display:inline-block;
     width:33%;
     text-align:center;
