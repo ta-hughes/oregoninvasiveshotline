@@ -1,4 +1,10 @@
-from elasticmodels import DateField, Index, IntegerField, StringField
+from elasticmodels import (
+    BooleanField,
+    DateField,
+    Index,
+    IntegerField,
+    StringField,
+)
 from elasticsearch_dsl import MetaField, analyzer, token_filter, tokenizer
 
 from .models import Report
@@ -49,6 +55,7 @@ class ReportIndex(Index):
     location = StringField(analyzer=name)
     county = StringField(analyzer="standard", attr="county.name")
     edrr_status = StringField(analyzer="standard", attr="get_edrr_status_display")
+    ofpd = BooleanField(attr="created_by.has_completed_ofpd")
 
     claimed_by = StringField(index="not_analyzed", attr="claimed_by.email")
     claimed_by_id = IntegerField(attr="claimed_by.pk")
