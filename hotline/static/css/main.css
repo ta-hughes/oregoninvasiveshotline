@@ -74,6 +74,21 @@ kbd {
     text-align:center;
 }
 
+#phone {
+    position:relative;
+    /* the magic numbers here place the phone number in the center of the
+     * Report Now button on the menu */
+    left:45px;
+    top:5px;
+    color:#333;
+}
+
+@media (max-width: 529px){
+    #phone {
+        position:static;
+    }
+}
+
 #header-links a {
     font-size:16px;
     padding:6px 12px;
@@ -136,7 +151,15 @@ kbd {
     padding:30px;
 }
 
-#sponsors a {
+#sponsors img {
+    max-height:100px;
+}
+
+#odf {
+    border-radius:50px;
+}
+
+#sponsors div {
     display:inline-block;
     width:33%;
     text-align:center;

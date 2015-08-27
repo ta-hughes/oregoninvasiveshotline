@@ -54,6 +54,11 @@ We need to load the permissions template library so we can access the permission
                         {% else %}
                             <a href="{% url 'login' %}">Login</a>
                         {% endif %}
+                        <br />
+                        <!-- only show the phone on certain pages, since it is kinda ugly -->
+                        {% if request.path == "/" or request.path == "/reports/create" %}
+                            <span id="phone">or call <strong>1-866-INVADER</strong></span>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -69,7 +74,7 @@ We need to load the permissions template library so we can access the permission
             </div>
 
             <div class="container text-center text-muted" id="footer">
-                <h6>Copyright &copy; {% now "Y" %}</h6>
+                <p>Copyright &copy; {% now "Y" %} Portland State University | Contact <a href="mailto:imapinvasivesoregon@gmail.com">imapinvasivesoregon@gmail.com</a> for questions regarding site content.</p>
             </div>
         </div>
     {% endblock %}
