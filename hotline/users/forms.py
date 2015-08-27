@@ -61,7 +61,6 @@ class UserForm(forms.ModelForm):
             'first_name',
             'last_name',
             'phone',
-            'has_completed_ofpd',
             'biography',
             'affiliations',
             'photo',
