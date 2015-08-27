@@ -2,6 +2,7 @@ from django.conf import settings
 from django.conf.urls import include, patterns, url
 from django.conf.urls.static import static
 from django.contrib import admin
+from django.shortcuts import redirect
 
 from .comments import views as comments
 from .notifications import views as notifications
@@ -18,6 +19,11 @@ urlpatterns = patterns(
     # Examples:
     # url(r'^$', 'hotline.views.home', name='home'),
     # url(r'^blog/', include('blog.urls')),
+
+    # redirects for the old site
+    url(r'^reports/(?P<report_id>\d+)/?$', lambda request, report_id: redirect("reports-detail", report_id)),
+    url(r'^reports/new/?$', lambda request: redirect("reports-create")),
+    url(r'^home/search.*$', lambda request: redirect("reports-list")),
 
     # the django admin interface is always nice to have
     url(r'^admin/', include(admin.site.urls)),
