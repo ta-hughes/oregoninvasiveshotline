@@ -48,6 +48,7 @@ class ReportIndex(Index):
     description = StringField(analyzer=name)
     location = StringField(analyzer=name)
     county = StringField(analyzer="standard", attr="county.name")
+    edrr_status = StringField(analyzer="standard", attr="get_edrr_status_display")
 
     claimed_by = StringField(index="not_analyzed", attr="claimed_by.email")
     claimed_by_id = IntegerField(attr="claimed_by.pk")
