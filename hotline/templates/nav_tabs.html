@@ -1,6 +1,8 @@
 <div class="account-links">
     {% if user.is_staff %}
         <a href="{% url 'admin-panel' %}">Admin</a>
+    {% elif user.is_active %}
+        <a href="{% url 'species-list' %}">Admin</a>
     {% endif %}
     <a href="{% url 'logout' %}">Logout</a>
 </div>
