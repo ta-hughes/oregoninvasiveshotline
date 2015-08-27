@@ -50,14 +50,14 @@ class Report(models.Model):
 
     # these are copied over from the original site
     edrr_status = models.IntegerField(verbose_name="EDRR Status", choices=[
-        (0, '',),
-        (1, 'No Response/Action Required',),
-        (2, 'Local expert notified',),
-        (3, 'Population assessed',),
-        (4, 'Population treated',),
-        (5, 'Ongoing monitoring',),
-        (6, 'Controlled at site'),
-    ], default=0)
+        (None, '',),
+        (0, 'No Response/Action Required',),
+        (1, 'Local expert notified',),
+        (2, 'Population assessed',),
+        (3, 'Population treated',),
+        (4, 'Ongoing monitoring',),
+        (5, 'Controlled at site'),
+    ], default=None, null=True, blank=True)
 
     # the actual species confirmed by an expert
     actual_species = models.ForeignKey("species.Species", null=True, default=None, related_name="reports")
