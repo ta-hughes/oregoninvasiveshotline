@@ -6,6 +6,7 @@ from django.shortcuts import redirect, render
 
 from hotline.perms import permissions
 from hotline.reports.models import Invite, Report
+from hotline.utils import get_tab_counts
 
 from .forms import UserNotificationQueryForm, UserSubscriptionDeleteForm
 from .models import UserNotificationQuery
@@ -39,15 +40,8 @@ def list_(request):
     # all that awesome tabs stuff
     user = request.user
 
-    invited_to = [invite.report for invite in Invite.objects.filter(user_id=user.pk).select_related("report")]
-    reported = Report.objects.filter(Q(pk__in=request.session.get("report_ids", [])) | Q(created_by_id=user.pk))
-    reported_querystring = "created_by_id:(%s)" % (" ".join(map(str, set(reported.values_list("created_by_id", flat=True)))))
-    open_and_claimed = Report.objects.filter(claimed_by_id=user.pk, is_public=False, is_archived=False).exclude(claimed_by=None)
-    subscribed = UserNotificationQuery.objects.filter(user_id=user.pk)
-
-    unclaimed_reports = []
-    if user.is_authenticated() and user.is_active:
-        unclaimed_reports = Report.objects.filter(claimed_by=None, is_public=False, is_archived=False)
+    report_ids = request.session.get("report_ids", [])
+    tab_context = get_tab_counts(user, report_ids)
 
     if request.method == "POST":
         form = UserSubscriptionDeleteForm(request.POST, user=request.user)
@@ -58,12 +52,6 @@ def list_(request):
     else:
         form = UserSubscriptionDeleteForm(user=request.user)
 
-    return render(request, "notifications/list.html", {
+    return render(request, "notifications/list.html", dict({
         "form": form,
-        "invited_to": invited_to,
-        "reported": reported,
-        "subscribed": subscribed,
-        "open_and_claimed": open_and_claimed,
-        "unclaimed_reports": unclaimed_reports,
-        "reported_querystring": reported_querystring
-    })
+    }, **tab_context))
