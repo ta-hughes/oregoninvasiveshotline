@@ -170,6 +170,11 @@ MIDDLEWARE_CLASSES = (
     # 'djangocas.middleware.CASMiddleware',
 )
 
+PASSWORD_HASHERS = (
+    'django.contrib.auth.hashers.PBKDF2PasswordHasher',
+    'hotline.users.utils.RubyPasswordHasher',
+)
+
 ROOT_URLCONF = 'hotline.urls'
 
 WSGI_APPLICATION = 'hotline.wsgi.application'
