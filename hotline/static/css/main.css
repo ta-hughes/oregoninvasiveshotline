@@ -280,13 +280,18 @@ kbd {
     white-space:nowrap
 }
 
-.comment-list .media {
+.comment-list .comment {
     padding:10px;
     margin-top:0;
 }
 
-.comment-list .media:nth-child(odd) {
+.comment-list .comment:nth-child(odd) {
     background-color:#F9F9F9;
+}
+
+.comment-list img {
+    margin-right:10px;
+    margin-bottom:10px;
 }
 
 .comment-meta {

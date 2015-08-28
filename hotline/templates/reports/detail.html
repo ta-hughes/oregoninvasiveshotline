@@ -62,26 +62,22 @@ Report #{{ report.pk }} - {{ report }}
         <h4>Commentary</h4>
         <div class="comment-list">
             {% for comment in comments %}
-                <div class="media" id="comment-{{ comment.pk }}">
-                    <div class="media-left">
-                        <img src="{{ comment.created_by.get_avatar_url }}" class="pull-left" width="64" height="64" />
-                    </div>
-                    <div class="media-body">
-                        {{ comment.body|linebreaksbr }}
-                        <p class="text-right comment-meta">
-                            {% if user.is_active or user|can_create_comment:report or comment.created_by.is_active %}
-                                <cite>{{ comment.created_by }} {% if comment_form.visibility %}({{ comment.get_visibility_display.split.0|lower }}){% endif %}</cite>
-                            {% elif comment.created_by_id == report.created_by_id %}
-                                <cite>Reporter</cite>
-                            {% else %}
-                                <cite>{{ comment.created_by }}</cite>
-                            {% endif %}
-                            <br /> {{ comment.created_on }}
-                            {% if user|can_edit_comment:comment %}
-                                <a href="{% url 'comments-edit' comment.pk %}">Edit</a>
-                            {% endif %}
-                        </p>
-                    </div>
+                <div id="comment-{{ comment.pk }}" class="comment">
+                    <img src="{{ comment.created_by.get_avatar_url }}" class="pull-left" width="64" height="64" />
+                    {{ comment.body|linebreaksbr }}
+                    <p class="text-right comment-meta">
+                        {% if user.is_active or user|can_create_comment:report or comment.created_by.is_active %}
+                            <cite>{{ comment.created_by }} {% if comment_form.visibility %}({{ comment.get_visibility_display.split.0|lower }}){% endif %}</cite>
+                        {% elif comment.created_by_id == report.created_by_id %}
+                            <cite>Reporter</cite>
+                        {% else %}
+                            <cite>{{ comment.created_by }}</cite>
+                        {% endif %}
+                        <br /> {{ comment.created_on }}
+                        {% if user|can_edit_comment:comment %}
+                            <a href="{% url 'comments-edit' comment.pk %}">Edit</a>
+                        {% endif %}
+                    </p>
                 </div>
             {% empty %}
                 <em>None</em>
