@@ -95,6 +95,10 @@ class UserForm(forms.ModelForm):
             self.fields.pop("biography")
             self.fields.pop("affiliations")
 
+        # stupid chrome...http://stackoverflow.com/a/30976223/2733517
+        for name, field in self.fields.items():
+            field.widget.attrs['autocomplete'] = "new-password"
+
     def save(self, *args, **kwargs):
         """
         Save the form, and set the password, if it has been set
