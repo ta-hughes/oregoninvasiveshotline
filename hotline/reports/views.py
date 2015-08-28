@@ -83,7 +83,6 @@ def help(request):
 
     return render(request, "reports/help.html", {
         "categories": categories,
-        "edrr_statuses": ", ".join(choice[1] for choice in Report._meta.get_field("edrr_status").choices if choice[1]),
     })
 
 

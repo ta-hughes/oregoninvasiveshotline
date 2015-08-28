@@ -1,28 +1,10 @@
 {% extends "base.html" %}
 {% block body %}
+{% load pages %}
 <div class="container">
     <div class="row">
         <div class="col-md-6">
-            <h3>Search Syntax</h3>
-            <h4>Basic Search</h4>
-            <p>Just enter a string of text: <kbd>Beetle Multnomah</kbd></p>
-            <h4>Advanced Search</h4>
-            <p>You can search against a specific field by typing the field name, followed by a colon, and then the phrase you're looking for: <kbd>county:"Hood River"</kbd>. If your value has spaces in it, wrap the phrase in quotes or parentheses. Using quotes means the terms in the phrase must appear in that order. With parentheses, the terms can appear in any order.
-            </p>
-
-            <p>You can combine clauses with AND and OR: <kbd>county:("Hood River" OR Multnomah)</kbd>. Use parentheses to group clauses. You can search on multiple fields too:<kbd>species:("Beetle" or "Bee") AND county:"Hood River"</kbd></p>
-
-            <h5 class="strong">Available Fields to Search</h5>
-            <ul>
-                <li>category <kbd>category:Aquatic</kbd></li>
-                <li>species <kbd>species:Beetle</kbd></li>
-                <li>description <kbd>description:(large infestation)</kbd></li>
-                <li>location <kbd>location:backyard</kbd></li>
-                <li>county <kbd>county:Washington</kbd></li>
-                <li>created_on <kbd>created_on:[2012-01-01 TO 2012-12-31]</kbd></li>
-                <li>edrr_status <kbd>edrr_status:"Local expert notified"</kbd> ({{ edrr_statuses }})</li>
-                <li>ofpd <kbd>ofpd:true</kbd></li>
-            </ul>
+            {% getcontent 'search' %}
         </div>
         <div class="col-md-6">
             <h3>Legend</h3>
