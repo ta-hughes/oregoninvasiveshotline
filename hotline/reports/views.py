@@ -190,7 +190,10 @@ def detail(request, report_id):
         request.user = report.created_by
 
     if not report.is_public:
-        if request.user.is_anonymous() or not can_view_private_report(request.user, report):
+        if request.user.is_anonymous():
+            messages.info(request, "If this is your report, please use the login system below to authenticate yourself.")
+            return login_required(lambda request: None)(request)
+        elif not can_view_private_report(request.user, report):
             raise PermissionDenied()
 
     # there are a bunch of forms that can be filled out on this page, by

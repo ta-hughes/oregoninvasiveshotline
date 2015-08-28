@@ -155,10 +155,10 @@ class CreateViewTest(TestCase):
 
 
 class DetailViewTest(TestCase):
-    def test_anonymous_users_cant_view_non_public_reports(self):
+    def test_anonymous_users_cant_view_non_public_reports_and_is_prompted_to_login(self):
         report = make(Report, is_public=False)
         response = self.client.get(reverse("reports-detail", args=[report.pk]))
-        self.assertEqual(response.status_code, 403)
+        self.assertRedirects(response, reverse("login") + "?next=" + reverse("reports-detail", args=[report.pk]))
 
     def test_anonymous_users_with_proper_session_state_can_view_non_public_reports(self):
         report = make(Report, is_public=False, created_by__is_active=False)
