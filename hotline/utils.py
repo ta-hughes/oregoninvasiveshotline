@@ -9,8 +9,30 @@ from django.contrib.auth.hashers import (
     constant_time_compare,
 )
 from django.contrib.sites.models import Site
+from django.core.management import call_command
+from django.core.signals import request_finished
+from django.db import transaction
 from django.db.models import Q
+from django.dispatch import receiver
+from django.utils.timezone import localtime, now
 
+
+@receiver(request_finished)
+def refresh_index(*args, **kwargs):
+    """
+    To avoid using a cron job to rebuild the elasticsearch index every night,
+    we have this signal receiver do it. It's a little hacky, but we create a
+    service user and use the last_login date to determine when to update the
+    index
+    """
+    with transaction.atomic():
+        user, _ = get_user_model().objects.get_or_create(email="ELASTICSEARCH_USER_DONT_DELETE_ME@pdx.edu", is_staff=False, is_active=False)
+        user = get_user_model().objects.select_for_update().filter(pk=user.pk).first()
+        # we use the last_login field on the user to determine if an update is necessary
+        if user.last_login is None or localtime(user.last_login).day < localtime(now()).day:
+            user.last_login = now()
+            user.save()
+            subprocess.Popen([settings.BASE_DIR("manage.py"), "rebuild_index", "--noinput", "--clopen"])
 
 # The sites framework is dumb. I don't want to hardcode the hostname of the
 # site in the database. To avoid doing that, we monkey patch
