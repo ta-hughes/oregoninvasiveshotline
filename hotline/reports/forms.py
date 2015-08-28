@@ -82,6 +82,10 @@ class ReportSearchForm(SearchForm):
         if user.is_anonymous():
             self.fields['source'].choices = [choice for choice in self.fields['source'].choices if choice[0] != "invited"]
 
+        if not report_ids and user.is_anonymous():
+            # there's no reason to show the field
+            self.fields.pop("source")
+
         # create a MultipleChoiceField listing the species, for each category
         groups = itertools.groupby(
             Species.objects.all().select_related("category").order_by("category__name", "category__pk", "name"),
