@@ -32,7 +32,7 @@ def refresh_index(*args, **kwargs):
         if user.last_login is None or localtime(user.last_login).day < localtime(now()).day:
             user.last_login = now()
             user.save()
-            subprocess.Popen([settings.BASE_DIR("manage.py"), "rebuild_index", "--noinput", "--clopen"])
+            subprocess.Popen([settings.BASE_DIR(".env", "bin", "python"), settings.BASE_DIR("manage.py"), "rebuild_index", "--noinput", "--clopen"])
 
 # The sites framework is dumb. I don't want to hardcode the hostname of the
 # site in the database. To avoid doing that, we monkey patch
