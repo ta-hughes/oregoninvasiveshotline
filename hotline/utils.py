@@ -9,7 +9,7 @@ from django.contrib.auth.hashers import (
     constant_time_compare,
 )
 from django.contrib.sites.models import Site
-from django.core.management import call_command
+from django.core import mail
 from django.core.signals import request_finished
 from django.db import transaction
 from django.db.models import Q
@@ -25,6 +25,10 @@ def refresh_index(*args, **kwargs):
     service user and use the last_login date to determine when to update the
     index
     """
+    # we don't want to run this during unit tests
+    if hasattr(mail, "outbox"):
+        return
+
     with transaction.atomic():
         user, _ = get_user_model().objects.get_or_create(email="ELASTICSEARCH_USER_DONT_DELETE_ME@pdx.edu", is_staff=False, is_active=False)
         user = get_user_model().objects.select_for_update().filter(pk=user.pk).first()
@@ -33,6 +37,7 @@ def refresh_index(*args, **kwargs):
             user.last_login = now()
             user.save()
             subprocess.Popen([settings.BASE_DIR(".env", "bin", "python"), settings.BASE_DIR("manage.py"), "rebuild_index", "--noinput", "--clopen"])
+
 
 # The sites framework is dumb. I don't want to hardcode the hostname of the
 # site in the database. To avoid doing that, we monkey patch
