@@ -66,7 +66,7 @@ class CategoryCreateView(SuccessMessageMixin, CreateView):
 class CategoryDeleteView(SuccessMessageMixin, DeleteView):
     model = Category
     success_message = "Category deleted successfully."
-    success_url = reverse_lazy('category-list')
+    success_url = reverse_lazy('categories-list')
 
     template_name = "delete.html"
     template_name_suffix = ""
