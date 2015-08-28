@@ -232,3 +232,5 @@ connections['default'].cursor().execute("""
     SELECT setval(pg_get_serial_sequence('user_notification_query', 'user_notification_query_id'), coalesce(max(user_notification_query_id),0) + 1, false)
     FROM user_notification_query;
 """)
+
+User.objects.filter(first_name="EXPERT", last_name="CONTACT").update(first_name="", last_name="")
