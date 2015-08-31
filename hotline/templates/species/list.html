@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block content %}
+<form class="form-inline">
+    {{ form.non_field_errors }}
+    {{ form.querystring|bootstrap }}
+    {{ form.sort_by|bootstrap }}
+    {{ form.order|bootstrap }}
+    <div class="pull-right">
+        <input type="submit" name="submit" value="Search" class="btn btn-primary" />
+        <a class="btn btn-warning" href="{% url 'species-list' %}">Clear</a>
+    </div>
+</form>
+<div>
+    <a class="btn btn-primary pull-right" href="{% url 'species-create' %}">Create a new species</a>
+    <h2>Species</h2>
+    <table class="table table-condensed table-striped">
+        <thead>
+            <tr>
+                <th>Action</th>
+                <th>Name</th>
+                <th>Scientific name</th>
+                <th>Category</th>
+                <th>Severity</th>
+                <th>Confidential</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for species in all_species %}
+                <tr>
+                    <td class="nowrap">
+                        <a href="{% url 'species-detail' species.pk %}">
+                            <span class="glyphicon glyphicon-pencil"></span>
+                        </a>
+                        <a href="{% url 'species-delete' species.pk %}" class="text-danger">
+                            <span class="glyphicon glyphicon-trash"></span>
+                        </a>
+                    </td>
+                    <td>{{ species.name }}</td>
+                    <td>{{ species.scientific_name }}</td>
+                    <td>{{ species.category }}</td>
+                    <td>{{ species.severity }}</td>
+                    <td>{{ species.is_confidential }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% include '_pagination.html' with items=all_species %}
+</div>
+{% endblock %}

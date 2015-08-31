@@ -5,11 +5,19 @@ from django.shortcuts import render
 from django.views.generic import CreateView, DeleteView, ListView, UpdateView
 
 from hotline.perms import permissions
+from hotline.species.forms import SpeciesSearchForm
 from hotline.species.models import Category, Severity, Species
 
 
-class SpeciesList(ListView):
-    model = Species
+@permissions.is_active
+def list_(request):
+    form = SpeciesSearchForm(request.GET, user=request.user)
+    species = form.results(request.GET.get("page"))
+
+    return render(request, 'species/list.html', {
+        "all_species": species,
+        "form": form,
+    })
 
 
 class SpeciesCreateView(SuccessMessageMixin, CreateView):
