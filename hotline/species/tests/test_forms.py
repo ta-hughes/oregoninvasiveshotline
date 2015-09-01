@@ -1,4 +1,5 @@
 from django.test import TestCase
+from django.test.client import RequestFactory
 from model_mommy.mommy import make
 
 from hotline.users.models import User
@@ -21,9 +22,33 @@ class SpeciesFormsTest(TestCase):
         self.client.login(username="foobar@example.com", password="foobar")
 
     def test_get_queryset(self):
+        """
+        test to ensure initial queryset is the entire set of species model objects.
+        """
+        form = SpeciesSearchForm(user=self.user, data={})
+        queryset = form.get_queryset()
+        self.assertEqual(len(queryset), Species.objects.count())
+
+    def test_valid_form(self):
         data = {
-            "querystring": "stuff",
+            "querystring": "other",
         }
         species_ids = Species.objects.all().values_list("pk")
         form = SpeciesSearchForm(user=self.user, data=data, species_ids=species_ids)
         self.assertTrue(form.is_valid())
+
+    def test_search(self):
+        # test object
+        other = make(Species, name="other")
+        # set it all up
+        request = RequestFactory().get("/", {'querystring': 'other'})
+        species_ids = Species.objects.all().values_list("pk")
+        form = SpeciesSearchForm(request.GET, user=self.user, species_ids=species_ids)
+        # make sure the form is valid
+        self.assertTrue(form.is_valid())
+        results = form.search()
+        values = results.to_dict()
+        ids_list = values['query']['filtered']['filter']['ids']['values']
+        # Check to see that the id of the test object "other"
+        # is in the list of ids returned by the search function
+        self.assertIn(other.pk, ids_list)
