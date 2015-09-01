@@ -85,3 +85,14 @@ class Species(models.Model):
             "severity": self.severity.name,
             "category": self.category.name,
         }
+
+    @property
+    def get_severity(self):
+        return self.severity.name
+
+    @property
+    def get_category(self):
+        return self.category.name
+
+
+from .indexes import * # noqa isort:skip
