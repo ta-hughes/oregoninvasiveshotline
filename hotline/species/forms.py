@@ -21,20 +21,18 @@ class SpeciesSearchForm(SearchForm):
     }), label=mark_safe("Search <a target='_blank' class='help' href='help'>[?]</a>"))
 
     sort_by = forms.ChoiceField(choices=[
-        ("name", "Name (Desc)"),
-        ("-name", "Name (Asc)"),
-        ("scientific_name", "Scientific Name (Desc)"),
-        ("-scientific_name", "Scientific Name (Asc)"),
-        ("remedy", "Remedy (Desc)"),
-        ("-remedy", "Remedy (Asc)"),
-        ("resources", "Resources (Desc)"),
-        ("-resources", "Resources (Asc)"),
-        ("severity.name", "Severity (Desc)"),
-        ("-severity.name", "Severity (Asc)"),
-        ("category.name", "Category (Desc)"),
-        ("-category.name", "Category (Asc)"),
-
+        ("name", "Name"),
+        ("scientific_name", "Scientific Name"),
+        ("severity", "Severity"),
+        ("category", "Category"),
+        ("is_confidential", "Confidential"),
     ], required=False)
+
+
+    order = forms.ChoiceField(choices=[
+        ("ascending", "Ascending"),
+        ("descending", "Descending"),
+    ], required=False, initial="ascending", widget=forms.widgets.RadioSelect)
 
     def __init__(self, *args, user, species_ids=(), **kwargs):
         self.user = user
@@ -42,8 +40,13 @@ class SpeciesSearchForm(SearchForm):
         super().__init__(*args, index=SpeciesIndex, **kwargs)
 
     def get_queryset(self):
-        queryset = super().get_queryset().prefetch_related().select_related(
+        queryset = super().get_queryset().select_related(
+            'category',
+            'severity'
         )
+
+        if self.species_ids:
+            queryset = queryset.filter(Q(pk__in=self.species_ids))
 
         return queryset
 
@@ -65,7 +68,10 @@ class SpeciesSearchForm(SearchForm):
                 results = query
 
         sort_by = self.cleaned_data.get("sort_by")
+        order = self.cleaned_data.get("order")
         if sort_by:
+            if order == "descending":
+                sort_by = "-" + sort_by
             results = results.sort(sort_by)
 
         return results
