@@ -2,8 +2,8 @@ from django.core.urlresolvers import reverse
 from django.test import RequestFactory, TestCase
 from model_mommy.mommy import make
 
-from .models import Category, Severity, Species
-from .views import (
+from ..models import Category, Severity, Species
+from ..views import (
     CategoryCreateView,
     CategoryDeleteView,
     CategoryDetailView,

@@ -1,5 +1,4 @@
-from elasticmodels import DateField, Index, IntegerField, StringField
-from elasticsearch_dsl import MetaField, analyzer, token_filter, tokenizer
+from elasticmodels import Index, StringField
 
 from .models import Species
 

@@ -3,11 +3,7 @@ from django.db.models import Q
 from django.utils.safestring import mark_safe
 from elasticmodels.forms import SearchForm
 
-from hotline.perms import permissions
-from hotline.users.models import User
-
 from .indexes import SpeciesIndex
-from .models import Species, Severity, Category
 
 
 class SpeciesSearchForm(SearchForm):
@@ -27,7 +23,6 @@ class SpeciesSearchForm(SearchForm):
         ("category", "Category"),
         ("is_confidential", "Confidential"),
     ], required=False)
-
 
     order = forms.ChoiceField(choices=[
         ("ascending", "Ascending"),

@@ -1,4 +1,5 @@
 import json
+
 from arcutils import will_be_deleted_with
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.urlresolvers import reverse, reverse_lazy
@@ -6,8 +7,8 @@ from django.shortcuts import render
 from django.views.generic import CreateView, DeleteView, ListView, UpdateView
 
 from hotline.perms import permissions
-from hotline.species.models import Category, Severity, Species
 from hotline.species.forms import SpeciesSearchForm
+from hotline.species.models import Category, Severity, Species
 from hotline.utils import get_tab_counts
 
 
