@@ -5,8 +5,8 @@ from .models import Species
 
 class SpeciesIndex(Index):
 
-    severity = StringField(attr="get_severity")
-    category = StringField(attr="get_category")
+    severity = StringField(attr="severity.name")
+    category = StringField(attr="category.name")
 
     class Meta:
         model = Species
