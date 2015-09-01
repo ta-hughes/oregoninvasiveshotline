@@ -17,6 +17,7 @@
     {{ form.resources|bootstrap }}
     {{ form.is_confidential|bootstrap }}
     <input type="submit" class="btn btn-primary" value="Update" />
+    <a href="{% url 'species-list' %}" class="btn btn-warning">Cancel</a>
 </form>
 
 {% endblock %}
