@@ -9,29 +9,23 @@ from django.views.generic import CreateView, DeleteView, ListView, UpdateView
 from hotline.perms import permissions
 from hotline.species.forms import SpeciesSearchForm
 from hotline.species.models import Category, Severity, Species
-from hotline.utils import get_tab_counts
 
 
 def list_(request):
-    species_ids = request.session.get("species_ids", [])
-    user = request.user
     tab = request.GET.get('tabs') if request.GET.get('tabs') is not None else "search"
-    tab_context = get_tab_counts(user, species_ids)
-
-    form = SpeciesSearchForm(request.GET, user=request.user, species_ids=species_ids)
-
+    form = SpeciesSearchForm(request.GET, user=request.user)
     species = form.results(request.GET.get("page", 1))
 
     species_json = []
     for s in species:
         species_json.append(s.to_json())
 
-    return render(request, 'species/list.html', dict({
+    return render(request, 'species/list.html', {
         "all_species": species,
         "form": form,
         "species_json": json.dumps(species_json),
         "tab": tab,
-    }, **tab_context))
+    })
 
 
 class SpeciesCreateView(SuccessMessageMixin, CreateView):

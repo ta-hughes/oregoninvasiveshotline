@@ -1,5 +1,4 @@
 from django import forms
-from django.db.models import Q
 from django.utils.safestring import mark_safe
 from elasticmodels.forms import SearchForm
 
@@ -29,9 +28,8 @@ class SpeciesSearchForm(SearchForm):
         ("descending", "Descending"),
     ], required=False, initial="ascending", widget=forms.widgets.RadioSelect)
 
-    def __init__(self, *args, user, species_ids=(), **kwargs):
+    def __init__(self, *args, user, **kwargs):
         self.user = user
-        self.species_ids = species_ids
         super().__init__(*args, index=SpeciesIndex, **kwargs)
 
     def get_queryset(self):
@@ -39,9 +37,6 @@ class SpeciesSearchForm(SearchForm):
             'category',
             'severity'
         )
-
-        if self.species_ids:
-            queryset = queryset.filter(Q(pk__in=self.species_ids))
 
         return queryset
 

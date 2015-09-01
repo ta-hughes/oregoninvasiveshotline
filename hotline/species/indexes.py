@@ -11,7 +11,6 @@ class SpeciesIndex(Index):
     class Meta:
         model = Species
         fields = [
-            'species_id',
             'name',
             'scientific_name',
             'remedy',

@@ -33,8 +33,7 @@ class SpeciesFormsTest(TestCase):
         data = {
             "querystring": "other",
         }
-        species_ids = Species.objects.all().values_list("pk")
-        form = SpeciesSearchForm(user=self.user, data=data, species_ids=species_ids)
+        form = SpeciesSearchForm(user=self.user, data=data)
         self.assertTrue(form.is_valid())
 
     def test_search(self):
@@ -42,8 +41,7 @@ class SpeciesFormsTest(TestCase):
         other = make(Species, name="other")
         # set it all up
         request = RequestFactory().get("/", {'querystring': 'other'})
-        species_ids = Species.objects.all().values_list("pk")
-        form = SpeciesSearchForm(request.GET, user=self.user, species_ids=species_ids)
+        form = SpeciesSearchForm(request.GET, user=self.user)
         # make sure the form is valid
         self.assertTrue(form.is_valid())
         results = form.search()
