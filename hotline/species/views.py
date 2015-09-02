@@ -1,5 +1,3 @@
-import json
-
 from arcutils import will_be_deleted_with
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.urlresolvers import reverse, reverse_lazy
@@ -11,20 +9,14 @@ from hotline.species.forms import SpeciesSearchForm
 from hotline.species.models import Category, Severity, Species
 
 
+@permissions.is_active
 def list_(request):
-    tab = request.GET.get('tabs') if request.GET.get('tabs') is not None else "search"
     form = SpeciesSearchForm(request.GET, user=request.user)
-    species = form.results(request.GET.get("page", 1))
-
-    species_json = []
-    for s in species:
-        species_json.append(s.to_json())
+    species = form.results(request.GET.get("page"))
 
     return render(request, 'species/list.html', {
         "all_species": species,
         "form": form,
-        "species_json": json.dumps(species_json),
-        "tab": tab,
     })
 
 

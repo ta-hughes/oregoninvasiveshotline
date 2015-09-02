@@ -1,5 +1,5 @@
+import elasticmodels
 from django.test import TestCase
-from django.test.client import RequestFactory
 from model_mommy.mommy import make
 
 from hotline.users.models import User
@@ -8,7 +8,7 @@ from ..forms import SpeciesSearchForm
 from ..models import Species
 
 
-class SpeciesFormsTest(TestCase):
+class SpeciesFormsTest(TestCase, elasticmodels.ESTestCase):
     """
     Some unit tests to ensure forms in the species app work as they should.
 
@@ -21,32 +21,30 @@ class SpeciesFormsTest(TestCase):
         self.user.save()
         self.client.login(username="foobar@example.com", password="foobar")
 
-    def test_get_queryset(self):
-        """
-        test to ensure initial queryset is the entire set of species model objects.
-        """
+    def test_get_initial_queryset(self):
         form = SpeciesSearchForm(user=self.user, data={})
         queryset = form.get_queryset()
         self.assertEqual(len(queryset), Species.objects.count())
 
     def test_valid_form(self):
-        data = {
-            "querystring": "other",
-        }
-        form = SpeciesSearchForm(user=self.user, data=data)
+        form = SpeciesSearchForm({'querystring': 'other'}, user=self.user)
         self.assertTrue(form.is_valid())
 
-    def test_search(self):
+    def test_form_with_empty_querystring_returns_everything(self):
+        form = SpeciesSearchForm({'querystring': ''}, user=self.user)
+        self.assertTrue(form.is_valid())
+        results = list(form.search().execute())
+        self.assertEqual(len(results), Species.objects.count())
+
+    def test_search_returns_correct_object(self):
         # test object
-        other = make(Species, name="other")
+        name = "other"
+        make(Species, name=name)
         # set it all up
-        request = RequestFactory().get("/", {'querystring': 'other'})
-        form = SpeciesSearchForm(request.GET, user=self.user)
+        form = SpeciesSearchForm({'querystring': 'other'}, user=self.user)
         # make sure the form is valid
         self.assertTrue(form.is_valid())
-        results = form.search()
-        values = results.to_dict()
-        ids_list = values['query']['filtered']['filter']['ids']['values']
+        results = form.search().execute()[0]
         # Check to see that the id of the test object "other"
         # is in the list of ids returned by the search function
-        self.assertIn(other.pk, ids_list)
+        self.assertEqual(results['name'], name)

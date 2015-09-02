@@ -74,17 +74,5 @@ class Species(models.Model):
     def __str__(self):
         return "%s%s" % (self.name, " (%s)" % self.scientific_name if self.scientific_name else "")
 
-    def to_json(self):
-        return {
-            "id": self.pk,
-            "name": self.name,
-            "scientific_name": self.scientific_name,
-            "remedy": self.remedy,
-            "resources": self.resources,
-            "is_confidential": self.is_confidential,
-            "severity": self.severity.name,
-            "category": self.category.name,
-        }
-
 
 from .indexes import * # noqa isort:skip

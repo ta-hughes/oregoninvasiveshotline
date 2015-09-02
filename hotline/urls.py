@@ -29,7 +29,7 @@ urlpatterns = patterns(
     url(r'^admin/', include(admin.site.urls)),
     url(r'^$', home, name="home"),
     url(r'^adminpanel/?$', species.admin_panel, name='admin-panel'),
-    url(r'^species/list/?$', permissions.is_active(species.list_), name='species-list'),
+    url(r'^species/list/?$', species.list_, name='species-list'),
     url(r'^species/detail/(?P<pk>[0-9]+)/?$', permissions.is_active(species.SpeciesDetailView.as_view()), name='species-detail'),
     url(r'^species/delete/(?P<pk>[0-9]+)/?$', permissions.is_active(species.SpeciesDeleteView.as_view()), name='species-delete'),
     url(r'^species/create/?$', permissions.is_active(species.SpeciesCreateView.as_view()), name='species-create'),

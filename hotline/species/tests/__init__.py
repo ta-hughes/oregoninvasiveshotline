@@ -1,2 +1,2 @@
-from .test_forms import *
-from .test_views import *
+from .test_forms import * # noqa isort:skip
+from .test_views import * # noqa isort:skip

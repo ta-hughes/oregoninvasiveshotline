@@ -8,6 +8,9 @@ class SpeciesIndex(Index):
     severity = StringField(attr="severity.name")
     category = StringField(attr="category.name")
 
+    def get_queryset(self, *args, **kwargs):
+        return super().get_queryset().select_related('category', 'severity')
+
     class Meta:
         model = Species
         fields = [

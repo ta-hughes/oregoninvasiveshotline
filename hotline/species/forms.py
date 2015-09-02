@@ -32,14 +32,6 @@ class SpeciesSearchForm(SearchForm):
         self.user = user
         super().__init__(*args, index=SpeciesIndex, **kwargs)
 
-    def get_queryset(self):
-        queryset = super().get_queryset().select_related(
-            'category',
-            'severity'
-        )
-
-        return queryset
-
     def search(self):
         results = super().search()
         if self.cleaned_data.get("querystring"):
