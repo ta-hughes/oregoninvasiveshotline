@@ -1,5 +1,4 @@
 from django import forms
-from django.utils.safestring import mark_safe
 from elasticmodels.forms import SearchForm
 
 from .indexes import SpeciesIndex
@@ -12,8 +11,8 @@ class SpeciesSearchForm(SearchForm):
     q = None
 
     querystring = forms.CharField(required=False, widget=forms.widgets.TextInput(attrs={
-        "placeholder": "name:Foobarius"
-    }), label=mark_safe("Search <a target='_blank' class='help' href='help'>[?]</a>"))
+        "placeholder": "name:Bass OR category:Plants"
+    }), label="Search")
 
     sort_by = forms.ChoiceField(choices=[
         ("name", "Name"),

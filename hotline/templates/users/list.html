@@ -19,18 +19,19 @@
                 <th>Name</th>
                 <th>Email</th>
                 <th class="text-center">Manager</th>
-                <th>Actions</th>
+                <th>&nbsp;</th>
             </tr>
         </thead>
         <tbody>
             {% for user in users %}
                 <tr>
-                    <td><a href="{% url 'users-detail' user.pk %}">{{ user }}</a></td>
-                    <td><a href="{% url 'users-detail' user.pk %}">{{ user.email }}</a></td>
+                    <td><a href="{% url 'users-edit' user.pk %}">{{ user }}</a></td>
+                    <td>{{ user.email }}</td>
                     <td class="text-center">{% if user.is_active %}<span class="glyphicon glyphicon-ok"></span>{% endif %}</td>
-                    <td>
-                        <a href="{% url 'users-edit' user.pk %}">Edit</a>
-                        <a href="{% url 'users-delete' user.pk %}">Delete</a>
+                    <td class="text-right">
+                        <a href="{% url 'users-delete' user.pk %}" class="text-danger">
+                            <span class="glyphicon glyphicon-trash"></span>
+                        </a>
                     </td>
                 </tr>
             {% endfor %}

@@ -6,18 +6,21 @@
 <table class="table table-condensed table-striped">
     <thead>
         <tr>
-            <th>Action</th>
             <th>Name</th>
+            <th>&nbsp;</th>
         </tr>
     </thead>
     <tbody>
         {% for severity in object_list %}
             <tr>
                 <td>
-                    <a href="{% url 'severities-detail' severity.pk %}">Edit</a>
-                    <a href="{% url 'severities-delete' severity.pk %}">Delete</a>
+                    <a href="{% url 'severities-detail' severity.pk %}">{{ severity.name }}</a>
                 </td>
-                <td>{{ severity.name }}</td>
+                <td class="text-right">
+                    <a href="{% url 'severities-delete' severity.pk %}" class="text-danger">
+                        <span class="glyphicon glyphicon-trash"></span>
+                    </a>
+                </td>
             </tr>
         {% endfor %}
     </tbody>
