@@ -42,6 +42,13 @@ reload:
 	$(MANAGE) rebuild_index --clopen --noinput
 	touch $(PROJECT_NAME)/wsgi.py
 
+stage:
+	git fetch arc
+	@git diff arc/master HEAD
+	@read -p "Are you sure? [y/n] " foo && [ $$foo = "y" ]
+	git push arc master
+	ssh -tt hrimfaxi.oit.pdx.edu "cd /vol/www/invasivespecieshotline/dev && sudo bash -c 'git fetch && git checkout $$(git rev-parse HEAD) && make reload'"
+
 $(VENV_DIR):
 	$(PYTHON) -m venv .env
 	curl https://raw.githubusercontent.com/pypa/pip/master/contrib/get-pip.py | python
