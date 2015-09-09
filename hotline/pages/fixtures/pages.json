@@ -133,5 +133,35 @@
     },
     "model": "flatpages.flatpage",
     "pk": 36
+},
+{
+    "model": "flatpages.flatpage",
+    "fields": {
+        "url": "/_login/",
+        "enable_comments": false,
+        "registration_required": false,
+        "sites": [
+            1
+        ],
+        "template_name": "",
+        "content": "Would you like to view or edit your reports to the Oregon Invasives Species Hotline, or were you invited to review a report? If so, enter your email address below to get your login link.",
+        "title": "_login"
+    },
+    "pk": 37
+},
+{
+    "model": "flatpages.flatpage",
+    "fields": {
+        "url": "/_search/",
+        "enable_comments": false,
+        "registration_required": false,
+        "sites": [
+            1
+        ],
+        "template_name": "",
+        "content": "<h3>Search Syntax</h3>\r\n<h4>Basic Search</h4>\r\n<p>Just enter a string of text: <kbd>Beetle Multnomah</kbd></p>\r\n<h4>Advanced Search</h4>\r\n<p>You can search against a specific field by typing the field name, followed by a colon, and then the phrase you're looking for: <kbd>county:\"Hood River\"</kbd>. If your value has spaces in it, wrap the phrase in quotes or parentheses. Using quotes means the terms in the phrase must appear in that order. With parentheses, the terms can appear in any order.\r\n</p>\r\n\r\n<p>You can combine clauses with AND and OR: <kbd>county:(\"Hood River\" OR Multnomah)</kbd>. Use parentheses to group clauses. You can search on multiple fields too:<kbd>species:(\"Beetle\" or \"Bee\") AND county:\"Hood River\"</kbd></p>\r\n\r\n<h5 class=\"strong\">Available Fields to Search</h5>\r\n<p><em>Field names are case sensitive and always use lowercase.</em></p>\r\n\r\n<ul>\r\n    <li>Category: <kbd>category:Aquatic</kbd></li>\r\n    <li>Species: <kbd>species:Beetle</kbd></li>\r\n    <li>Description: <kbd>description:(large infestation)</kbd></li>\r\n    <li>Location: <kbd>location:backyard</kbd></li>\r\n    <li>County: <kbd>county:Washington</kbd></li>\r\n    <li>Report submission date: <kbd>created_on:[2012-01-01 TO 2012-12-31]</kbd></li>\r\n    <li>EDRR status: <kbd>edrr_status:\"Local expert notified\"</kbd> (No Response/Action Required, Local expert notified, Population assessed, Population treated, Ongoing monitoring, Controlled at site)</li>\r\n    <li>Oregon Forest Pest Detector reports: <kbd>ofpd:true</kbd></li>\r\n</ul>\r\n",
+        "title": "_search"
+    },
+    "pk": 38
 }
 ]
