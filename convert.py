@@ -16,6 +16,7 @@ It assumes your DATABASES setting has this in it
 import urllib.parse
 import os
 from collections import defaultdict
+import subprocess
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "hotline.settings")
 
 import django
@@ -234,3 +235,4 @@ connections['default'].cursor().execute("""
 """)
 
 User.objects.filter(first_name="EXPERT", last_name="CONTACT").update(first_name="", last_name="")
+subprocess.call(["bash", "convert.sh"])
