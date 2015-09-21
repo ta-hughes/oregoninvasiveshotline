@@ -34,7 +34,7 @@ coverage:
 	coverage run ./manage.py test --keepdb && coverage html && cd htmlcov && python -m http.server 9000
 
 test:
-	$(MANAGE) test --keepdb && flake8 && isort -rc --diff --check-only $(PROJECT_NAME)
+	LOCAL_SETTINGS_FILE="local.cfg#test" $(MANAGE) test --keepdb && flake8 && isort -rc --diff --check-only $(PROJECT_NAME)
 
 reload:
 	$(MANAGE) migrate
