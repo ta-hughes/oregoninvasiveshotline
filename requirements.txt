@@ -2,6 +2,7 @@ coverage==3.7.1
 Django==1.8.3
 git+https://github.com/PSU-OIT-ARC/django-arcutils.git#egg=django-arcutils
 django-cloak==1.0.0
+git+https://github.com/PSU-OIT-ARC/django-local-settings.git#egg=django_local_settings
 django-perms==1.2.1
 git+https://github.com/PSU-OIT-ARC/elasticmodels.git#egg=elasticmodels
 elasticsearch==1.6.0
@@ -23,5 +24,4 @@ pytz==2015.4
 six==1.9.0
 stashward==0.1.4
 urllib3==1.11
-varlet==0.0.8
 wheel==0.24.0

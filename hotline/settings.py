@@ -1,10 +1,18 @@
 import os
 from fnmatch import fnmatch
 
+import pkg_resources
 from django.contrib.messages import constants as messages
 from django.core.urlresolvers import reverse_lazy
+from local_settings import LocalSetting, SecretSetting, load_and_check_settings
 from mommy_spatial_generators import MOMMY_SPATIAL_FIELDS
-from varlet import variable
+
+#
+# Package Stuff
+#
+CWD = os.getcwd()
+PACKAGE = os.path.basename(os.path.dirname(__file__))
+PACKAGE_DIR = pkg_resources.resource_filename(PACKAGE, '')
 
 #
 # Path constructors
@@ -19,7 +27,7 @@ BASE_DIR = lambda *path: DJANGO_DIR("../", *path)
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # make this True in dev
-DEBUG = variable("DEBUG", default=False)
+DEBUG = LocalSetting(default=False)
 DEFAULT_FROM_EMAIL = SERVER_EMAIL = 'no-reply@pdx.edu'
 
 
@@ -30,9 +38,7 @@ class IPList(list):
     def __contains__(self, ip):
         return any(fnmatch(ip, ip_pattern) for ip_pattern in self)
 INTERNAL_IPS = IPList(['10.*', '192.168.*'])
-ADMINS = variable("ADMINS", default=[("Matt", "foo@example.com")])
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = variable("SECRET_KEY", os.urandom(64).decode("latin1"))
+ADMINS = LocalSetting(default=[("Konstantin", "foo@example.com")])
 
 #
 # Host info
@@ -41,7 +47,7 @@ SECRET_KEY = variable("SECRET_KEY", os.urandom(64).decode("latin1"))
 # This hostname is used to construct URLs. It would be something like
 # "example.com" in production. This is used to construct the
 # SESSION_COOKIE_DOMAIN and ALLOWED_HOSTS, so make sure it is correct
-HOSTNAME = variable("HOSTNAME", default="10.0.0.10.xip.io:8000")
+HOSTNAME = LocalSetting(default="10.0.0.10.xip.io:8000")
 # we construct the SESSION_COOKIE_DOMAIN based on the hostname. We prepend a
 # dot so the cookie is set for all subdomains
 # SESSION_COOKIE_DOMAIN = "." + HOSTNAME.split(":")[0]
@@ -54,7 +60,7 @@ ALLOWED_HOSTS = ["*"]
 # we use a custom test runner to set some custom settings
 TEST_RUNNER = 'hotline.testrunner.TestRunner'
 # are we in test mode? This gets overridden in the test runnner
-TEST = False
+TEST = LocalSetting(default=False)
 
 #
 # Auth Stuff
@@ -82,7 +88,7 @@ LOGIN_REDIRECT_URL = reverse_lazy("users-home")
 #
 
 # In production, use something like 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_BACKEND = variable("EMAIL_BACKEND", default='django.core.mail.backends.console.EmailBackend')
+EMAIL_BACKEND = LocalSetting(default='django.core.mail.backends.console.EmailBackend')
 
 #
 # DB
@@ -90,14 +96,13 @@ EMAIL_BACKEND = variable("EMAIL_BACKEND", default='django.core.mail.backends.con
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': 'hotline',
+        'NAME': LocalSetting(PACKAGE),
         # the default is fine for dev
-        'USER': variable("DB_USER", default='root'),
+        'USER': LocalSetting(''),
         # the default is fine for dev
-        'PASSWORD': variable("DB_PASSWORD", default=''),
+        'PASSWORD': SecretSetting(),
         # the default is fine for dev
-        'HOST': variable("DB_HOST", default=''),
+        'HOST': LocalSetting(''),
         'PORT': '',
         'ATOMIC_REQUESTS': True,
     },
@@ -116,7 +121,7 @@ SITE_ID = 1
 
 ELASTICSEARCH_CONNECTIONS = {
     'default': {
-        'hosts': [variable("ELASTICSEARCH_HOST", default='http://localhost:9200')],
+        'hosts': [LocalSetting(default='http://localhost:9200')],
         'index_name': 'hotline',
     }
 }
@@ -203,6 +208,8 @@ STATIC_ROOT = BASE_DIR("static")
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR("media")
 
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = SecretSetting(doc="The secret key")
 
 #
 # Templates
@@ -231,3 +238,14 @@ TEMPLATES = [{
 #
 
 MOMMY_CUSTOM_FIELDS_GEN = MOMMY_SPATIAL_FIELDS
+
+
+#
+# Need this for Wyatt's deployment tool
+#
+_settings = load_and_check_settings(globals())
+globals().update(_settings)
+
+if _settings.get('TEST'):
+    import logging
+    logging.disable(logging.ERROR)
