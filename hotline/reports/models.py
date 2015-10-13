@@ -6,13 +6,13 @@ import subprocess
 import tempfile
 
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.contrib.gis.db import models
 from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
 from django.template import Context
 from django.template.loader import get_template, render_to_string
 
-from hotline.users.models import User
 from hotline.utils import resize_image
 
 
@@ -187,11 +187,11 @@ class Invite(models.Model):
         Returns True if the invite was sent, otherwise False (meaning the user
         has already been invited before)
         """
+        user_model = get_user_model()
         try:
-            user = User.objects.get(email__iexact=email)
-        except User.DoesNotExist:
-            user = User(email=email, is_active=False)
-            user.save()
+            user = user_model.objects.get(email__iexact=email)
+        except user_model.DoesNotExist:
+            user = user_model.objects.create(email=email, is_active=False)
 
         if Invite.objects.filter(user=user, report=report).exists():
             return False
