@@ -1,0 +1,3 @@
+include README.md
+recursive-include hotline/static *
+recursive-include hotline/templates *
