@@ -1,31 +1,38 @@
 #!/usr/bin/env python
-"""
-This script takes the data from the old schema and converts it into the new
-schema
+"""Grab data from old schema and convert/load into new schema.
 
-It assumes your DATABASES setting has this in it
+Note: You can call this via `inv convert`.
+
+It's assumed thtat your DATABASES setting has an `old` key like so:
+
     'old': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
         'NAME': 'invhotline',
         'USER': 'username',
         'PASSWORD': 'password',
         'HOST': 'pgsql.rc.pdx.edu',
-        'PORT': '',
-    },
+    }
+
+Note: These settings are in local.convert.cfg, except for the password
+for the old database, which you will have to retrieve from the prod
+server.
+
 """
-import urllib.parse
 import os
+import urllib.parse
 from collections import defaultdict
-import subprocess
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "hotline.settings")
 
-import django
-django.setup()
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'hotline.settings')
+os.environ.setdefault('LOCAL_SETTINGS_FILE', 'local.convert.cfg#convert')
 
-from arcutils.db import dictfetchall
 from django.conf import settings
 from django.db import connections
+
+from arcutils.db import dictfetchall
+
 from elasticmodels import suspended_updates
+
+import pytz
 
 from hotline.comments.models import Comment
 from hotline.counties.models import County
@@ -37,6 +44,8 @@ from hotline.users.models import User
 
 
 old = connections['old'].cursor()
+tz = pytz.timezone(settings.TIME_ZONE)
+
 
 # the severity ID and category IDs are assumed to be the same, so we aren't
 # importing those
@@ -104,7 +113,6 @@ with suspended_updates():
         7: 5,
     }
     for row in dictfetchall(old):
-        print(row['id'])
         report = Report.objects.filter(report_id=row['id']).first()
         if not report:
             report = Report(pk=row['id'])
@@ -116,13 +124,13 @@ with suspended_updates():
         report.has_specimen = row['has_sample']
         report.point = "POINT(" + str(row['lng']) + " " + str(row['lat']) + ")"
         report.created_by_id = report_submitter_user_id[row['id']]
-        report.created_on = row['created_at']
+        report.created_on = tz.localize(row['created_at'])
         report.claimed_by_id = user_id_to_user_id[row['user_id']]
         report.edrr_status = old_edrr_status_to_new_edrr_status.get(row['edrr_status'], None)
         report.actual_species_id = row['issue_id']
         report.county = County.objects.filter(the_geom__intersects=report.point).first()
         report.is_archived = row['closed'] and not row['issue_id']
-        report.is_public = row['closed'] and row['issue_id']
+        report.is_public = bool(row['closed'] and row['issue_id'])
         try:
             report.save()
         except Exception as e:
@@ -136,7 +144,7 @@ with suspended_updates():
                 pk=100000+report.pk,
                 report_id=report.pk,
                 body=row['private_note'],
-                created_on=row['created_at'],
+                created_on=tz.localize(row['created_at']),
                 visibility=Comment.PRIVATE,
                 created_by=report.claimed_by or User.objects.filter(is_staff=True).first()
             ).save()
@@ -151,12 +159,12 @@ with suspended_updates():
             comment = Comment(pk=row['id'])
 
         comment.body = row['body'] or ""
-        comment.created_on = row['created_at']
+        comment.created_on = tz.localize(row['created_at'])
         comment.visibility = Comment.PUBLIC
         try:
             comment.report = Report.objects.get(pk=row['report_id'])
         except Report.DoesNotExist:
-            print(row['id'])
+            print('Report does not exist:', row['id'])
             continue
 
         if row['private']:
@@ -189,7 +197,7 @@ with suspended_updates():
             image=os.path.relpath(os.path.join(settings.MEDIA_ROOT, "images", ("%04d-" % row['id']) + row['filename']), settings.MEDIA_ROOT),
             name=row['label'],
             created_by_id=report.created_by_id,
-            created_on=row['created_at'],
+            created_on=tz.localize(row['created_at']),
             visibility=Image.PUBLIC,
             report=report,
         ).save()
@@ -235,4 +243,3 @@ connections['default'].cursor().execute("""
 """)
 
 User.objects.filter(first_name="EXPERT", last_name="CONTACT").update(first_name="", last_name="")
-subprocess.call(["bash", "convert.sh"])

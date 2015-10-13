@@ -18,3 +18,10 @@ def loaddata(ctx):
         'loaddata',
         'dummy_user.json category.json severity.json species.json counties.json pages.json',
     ))
+
+
+@arctask(configured='convert')
+def convert(ctx, copy_images=False):
+    local(ctx, '{bin.python} convert.py')
+    if copy_images:
+        local(ctx, 'bash convert.sh')
