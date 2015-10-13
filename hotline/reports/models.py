@@ -116,10 +116,15 @@ class Report(models.Model):
         # if the PNG doesn't exist, create it
         if not os.path.exists(icon_location):
             with tempfile.NamedTemporaryFile("wt", suffix=".svg") as f:
+                if category.icon and os.path.exists(category.icon.path):
+                    with open(category.icon.path, 'rb') as icon_fp:
+                        img = base64.b64encode(icon_fp.read())
+                else:
+                    img = None
                 f.write(render_to_string("reports/icon.svg", {
                     # we encode the category PNG inside the SVG, to avoid file path
                     # problems that come from generating the PNG from imagemagick
-                    "img": base64.b64encode(open(category.icon.path, "rb").read()) if category.icon else None,
+                    "img":  img,
                     "color": color
                 }))
                 f.flush()
