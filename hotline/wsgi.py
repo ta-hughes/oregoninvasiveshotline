@@ -2,31 +2,26 @@ import os
 import site
 import sys
 
-prev_sys_path = list(sys.path)
-root = os.path.normpath(os.path.join(os.path.dirname(__file__), "../"))
-sys.path.append(root)
-site.addsitedir(os.path.join(root, ".env/lib/python%d.%d/site-packages" % sys.version_info[:2]))
-site.addsitedir(os.path.join(root, ".env/lib64/python%d.%d/site-packages" % sys.version_info[:2]))
+here = os.path.dirname(__file__)  # Directory containing this module
+root = os.path.dirname(here)      # One level up containing directory
 
-# addsitedir adds its directories at the end, but we want our local stuff
-# to take precedence over system-installed packages.
-# See http://code.google.com/p/modwsgi/issues/detail?id=112
-new_sys_path = []
-for item in list(sys.path):
-    if item not in prev_sys_path:
-        new_sys_path.append(item)
-        sys.path.remove(item)
-sys.path[:0] = new_sys_path
+major, minor = sys.version_info[:2]
+site_packages = 'lib/python{major}.{minor}/site-packages'.format(**locals())
+site_packages = os.path.join(root, '.env', site_packages)
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", os.path.basename(os.path.dirname(__file__)) + ".settings")
+if not os.path.isdir(site_packages):
+    raise NotADirectoryError('Could not find virtualenv site-packages at {}'.format(site_packages))
 
+# Add the virtualenv's site-packages to sys.path, ensuring its packages
+# take precedence over system packages (by moving them to the front of
+# sys.path after they're added).
+old_sys_path = list(sys.path)
+site.addsitedir(site_packages)
+new_sys_path = [item for item in sys.path if item not in old_sys_path]
+sys.path = new_sys_path + old_sys_path
 
-# This application object is used by any WSGI server configured to use this
-# file. This includes Django's development server, if the WSGI_APPLICATION
-# setting points here.
+os.environ.setdefault('LOCAL_SETTINGS_FILE', os.path.join(root, 'local.cfg'))
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'hotline.settings')
+
 from django.core.wsgi import get_wsgi_application
 application = get_wsgi_application()
-
-# Apply WSGI middleware here.
-# from helloworld.wsgi import HelloWorldApplication
-# application = HelloWorldApplication(application)
