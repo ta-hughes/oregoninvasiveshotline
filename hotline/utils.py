@@ -10,6 +10,7 @@ from django.contrib.auth.hashers import (
 )
 from django.contrib.sites.models import Site
 from django.core import mail
+from django.core.management import call_command
 from django.core.signals import request_finished
 from django.db import transaction
 from django.db.models import Q
@@ -19,6 +20,9 @@ from django.utils.timezone import localtime, now
 
 @receiver(request_finished)
 def refresh_index(*args, **kwargs):
+    # XXX: This is so terrible; it should be replaced with a cron job
+    #      OR, at the very least, a hack that isn't so bad.
+
     """
     To avoid using a cron job to rebuild the elasticsearch index every night,
     we have this signal receiver do it. It's a little hacky, but we create a
@@ -36,7 +40,7 @@ def refresh_index(*args, **kwargs):
         if user.last_login is None or localtime(user.last_login).day < localtime(now()).day:
             user.last_login = now()
             user.save()
-            subprocess.Popen([settings.BASE_DIR(".env", "bin", "python"), settings.BASE_DIR("manage.py"), "rebuild_index", "--noinput", "--clopen"])
+            call_command('rebuild_index', noinput=True, clopen=True)
 
 
 # The sites framework is dumb. I don't want to hardcode the hostname of the
