@@ -216,11 +216,11 @@ Report #{{ report.pk }} - {{ report }}
 var category_id_to_species_id = {{ category_id_to_species_id|safe }};
 </script>
 <script type="text/javascript" src="//maps.googleapis.com/maps/api/js?key=AIzaSyDRamH3fauUUQow07BOuep8gojIvCiGpm4"></script>
-<script src="{{ STATIC_URL }}js/species_selector.js"></script>
-<script src="{{ STATIC_URL }}galleria/galleria-1.4.2.min.js"></script>
+<script src="{% static 'js/species_selector.js' %}"></script>
+<script src="{% static 'galleria/galleria-1.4.2.min.js' %}"></script>
 <script>
 if($('.galleria').length){
-    Galleria.loadTheme('{{ STATIC_URL }}galleria/themes/classic/galleria.classic.min.js');
+    Galleria.loadTheme('{% static "galleria/themes/classic/galleria.classic.min.js" %}');
     Galleria.run('.galleria', {
         "lightbox": true
     });

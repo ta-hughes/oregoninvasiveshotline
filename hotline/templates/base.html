@@ -12,9 +12,9 @@ We need to load the permissions template library so we can access the permission
 
     <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
-    <script src="{{ STATIC_URL }}js/cookie.js"></script>
-    <script src="{{ STATIC_URL }}js/main.js"></script>
-    <link rel="shortcut icon" href="{{ STATIC_URL }}img/favicon.ico" type="image/x-icon" />
+    <script src="{% static 'js/cookie.js' %}"></script>
+    <script src="{% static 'js/main.js' %}"></script>
+    <link rel="shortcut icon" href="{% static 'img/favicon.ico' %}" type="image/x-icon" />
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
     <link rel="stylesheet" href="{% static 'css/main.css' %}" />
@@ -42,7 +42,7 @@ We need to load the permissions template library so we can access the permission
             <div id="header" class="container">
                 <div class="row">
                     <div class="col-md-5">
-                        <a href="{% url 'home' %}"><img src="{{ STATIC_URL }}img/header_logo.png"></a>
+                        <a href="{% url 'home' %}"><img src="{% static 'img/header_logo.png' %}"></a>
                     </div>
                     <div class="col-md-7" id="header-links">
                         <a href="/pages/learn/">Learn</a>
