@@ -20,6 +20,7 @@ setup(
         'django-perms>=1.2.0',
         'django>=1.8.5,<1.9',
         'elasticmodels>=0.2.0',
+        'elasticsearch>=1.9.0,<2.0.0',
         'Markdown>=2.6.2',
         'Pillow>=3.0.0',
         'psycopg2>=2.6.1',
