@@ -1,5 +1,9 @@
+import os
+import sys
+from getpass import getpass
+
 from arctasks import *
-from arctasks.django import manage
+from arctasks.django import setup, get_settings, manage
 
 
 @arctask(configured='dev', timed=True)
@@ -20,8 +24,21 @@ def loaddata(ctx):
     ))
 
 
-@arctask(configured='convert')
+@arctask(configured='dev')
 def convert(ctx, copy_images=False):
-    local(ctx, '{bin.python} convert.py')
+    setup()
+    settings = get_settings()
+    settings.DATABASES['old'] = {
+        'ENGINE': 'django.contrib.gis.db.backends.postgis',
+        'HOST': 'pgsql.rc.pdx.edu',
+        'NAME': 'invhotline',
+        'USER': 'invhotline_l',
+        'PASSWORD': getpass(
+            'Old database password (get from '
+            '/vol/www/invasivespecieshotline/invasivespecieshotline/config/database.yml): '
+        ),
+    }
+    sys.path.insert(0, os.path.dirname(__file__))
+    import convert
     if copy_images:
         local(ctx, 'bash convert.sh')

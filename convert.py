@@ -18,12 +18,13 @@ for the old database, which you will have to retrieve from the prod
 server.
 
 """
+if __name__ == '__main__':
+    raise RuntimeError('Run this via `inv convert`')
+
+
 import os
 import urllib.parse
 from collections import defaultdict
-
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'hotline.settings')
-os.environ.setdefault('LOCAL_SETTINGS_FILE', 'local.convert.cfg#convert')
 
 from django.conf import settings
 from django.db import connections
