@@ -5,17 +5,8 @@ from collections import defaultdict
 from getpass import getpass
 from urllib.parse import urlencode
 
-from django.apps import apps
-from django.db import connections
-
-import pytz
-
 from arctasks import *
 from arctasks.django import setup, get_settings, manage
-
-from arcutils.db import dictfetchall
-
-from elasticmodels import suspended_updates
 
 
 @arctask(configured='dev', timed=True)
@@ -45,7 +36,9 @@ def copy_records(ctx, recreate_db=False):
 
     """
     setup()
+    from django.db import connections
     from django.contrib.auth import get_user_model
+    from elasticmodels import suspended_updates
 
     settings = get_settings()
     settings.DATABASES['old'] = {
@@ -95,6 +88,10 @@ def copy_records(ctx, recreate_db=False):
 
 
 def _copy_records(settings):
+    import pytz
+    from arcutils.db import dictfetchall
+    from django.apps import apps
+    from django.db import connections
     from django.contrib.auth import get_user_model
 
     old = connections['old'].cursor()
