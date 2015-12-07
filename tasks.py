@@ -163,6 +163,9 @@ def _copy_records(settings):
     print('Copying reports...', end='', flush=True)
     staff_user = User.objects.filter(is_staff=True).first()
     edrr_status_map = {2: 0, 3: 1, 4: 2, 5: 3, 6: 4, 7: 5}
+    category_map = {
+        5: 13,  # Aquatic Vertebrates => Reptiles and Amphibians
+    }
     old.execute("""
         SELECT reports.id, category_id, issue_id, reported_category, reported_issue, has_sample,
         issue_desc, private_note, location_desc, reports.created_at, reports.updated_at, closed,
@@ -180,6 +183,8 @@ def _copy_records(settings):
         if not Species.objects.filter(pk=reported_species_id).exists():
             reported_species_id = None
         created_on = tz.localize(row['created_at'])
+        reported_category_id = row['reported_category']
+        reported_category_id = category_map.get(reported_category_id, reported_category_id)
         data = {
             'actual_species_id': actual_species_id,
             'claimed_by_id': user_id_map[row['user_id']],
@@ -193,7 +198,7 @@ def _copy_records(settings):
             'is_public': bool(row['closed'] and row['issue_id']),
             'location': row['location_desc'] or '',
             'point': point,
-            'reported_category_id': row['reported_category'],
+            'reported_category_id': reported_category_id,
             'reported_species_id': reported_species_id,
         }
         report, created = Report.objects.update_or_create(pk=pk, defaults=data)
