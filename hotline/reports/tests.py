@@ -1,9 +1,9 @@
-import base64
 import codecs
 import csv
 import json
 import os
 import re
+from base64 import b64decode
 from unittest.mock import Mock, patch
 
 from django.conf import settings
@@ -81,40 +81,24 @@ class ReportTest(TestCase):
         self.assertTrue(os.path.exists(os.path.join(settings.MEDIA_ROOT, "generated_thumbnails", str(image.pk) + ".png")))
 
     def test_icon_url_generates_image(self):
-        f = SimpleUploadedFile(
-            "foo.png",
-            base64.b64decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNg+P+/HgAFfwJ+BSYS9wAAAABJRU5ErkJggg==")
+        icon = SimpleUploadedFile(
+            'foo.png',
+            b64decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNg+P+/HgAFfwJ+BSYS9wAAAABJRU5ErkJggg==')
         )
+
         report = make(
             Report,
-            actual_species__severity__color="#ff8800",
-            actual_species__category__icon=f
-        )
-        # make sure imagemagick gets called with the right args
-        with patch("hotline.reports.models.hashlib.md5", return_value=Mock(hexdigest=Mock(return_value="foo"))):
-            with patch("hotline.reports.models.subprocess.call") as call:
-                report.icon_url()  # trigger the image generation
-                self.assertTrue(re.match(r"convert -background none -crop 30x45\+0\+0 /tmp/.*?\.svg .*?generated_icons/foo\.png", " ".join(call.call_args[0][0])))  # noqa
-
-        # ensure the file actually gets created
-        with patch("hotline.reports.models.hashlib.md5", return_value=Mock(hexdigest=Mock(return_value="foo"))):
-            report.icon_url()  # trigger the report generation
-        self.assertTrue(os.path.exists(os.path.join(settings.MEDIA_ROOT, "generated_icons", "foo.png")))
-        # remove the garbage we created
-        os.unlink(os.path.join(settings.MEDIA_ROOT, "generated_icons", "foo.png"))
-
-    def test_icon_when_no_category_icon_set(self):
-        report = make(
-            Report,
-            actual_species__severity__color="#ff8800",
-            actual_species__category__icon=None
+            actual_species__severity__color='#ff8800',
+            actual_species__category__icon=icon
         )
 
-        # make sure imagemagick gets called with the right args
-        with patch("hotline.reports.models.hashlib.md5", return_value=Mock(hexdigest=Mock(return_value="foo"))):
-            with patch("hotline.reports.models.subprocess.call") as call:
-                report.icon_url()  # trigger the report generation
-                self.assertTrue(re.match(r"convert -background none -crop 30x45\+0\+0 /tmp/.*?\.svg .*?generated_icons/foo\.png", " ".join(call.call_args[0][0])))  # noqa
+        return_value = Mock(hexdigest=Mock(return_value='foo'))
+        with patch('hotline.reports.models.hashlib.md5', return_value=return_value):
+            report.icon_url
+
+        file_name = os.path.join(settings.MEDIA_ROOT, 'generated_icons', 'foo.png')
+        self.assertTrue(os.path.exists(file_name))
+        os.unlink(file_name)
 
 
 class CreateViewTest(TestCase):
@@ -568,8 +552,7 @@ class ReportListView(ESTestCase, TestCase):
         user.set_password("foo")
         user.save()
         self.client.login(email=user.email, password="foo")
-        with patch("hotline.reports.models.Report.icon_url", return_value="foo.png"):
-            response = self.client.get(reverse("reports-list"))
+        response = self.client.get(reverse("reports-list"))
         self.assertEqual(response.status_code, 200)
         self.assertIn(str(reports[0]), response.content.decode())
 
