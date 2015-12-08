@@ -83,7 +83,7 @@ class Report(models.Model):
         return self.category.name
 
     def to_json(self):
-        image_url = self.image_url()
+        image_url = self.image_url
         return {
             "lat": self.point.y,
             "lng": self.point.x,
@@ -186,6 +186,7 @@ class Report(models.Model):
                         'convert command returned error code {return_code}: `{command}`'
                         .format(command=' '.join(args), return_code=return_code))
 
+    @property
     def image_url(self):
         """
         Returns the URL to the thumbnail generated for the first public image
