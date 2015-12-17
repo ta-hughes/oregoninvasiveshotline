@@ -13,3 +13,8 @@ def can_create_comment(user, report):
 @permissions.register(model=Comment)
 def can_edit_comment(user, comment):
     return user.is_staff or comment.created_by == user
+
+
+@permissions.register(model=Comment)
+def can_delete_comment(user, comment):
+    return comment.pk is not None and can_edit_comment(user, comment)

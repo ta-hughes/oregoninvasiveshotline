@@ -1,3 +1,5 @@
+{% load permissions %}
+
 <form method="post" enctype="multipart/form-data" id="create-comment">
     <fieldset>
         <legend>{% if form.instance.pk %}Edit{% else %}Add{% endif %} Comment</legend>
@@ -27,6 +29,11 @@
                     <button id="cancel-comment" class="btn btn-warning">Cancel</button>
                 {% endif %}
             </div>
+            {% if user|can_delete_comment:comment %}
+                <div class="col-md-2">
+                    <a href="{% url 'comments-delete' comment.pk %}" class="btn btn-danger pull-right">Delete</a>
+                </div>
+            {% endif %}
         </div>
     </fieldset>
     {% if comment.pk == None %}
