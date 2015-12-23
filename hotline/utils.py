@@ -57,7 +57,7 @@ def get_current(request=None, _get_current=Site.objects.get_current):
 Site.objects.get_current = get_current
 
 
-def resize_image(input_path, output_path, width, height):
+def generate_thumbnail(input_path, output_path, width, height):
     size = "%dx%d" % (width, height)
     return subprocess.call([
         "convert",
@@ -75,7 +75,6 @@ def resize_image(input_path, output_path, width, height):
         size,
         output_path
     ])
-
 
 def get_tab_counts(user, report_ids):
     from .reports.models import Report, Invite

@@ -15,7 +15,7 @@ from django.core.urlresolvers import reverse
 from django.template import Context
 from django.template.loader import get_template, render_to_string
 
-from hotline.utils import resize_image
+from hotline.utils import generate_thumbnail
 
 
 log = logging.getLogger(__name__)
@@ -198,7 +198,7 @@ class Report(models.Model):
             if image.visibility == image.PUBLIC:
                 output_path = os.path.join(settings.MEDIA_ROOT, "generated_thumbnails", str(image.pk) + ".png")
                 if not os.path.exists(output_path):
-                    resize_image(image.image.path, output_path, width=64, height=64)
+                    generate_thumbnail(image.image.path, output_path, width=64, height=64)
                 return settings.MEDIA_URL + os.path.relpath(output_path, settings.MEDIA_ROOT)
 
         return None

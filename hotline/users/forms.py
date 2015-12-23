@@ -4,7 +4,7 @@ from django.core.urlresolvers import reverse
 from django.template.loader import render_to_string
 from elasticmodels.forms import SearchForm
 
-from hotline.utils import resize_image
+from hotline.utils import generate_thumbnail
 
 from .indexes import UserIndex
 from .models import User
@@ -112,7 +112,7 @@ class UserForm(forms.ModelForm):
         # if we got a new photo resize it and convert it to a png
         if self.cleaned_data.get("photo"):
             output_path = instance.photo.path + ".png"
-            resize_image(instance.photo.path, output_path, width=256, height=256)
+            generate_thumbnail(instance.photo.path, output_path, width=256, height=256)
             self.instance.photo = instance.photo.name + ".png"
             self.instance.save()
 
