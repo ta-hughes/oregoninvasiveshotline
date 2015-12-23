@@ -1,5 +1,10 @@
 import hashlib
+import logging
+import os
 import subprocess
+import sys
+
+from PIL import Image
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -17,6 +22,7 @@ from django.db.models import Q
 from django.dispatch import receiver
 from django.utils.timezone import localtime, now
 
+log = logging.getLogger(__name__)
 
 @receiver(request_finished)
 def refresh_index(*args, **kwargs):
@@ -58,23 +64,30 @@ Site.objects.get_current = get_current
 
 
 def generate_thumbnail(input_path, output_path, width, height):
-    size = "%dx%d" % (width, height)
-    return subprocess.call([
-        "convert",
-        input_path,
-        "-thumbnail",
-        # the > below means don't enlarge images that fit in the box
-        size + ">",
-        "-background",
-        "transparent",
-        "-gravity",
-        "center",
-        # fill the box with the background color (which
-        # is transparent)
-        "-extent",
-        size,
-        output_path
-    ])
+    """Generate a thumbnail from the source image.
+
+    If the input image is already smaller than ``width`` X ``height``,
+    it will be returned as is.
+
+    The aspect ratio will be preserved if the image has to be resized.
+
+    If the input and output paths are the same, a ``ValueError`` will
+    be raised.
+
+    """
+    size = (width, height)
+    if input_path == output_path:
+        raise ValueError("Input path is identical to output path")
+    try:
+        img = Image.open(input_path)
+    except IOError as e:
+        log.error("error while opening image at: ", image_path)
+    try:
+        img.thumbnail(size)
+        img.save(output_path)
+    except IOError as e:
+        log.error("cannot resize image at: ", input_path)
+
 
 def get_tab_counts(user, report_ids):
     from .reports.models import Report, Invite
