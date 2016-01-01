@@ -11,6 +11,8 @@ from django.contrib.auth import get_user_model
 from django.contrib.gis.db import models
 from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
+from django.db.models.signals import post_init, post_save
+from django.dispatch import receiver
 from django.template import Context
 from django.template.loader import get_template, render_to_string
 
@@ -132,9 +134,19 @@ class Report(models.Model):
         ``static/js/main.js`` also.
 
         """
+        return posixpath.join(settings.MEDIA_URL, self.icon_rel_path)
+
+    def generate_icon(self):
+        """Generate a map-style icon for this Report.
+
+        The file path for the generated icon is based on parameters that
+        will change the appearance of the icon. This ensures the icon is
+        updated if the Report's category changes. The implementation of
+        this logic is in :meth:`icon_rel_path`.
+
+        """
         if not os.path.exists(self.icon_path):
             generate_icon(self.icon_path, self.category.icon, self.icon_color)
-        return posixpath.join(settings.MEDIA_URL, self.icon_rel_path)
 
     @property
     def image_url(self):
@@ -173,6 +185,18 @@ class Report(models.Model):
         Returns True if the reported_species differs from the actual species (and both fields are filled out)
         """
         return bool(self.reported_species and self.actual_species and self.reported_species != self.actual_species)
+
+
+@receiver([post_save, post_init], sender=Report)
+def receiver__generate_icon(sender, instance, **kwargs):
+    """Generate icon for Report on save and init.
+
+    If the Report is new (does not have a PK), we skip icon generation
+    here because it will either fail or generate an incorrect icon.
+
+    """
+    if instance.pk is not None:
+        instance.generate_icon()
 
 
 class Invite(models.Model):
