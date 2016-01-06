@@ -10,6 +10,7 @@ from django.conf import settings
 from django.core.exceptions import NON_FIELD_ERRORS
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.urlresolvers import reverse
+from django.db.models.signals import post_save
 from django.test import TestCase
 from elasticmodels import ESTestCase
 from model_mommy.mommy import make, prepare
@@ -21,11 +22,25 @@ from hotline.species.models import Category, Severity, Species
 from hotline.users.models import User
 
 from .forms import InviteForm, ManagementForm, ReportForm
-from .models import Invite, Report
+from .models import Invite, Report, receiver__generate_icon
 from .views import _export
 
 
-class ReportTest(TestCase):
+class SuppressPostSaveMixin:
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        post_save.disconnect(receiver__generate_icon, sender=Report)
+
+    @classmethod
+    def tearDownClass(cls):
+        super().tearDownClass()
+        post_save.connect(receiver__generate_icon, sender=Report)
+
+
+class ReportTest(SuppressPostSaveMixin, TestCase):
+
     def test_species(self):
         reported_species = make(Species)
         actual_species = make(Species)
@@ -80,25 +95,43 @@ class ReportTest(TestCase):
         # make sure the file got created
         self.assertTrue(os.path.exists(os.path.join(settings.MEDIA_ROOT, "generated_thumbnails", str(image.pk) + ".png")))
 
-    def test_icon_url_generates_image(self):
-        icon = SimpleUploadedFile(
+
+class TestReportIconGeneration(TestCase):
+
+    def _make_category_icon(self):
+        return SimpleUploadedFile(
             'foo.png',
             b64decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNg+P+/HgAFfwJ+BSYS9wAAAABJRU5ErkJggg==')
         )
 
+    def test_generate_icon_manually(self):
+        report = make.prepare(
+            Report,
+            actual_species__severity__color='#ff8800',
+            actual_species__category__icon=self._make_category_icon(),
+        )
+        self.assertFalse(os.path.exists(report.icon_path))
+        report.generate_icon()
+        self.assertTrue(os.path.exists(report.icon_path))
+        # Clean up
+        os.unlink(report.icon_path)
+
+    def test_icon_is_generated_on_post_save_and_post_init_for_existing_reports(self):
         report = make(
             Report,
             actual_species__severity__color='#ff8800',
-            actual_species__category__icon=icon
+            actual_species__category__icon=self._make_category_icon(),
         )
-
-        return_value = Mock(hexdigest=Mock(return_value='foo'))
-        with patch('hotline.reports.models.hashlib.md5', return_value=return_value):
-            report.icon_url
-
-        file_name = os.path.join(settings.MEDIA_ROOT, 'generated_icons', 'foo.png')
-        self.assertTrue(os.path.exists(file_name))
-        os.unlink(file_name)
+        # The report was saved with a PK by make(), so it should have an
+        # icon.
+        self.assertTrue(os.path.exists(report.icon_path))
+        # Remove the icon and verify that its icon is re-created the
+        # next time the report is fetched.
+        os.unlink(report.icon_path)
+        Report.objects.get(pk=report.pk)
+        self.assertTrue(os.path.exists(report.icon_path))
+        # Clean up
+        os.unlink(report.icon_path)
 
 
 class CreateViewTest(TestCase):
@@ -380,7 +413,7 @@ class ReportFormTest(TestCase):
         self.assertEqual(Comment.objects.get(report=report).body, "hello world")
 
 
-class ManagementFormTest(TestCase):
+class ManagementFormTest(SuppressPostSaveMixin, TestCase):
     def test_species_and_category_initialized(self):
         species = make(Species)
         report = make(Report, reported_species=species, reported_category=species.category)
