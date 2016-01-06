@@ -18,7 +18,7 @@ setup(
         'django-cloak',
         'django-local-settings>=1.0a10',
         'django-perms>=1.2.0',
-        'django>=1.8.7,<1.9',
+        'django>=1.8.8,<1.9',
         'django-pgcli',
         'elasticmodels>=0.2.0',
         'elasticsearch>=1.9.0,<2.0.0',
