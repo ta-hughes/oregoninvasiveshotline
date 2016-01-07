@@ -37,8 +37,14 @@ def copy_records(ctx, recreate_db=False):
     """
     setup()
     from django.db import connections
+    from django.db.models.signals import post_init, post_save
     from django.contrib.auth import get_user_model
     from elasticmodels import suspended_updates
+    from hotline.reports.models import Report, receiver__generate_icon
+
+    # Keep icons from being generated on init and save
+    post_init.disconnect(receiver__generate_icon, sender=Report)
+    post_save.disconnect(receiver__generate_icon, sender=Report)
 
     settings = get_settings()
     settings.DATABASES['old'] = {
