@@ -47,15 +47,20 @@ def copy_records(ctx, recreate_db=False):
     post_save.disconnect(receiver__generate_icon, sender=Report)
 
     settings = get_settings()
+
+    password = getattr(settings, 'OLD_DATABASE_PASSWORD', None)
+    if not password:
+        password = getpass(
+            'Old database password (get from '
+            '/vol/www/invasivespecieshotline/invasivespecieshotline/config/database.yml): '
+        )
+
     settings.DATABASES['old'] = {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
         'HOST': 'pgsql.rc.pdx.edu',
         'NAME': 'invhotline',
         'USER': 'invhotline_l',
-        'PASSWORD': getpass(
-            'Old database password (get from '
-            '/vol/www/invasivespecieshotline/invasivespecieshotline/config/database.yml): '
-        ),
+        'PASSWORD': password,
     }
 
     User = get_user_model()
