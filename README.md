@@ -14,7 +14,6 @@ You can login with an email of "foobar@example.com" with a password of "foobar"
 - Postgres
 - Elasticsearch
 - Google Maps
-- Imagemagick (to make thumbnails and to convert SVGs to PNGs)
 
 # Notable Hackiness
 
