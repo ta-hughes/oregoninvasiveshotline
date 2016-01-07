@@ -74,19 +74,29 @@ def generate_thumbnail(input_path, output_path, width, height):
     If the input and output paths are the same, a ``ValueError`` will
     be raised.
 
+    On successful thumbnail generation, ``True`` will be returned. If
+    the thumbnail can't be generated for some reason, ``False`` will be
+    returned.
+
     """
-    size = (width, height)
     if input_path == output_path:
-        raise ValueError("Input path is identical to output path")
+        raise ValueError('Input path is identical to output path')
+
     try:
         img = Image.open(input_path)
-    except IOError as e:
-        log.error("error while opening image at: ", image_path)
+    except IOError:
+        # Usually, getting here means the image doesn't exist
+        log.exception('Error while opening image at: %s', input_path)
+        return False
+
     try:
-        img.thumbnail(size)
+        img.thumbnail((width, height))
         img.save(output_path)
-    except IOError as e:
-        log.error("cannot resize image at: ", input_path)
+    except IOError:
+        log.exception('Cannot resize image at: %s', input_path)
+        return False
+
+    return True
 
 
 def get_tab_counts(user, report_ids):
