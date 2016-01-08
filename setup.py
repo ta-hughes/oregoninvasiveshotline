@@ -14,7 +14,8 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=[
-        'django-arcutils>=1.1.1,<2.0',
+        'django-arcutils>=2.0.dev0',
+        'django-bootstrap-form>=3.2',
         'django-cloak',
         'django-local-settings>=1.0a10',
         'django-perms>=1.2.0',

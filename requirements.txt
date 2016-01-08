@@ -1,3 +1,4 @@
 -f https://cdn.research.pdx.edu/pypi/dist/
 git+https://github.com/PSU-OIT-ARC/arctasks#egg=psu.oit.arc.tasks
+-e ../django-arcutils
 -e .[dev]
