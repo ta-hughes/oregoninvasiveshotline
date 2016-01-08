@@ -55,16 +55,16 @@ def generate_icon(output_path,
     mode = 'RGBA'
 
     # Create a new, transparent image as a canvas.
-    canvas = Image.new(mode, generated_icon_size, transparent)
+    icon = Image.new(mode, generated_icon_size, transparent)
 
     # Draw the background onto the canvas.
-    background = ImageDraw.Draw(canvas)
+    background = ImageDraw.Draw(icon)
     background.rectangle(square_coords, fill=color)
     background.polygon(triangle_coords, fill=color)
 
     # Filter out the edges of the background and add a nice dark outline
     # to it by traversing pixel by pixel.
-    outline = canvas.filter(ImageFilter.FIND_EDGES)
+    outline = icon.filter(ImageFilter.FIND_EDGES)
     outline_width, outline_height = outline.size
     outline_pixels = outline.load()
     for i in range(outline_width):
@@ -75,26 +75,27 @@ def generate_icon(output_path,
                 # have its color changed to the outline color.
                 outline_pixels[i, j] = outline_color
 
-    if inner_icon and os.path.exists(inner_icon.path):
-        # Before we can use the inner icon, it needs to be pasted into
-        # an image with the same properties as the background image.
-        # Otherwise, transparency will not be preserved. To do this, we
-        # simply create a new image with the same properties as the
-        # canvas, and paste the icon into it.
-        inner_icon = Image.open(inner_icon.path)
-        inner_icon_canvas = Image.new(mode, generated_icon_size)
-        inner_icon_canvas.paste(inner_icon, icon_offset)
+    if inner_icon:
+        if os.path.exists(inner_icon.path):
+            # Before we can use the inner icon, it needs to be pasted into
+            # an image with the same properties as the background image.
+            # Otherwise, transparency will not be preserved. To do this, we
+            # simply create a new image with the same properties as the
+            # canvas, and paste the icon into it.
+            inner_icon = Image.open(inner_icon.path)
+            inner_icon_canvas = Image.new(mode, generated_icon_size)
+            inner_icon_canvas.paste(inner_icon, icon_offset)
 
-        # Alpha composite merge is used to ensure transparency is
-        # preserved while moving the icon onto the canvas.
-        img = Image.alpha_composite(canvas, inner_icon_canvas)
-    else:
-        img = canvas
+            # Alpha composite merge is used to ensure transparency is
+            # preserved while moving the icon onto the canvas.
+            icon = Image.alpha_composite(icon, inner_icon_canvas)
+        else:
+            log.error('Inner icon file does not exist: %s', inner_icon.path)
 
     # Now merge the image with the outline.
-    img = Image.alpha_composite(img, outline)
+    icon = Image.alpha_composite(icon, outline)
 
     try:
-        img.save(output_path)
+        icon.save(output_path)
     except IOError:
         log.exception('Error while saving icon image')
