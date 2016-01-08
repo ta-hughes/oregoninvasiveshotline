@@ -1,6 +1,6 @@
 import random
 
-from arcutils import will_be_deleted_with
+from arcutils.db import will_be_deleted_with
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import login as django_login
