@@ -84,8 +84,10 @@ def generate_thumbnail(input_path, output_path, width, height):
 
     try:
         img = Image.open(input_path)
+    except FileNotFoundError:
+        log.error('Could not find image at: %s', input_path)
+        return False
     except IOError:
-        # Usually, getting here means the image doesn't exist
         log.exception('Error while opening image at: %s', input_path)
         return False
 
