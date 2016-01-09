@@ -32,35 +32,39 @@ from .perms import can_manage_report, can_view_private_report, permissions
 
 
 def list_(request):
-    if request.user.is_active:
-        template = "reports/list.html"
-    else:
-        template = "reports/list_public.html"
-
-    report_ids = request.session.get("report_ids", [])
-    # all that awesome tabs stuff
     user = request.user
-    tab = request.GET.get('tabs') if request.GET.get('tabs') is not None else "search"
-    tab_context = get_tab_counts(user, report_ids)
+    params = request.GET
+    report_ids = request.session.get('report_ids', [])
 
-    form = ReportSearchForm(request.GET, user=request.user, report_ids=report_ids)
+    form = ReportSearchForm(params, user=user, report_ids=report_ids)
 
-    # handle the case where they want to export the reports
-    if request.user.is_active and request.GET.get("export") in ['kml', 'csv']:
-        return _export(reports=form.results(page=1, items_per_page=sys.maxsize), format=request.GET['export'])
+    # Handle the case where they want to export the reports
+    # XXX: Why isn't this a separate view?
+    export_format = params.get('export')
+    if user.is_active and export_format in ('kml', 'csv'):
+        export_data = form.results(page=1, items_per_page=sys.maxsize)
+        return _export(reports=export_data, format=export_format)
 
-    reports = form.results(request.GET.get("page", 1))
-
+    reports = form.results(request.GET.get('page', 1))
     reports_json = []
     for report in reports:
         reports_json.append(report.to_json())
 
-    return render(request, template, dict({
-        "reports": reports,
-        "form": form,
-        "reports_json": json.dumps(reports_json),
-        "tab": tab,
-    }, **tab_context))
+    template_name = 'list' if user.is_active else 'list_public'
+    template = 'reports/{name}.html'.format(name=template_name)
+
+    tab = params.get('tabs') or 'search'
+    tab_context = get_tab_counts(user, report_ids)
+
+    context = {
+        'reports': reports,
+        'form': form,
+        'reports_json': json.dumps(reports_json),
+        'tab': tab,
+    }
+    context.update(tab_context)
+
+    return render(request, template, context)
 
 
 def help(request):
