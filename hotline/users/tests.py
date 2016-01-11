@@ -45,6 +45,12 @@ class EditViewTest(TestCase):
 
 
 class AuthenticateViewTest(TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.login_redirect_url = reverse(settings.LOGIN_REDIRECT_URL)
+
     def test_bad_signature_redirects_to_home(self):
         response = self.client.get(reverse("users-authenticate") + "?sig=asfd")
         self.assertRedirects(response, reverse("home"))
@@ -54,20 +60,20 @@ class AuthenticateViewTest(TestCase):
         invite = make(Invite)
         url = invite.user.get_authentication_url(request=Mock(build_absolute_uri=lambda a: a))
         response = self.client.get(url)
-        self.assertRedirects(response, str(settings.LOGIN_REDIRECT_URL))
+        self.assertRedirects(response, self.login_redirect_url)
 
         # test for an active user
         user = make(User, is_active=True)
         url = user.get_authentication_url(request=Mock(build_absolute_uri=lambda a: a))
         response = self.client.get(url)
-        self.assertRedirects(response, str(settings.LOGIN_REDIRECT_URL))
+        self.assertRedirects(response, self.login_redirect_url)
 
     def test_report_ids_session_variable_is_populated(self):
         user = make(User, is_active=False)
         report = make(Report, created_by=user)
         url = user.get_authentication_url(request=Mock(build_absolute_uri=lambda a: a))
         response = self.client.get(url)
-        self.assertRedirects(response, str(settings.LOGIN_REDIRECT_URL))
+        self.assertRedirects(response, self.login_redirect_url)
         self.assertIn(report.pk, self.client.session['report_ids'])
 
 
