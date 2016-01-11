@@ -1,14 +1,15 @@
+import binascii
 import codecs
 import csv
 import json
 import os
 import re
-from base64 import b64decode
+import tempfile
 from unittest.mock import Mock, patch
 
 from django.conf import settings
 from django.core.exceptions import NON_FIELD_ERRORS
-from django.core.files.uploadedfile import SimpleUploadedFile
+from django.core.files.base import File
 from django.core.urlresolvers import reverse
 from django.db.models.signals import post_save
 from django.test import TestCase
@@ -99,10 +100,22 @@ class ReportTest(SuppressPostSaveMixin, TestCase):
 class TestReportIconGeneration(TestCase):
 
     def _make_category_icon(self):
-        return SimpleUploadedFile(
-            'foo.png',
-            b64decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNg+P+/HgAFfwJ+BSYS9wAAAABJRU5ErkJggg==')
+        content = binascii.unhexlify(
+            # Turtle icon encoded as hex
+            b'89504e470d0a1a0a0000000d494844520000002000000025080600000023b7eb47000000d249444154588'
+            b'5ed95410ec42008453f93b9191cbb9ecd59991082561cba980c6fd3a6c6f004a1405114455114bf063377'
+            b'fdfc96d7c9a6de7b9a0445373073bfae0b0020220080d61ae975bb47afa708008095d08c350020a2658cb'
+            b'08027a1453cb14733e0e1952645203b3870d005abe083dde04702d9bcbd8fb69522274a1168add1183622'
+            b'9236f53cdc123073b76d65dfb398a676e7c65ba21db014884a9c04bf15d0121a4f6877f28505acc86afc5'
+            b'a911d19b70b66ec9422f223028219589d74466a066cf08c0115be038327a7e37ff101afa37d185ce02898'
+            b'0000000049454e44ae426082'
         )
+        icon_dir = os.path.join(settings.MEDIA_ROOT, 'icons')
+        fd, name = tempfile.mkstemp(dir=icon_dir, suffix='.png')
+        os.write(fd, content)
+        os.close(fd)
+        icon_file = File(open(name, 'rb'), name)
+        return icon_file
 
     def test_generate_icon_manually(self):
         report = make.prepare(
