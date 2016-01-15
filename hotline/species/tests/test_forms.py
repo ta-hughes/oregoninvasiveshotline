@@ -55,9 +55,9 @@ class SpeciesSearchFormTest(TestCase):
         self.assertEqual(results.name, name)
 
     def test_sort_by_field_sorts_species(self):
-        albatross = make(Species, name="albatross", scientific_name="diomedeidae")
-        buffalo = make(Species, name="buffalo", scientific_name="bison")
-        cat = make(Species, name="cat", scientific_name="felis catus")
+        make(Species, name="albatross", scientific_name="diomedeidae")
+        make(Species, name="buffalo", scientific_name="bison")
+        make(Species, name="cat", scientific_name="felis catus")
 
         form = SpeciesSearchForm({
             'q': '',

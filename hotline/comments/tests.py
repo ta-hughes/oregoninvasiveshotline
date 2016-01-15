@@ -87,7 +87,7 @@ class CommentFormTest(TestCase, UserMixin):
 
     def test_email_not_sent_to_person_submitting_comment(self):
         report = make(Report)
-        invite = make(Invite, report=report, user=self.user)
+        make(Invite, report=report, user=self.user)
 
         form = CommentForm({
             'body': "foo",

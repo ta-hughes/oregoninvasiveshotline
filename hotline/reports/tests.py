@@ -331,9 +331,9 @@ class ReportSearchFormTest(TestCase, UserMixin):
 
     def test_sort_by_field_sorts_reports(self):
         now = timezone.now()
-        older_report = make(Report, created_on=now - timedelta(days=1))
-        old_report = make(Report, created_on=now)
-        current_report = make(Report, created_on=now + timedelta(days=1))
+        make(Report, created_on=now - timedelta(days=1))
+        make(Report, created_on=now)
+        make(Report, created_on=now + timedelta(days=1))
 
         form = ReportSearchForm({
             "sort_by": "-created_on",
