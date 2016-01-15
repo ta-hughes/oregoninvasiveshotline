@@ -179,6 +179,7 @@ class UserFormTest(TestCase, UserMixin):
             # ensure the superclass was called (which actually saves the model)
             self.assertTrue(mock.called)
 
+
 class UserSearchFormTest(TestCase, UserMixin):
     """
     Tests for the User search form
