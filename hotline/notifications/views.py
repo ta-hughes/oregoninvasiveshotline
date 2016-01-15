@@ -16,7 +16,7 @@ def create(request):
     try:
         query.pop("tabs")
     except KeyError:
-        pass # no keyword called tabs, so that's fine.
+        pass  # no keyword called tabs, so that's fine.
     query = query.urlencode()
     instance = UserNotificationQuery(user=request.user, query=query)
     if request.method == "POST":
