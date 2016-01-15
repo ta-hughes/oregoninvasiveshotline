@@ -6,7 +6,7 @@ from getpass import getpass
 from urllib.parse import urlencode
 
 from arctasks import *
-from arctasks.django import setup, get_settings, manage
+from arctasks.django import call_command, setup, get_settings, manage
 
 
 @arctask(configured='dev', timed=True)
@@ -15,7 +15,7 @@ def init(ctx, overwrite=False):
     install(ctx)
     createdb(ctx, drop=overwrite)
     migrate(ctx)
-    manage(ctx, 'rebuild_index --noinput')
+    rebuild_index(ctx, interactive=False)
     loaddata(ctx)
 
 
@@ -27,9 +27,9 @@ def loaddata(ctx):
     ))
 
 
-@arctask(configured='dev')
+@arctask(configured=DEFAULT_ENV)
 def rebuild_index(ctx, interactive=True):
-    manage(ctx, ('rebuild_index', '--noinput' if not interactive else ''))
+    call_command('rebuild_index', interactive=interactive)
 
 
 @arctask(configured='dev', timed=True)
