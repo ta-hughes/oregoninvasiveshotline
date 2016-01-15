@@ -6,65 +6,87 @@ from django.db import models
 from django.http import QueryDict
 from django.template.loader import render_to_string
 
+from arcutils.settings import get_setting
+
 
 class UserNotificationQuery(models.Model):
-    user_notification_query_id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=255, verbose_name="""
-        To make it easier to review your subscriptions, give the search you
-        just performed a name. For example "Aquatic plants in Multnomah county"
-    """)
-    user = models.ForeignKey("users.User")
-    query = models.TextField(help_text="""
-        This is a a string for a QueryDict of the GET parameters to pass to the
-        ReportSearchForm that match reports the user should be notified about
-    """)
-    created_on = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        db_table = "user_notification_query"
+        db_table = 'user_notification_query'
+
+    user_notification_query_id = models.AutoField(primary_key=True)
+    user = models.ForeignKey('users.User')
+    name = models.CharField(
+        max_length=255,
+        verbose_name=(
+            'To make it easier to review your subscriptions, give the search you just performed '
+            'a name. For example: "Aquatic plants in Multnomah county".'
+        )
+    )
+    query = models.TextField(
+        help_text=(
+            'This is a string for a QueryDict of the GET parameters to pass to the '
+            'ReportSearchForm that match reports the user should be notified about.'
+        )
+    )
+    created_on = models.DateTimeField(auto_now_add=True)
 
     @classmethod
     def notify(cls, report, request):
-        """
-        When a new report is submitted, we need to notify everyone who has
-        subscribed to a query on the ReportSearchForm that matches the report.
+        """Notify users subscribed to a query that matches ``report``.
 
-        This function spawns a thread to send the emails, since this is a
-        fairly slow process
-        """
-        def runnable(cls, report, request):
-            from oregoninvasiveshotline.reports.forms import ReportSearchForm  # get around a circular import
-            users = set()
-            for query in cls.objects.all().select_related("user").exclude(
-                    user__pk__in=Notification.objects.filter(report=report).values_list("user_id", flat=True)
-            ):
-                if query.user.pk not in users:
-                    form = ReportSearchForm(QueryDict(query.query), user=query.user)
-                    if form.is_valid() and form.search().filter(id=report.pk).count() >= 1:
-                        send_mail("New Online Hotline submission for review", render_to_string("notifications/email.txt", {
-                            "user": query.user,
-                            "name": query.name,
-                            "url": query.user.get_authentication_url(request=request, next=reverse("reports-detail", args=[report.pk])),
-                            "report": report,
-                        }), "noreply@pdx.edu", [query.user.email])
-                        Notification(user=query.user, report=report).save()
-                        users.add(query.user.pk)
+        This function spawns a thread to send the emails, since this is
+        a fairly slow process.
 
-        threading.Thread(target=runnable, args=(cls, report, request)).start()
+        """
+        from oregoninvasiveshotline.reports.forms import ReportSearchForm  # Avoid circular import
+
+        subject = get_setting('NOTIFICATIONS.subject')
+        from_email = get_setting('NOTIFICATIONS.from_email')
+        excluded_users = Notification.objects.filter(report=report).values_list('user_id', flat=True)
+        q = cls.objects.all().select_related('user')
+        q = q.exclude(user__pk__in=excluded_users)
+        user_notification_queries = q.all()
+        notified_users = set()
+
+        def runnable():
+            for user_notification_query in user_notification_queries:
+                user = user_notification_query.user
+                if user.pk not in notified_users:
+                    query = user_notification_query.query
+                    form = ReportSearchForm(QueryDict(query), user=user)
+                    if form.is_valid() and form.search().filter(id=report.pk).count():
+                        next_url = reverse('reports-detail', args=[report.pk])
+                        url = user.get_authentication_url(request=request, next=next_url)
+                        body = render_to_string('notifications/email.txt', {
+                            'user': user,
+                            'name': user_notification_query.name,
+                            'url': url,
+                            'report': report,
+                        })
+                        send_mail(subject, body, from_email, [user.email])
+                        Notification(user=user, report=report).save()
+                        notified_users.add(user.pk)
+
+        threading.Thread(target=runnable).start()
 
     def __str__(self):
         return self.name
 
 
 class Notification(models.Model):
+
+    """Keeps track of notifications to users.
+
+    This keeps track of which users have been notified about which
+    reports, so they don't get emailed twice about the same report.
+
     """
-    This just tells you which users have been notified about which reports, so
-    they don't get emailed twice about the same report
-    """
-    notification_id = models.AutoField(primary_key=True)
-    user = models.ForeignKey("users.User")
-    report = models.ForeignKey("reports.Report")
-    created_on = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        db_table = "notification"
+        db_table = 'notification'
+
+    notification_id = models.AutoField(primary_key=True)
+    user = models.ForeignKey('users.User')
+    report = models.ForeignKey('reports.Report')
+    created_on = models.DateTimeField(auto_now_add=True)
