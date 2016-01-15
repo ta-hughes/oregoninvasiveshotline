@@ -17,7 +17,7 @@ install:
 
 before_script:
     - sleep 10
-    - curl -XPUT 'http://localhost:9200/hotline-test/'
+    - curl -XPUT 'http://localhost:9200/oregoninvasiveshotline-test/'
 
 script:
     - LOCAL_SETTINGS_FILE="local.base.cfg#test" python manage.py test

@@ -1,4 +1,4 @@
 include README.md
-recursive-include hotline/static *
-recursive-include hotline/templates *
-recursive-include hotline/pages/templates *
+recursive-include oregoninvasiveshotline/static *
+recursive-include oregoninvasiveshotline/templates *
+recursive-include oregoninvasiveshotline/pages/templates *
