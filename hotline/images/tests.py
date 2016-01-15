@@ -5,12 +5,12 @@ from unittest.mock import patch
 from django import forms
 from django.forms.models import modelformset_factory
 from django.test import TestCase
+
 from model_mommy.mommy import make
 
 from arcutils.test.user import UserMixin
 
 from hotline.reports.models import Report
-from hotline.users.models import User
 
 from .fields import ClearableImageInput
 from .forms import BaseImageFormSet, ImageForm, get_image_formset

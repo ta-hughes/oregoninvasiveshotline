@@ -1,10 +1,7 @@
-import base64
 import hashlib
 import itertools
 import os
 import posixpath
-import subprocess
-import tempfile
 
 from django.conf import settings
 from django.contrib.auth import get_user_model

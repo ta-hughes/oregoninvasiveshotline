@@ -1,12 +1,12 @@
 from django.contrib.auth.models import AnonymousUser
 from django.test import TestCase
+
 from model_mommy.mommy import make
 
 from arcutils.test.user import UserMixin
 
 from .notifications.models import UserNotificationQuery
 from .reports.models import Invite, Report
-from .users.models import User
 from .utils import get_tab_counts
 
 

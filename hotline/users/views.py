@@ -1,6 +1,5 @@
 import random
 
-from arcutils.db import will_be_deleted_with
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import login as django_login
@@ -8,6 +7,8 @@ from django.contrib.auth.views import login as django_login_view
 from django.core.signing import BadSignature
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import DetailView
+
+from arcutils.db import will_be_deleted_with
 
 from hotline.reports.models import Invite, Report
 from hotline.utils import get_tab_counts

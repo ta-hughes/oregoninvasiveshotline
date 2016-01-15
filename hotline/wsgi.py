@@ -23,5 +23,5 @@ sys.path = new_sys_path + old_sys_path
 os.environ.setdefault('LOCAL_SETTINGS_FILE', os.path.join(root, 'local.cfg'))
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'hotline.settings')
 
-from django.core.wsgi import get_wsgi_application
+from django.core.wsgi import get_wsgi_application  # noqa
 application = get_wsgi_application()

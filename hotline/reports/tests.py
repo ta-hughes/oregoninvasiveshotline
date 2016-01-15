@@ -3,7 +3,6 @@ import codecs
 import csv
 import json
 import os
-import re
 import tempfile
 from unittest.mock import Mock, patch
 
@@ -15,6 +14,7 @@ from django.core.urlresolvers import reverse
 from django.db.models.signals import post_save
 from django.test import TestCase
 from django.utils import timezone
+
 from model_mommy.mommy import make, prepare
 
 from arcutils.test.user import UserMixin

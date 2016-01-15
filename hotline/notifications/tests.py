@@ -3,12 +3,12 @@ from unittest.mock import Mock, patch
 from django.core import mail
 from django.core.urlresolvers import reverse
 from django.test import TestCase
-from model_mommy.mommy import make, prepare
+
+from model_mommy.mommy import make
 
 from arcutils.test.user import UserMixin
 
 from hotline.reports.models import Report
-from hotline.users.models import User
 
 from .models import UserNotificationQuery
 

@@ -1,7 +1,8 @@
-from arcutils.forms import BaseModelFormSet
 from django import forms
 from django.forms.models import modelformset_factory
 from django.utils.functional import curry
+
+from arcutils.forms import BaseModelFormSet
 
 from hotline.reports.perms import can_adjust_visibility
 

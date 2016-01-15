@@ -1,7 +1,7 @@
 from django.template import Context
 from django.template.loader import get_template
+
 from rest_framework import serializers
-from .models import Report
 
 
 class ReportSerializer(serializers.Serializer):

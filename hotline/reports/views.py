@@ -1,9 +1,7 @@
 import csv
 import json
-import sys
 from collections import OrderedDict
 
-from arcutils.db import will_be_deleted_with
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -15,17 +13,14 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
 from django.utils.functional import curry
 
+from arcutils.db import will_be_deleted_with
+
 from hotline.comments.forms import CommentForm
 from hotline.comments.models import Comment
 from hotline.comments.perms import can_create_comment
 from hotline.images.forms import get_image_formset
 from hotline.images.models import Image
-from hotline.species.models import (
-    Category,
-    Severity,
-    Species,
-    category_id_to_species_id_json,
-)
+from hotline.species.models import Category, Severity, Species, category_id_to_species_id_json
 from hotline.utils import get_tab_counts
 
 from .forms import InviteForm, ManagementForm, ReportForm, ReportSearchForm

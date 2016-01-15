@@ -1,18 +1,10 @@
 import hashlib
 import logging
-import os
-import subprocess
-import sys
-
-from PIL import Image
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import PasswordResetForm
-from django.contrib.auth.hashers import (
-    BasePasswordHasher,
-    constant_time_compare,
-)
+from django.contrib.auth.hashers import BasePasswordHasher, constant_time_compare
 from django.contrib.sites.models import Site
 from django.core import mail
 from django.core.management import call_command
@@ -22,7 +14,11 @@ from django.db.models import Q
 from django.dispatch import receiver
 from django.utils.timezone import localtime, now
 
+from PIL import Image
+
+
 log = logging.getLogger(__name__)
+
 
 @receiver(request_finished)
 def refresh_index(*args, **kwargs):

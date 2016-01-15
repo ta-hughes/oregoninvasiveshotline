@@ -5,6 +5,7 @@ from django.conf import settings
 from django.core import mail
 from django.core.urlresolvers import reverse
 from django.test import TestCase
+
 from model_mommy.mommy import make, prepare
 
 from arcutils.test.user import UserMixin

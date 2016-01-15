@@ -3,13 +3,13 @@ from unittest.mock import Mock
 from django.core import mail
 from django.core.urlresolvers import reverse
 from django.test import TestCase
+
 from model_mommy.mommy import make
 
 from arcutils.test.user import UserMixin
 
 from hotline.images.models import Image
 from hotline.reports.models import Invite, Report
-from hotline.users.models import User
 
 from .forms import CommentForm
 from .models import Comment
