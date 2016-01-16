@@ -8,7 +8,7 @@ Subscribe to Search
 <form method="post">
     {% csrf_token %}
     {{ form.name|bootstrap }}
-    <input type="submit" name="submit" value="Subscribe" />
-    <a href="javascript:window.history.go(-1)">Back</a>
+    <input type="submit" name="submit" value="Subscribe" class="btn btn-primary"/>
+    <a href="javascript:window.history.go(-1)" class="btn btn-default">Back</a>
 </form>
 {% endblock %}

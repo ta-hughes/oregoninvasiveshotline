@@ -143,7 +143,7 @@ Report #{{ report.pk }} - {{ report }}
                             {{ management_form.is_public|bootstrap }}
                             {{ management_form.is_archived|bootstrap }}
                             <input type="hidden" name="submit_flag" value="{{ management_form.SUBMIT_FLAG }}" />
-                            <input type="submit" value="Submit" name="submit" />
+                            <input type="submit" value="Submit" name="submit" class="btn btn-primary"/>
                         </form>
                     </div>
                     <div class="public-form tab-pane" id="invite">
@@ -164,7 +164,7 @@ Report #{{ report.pk }} - {{ report }}
                             {% csrf_token %}
                             {{ invite_form|bootstrap }}
                             <input type="hidden" name="submit_flag" value="{{ invite_form.SUBMIT_FLAG }}" />
-                            <input type="submit" value="Submit" name="submit" />
+                            <input type="submit" value="Submit" name="submit" class="btn btn-primary"/>
                         </form>
                     </div>
                 </div>

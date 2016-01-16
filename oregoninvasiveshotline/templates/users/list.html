@@ -7,8 +7,8 @@
 
 <form class="form-inline">
     {{ form|bootstrap }}
-    <input type="submit" value="Search" />
-    <button onclick="window.location = '{% url 'users-list' %}'; return false">Reset</button>
+    <input type="submit" value="Search" class="btn btn-primary"/>
+    <button onclick="window.location = '{% url 'users-list' %}'; return false" class="btn btn-default">Reset</button>
 </form>
 <br />
 
