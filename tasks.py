@@ -297,43 +297,45 @@ def _copy_records(settings):
 
     @transaction.atomic
     def copy_user_notification_queries():
-        print('Creating user notification queries...', end='', flush=True)
+        print('Creating user notification queries...', flush=True)
+        user_query_info = defaultdict(lambda: defaultdict(list))
+        counties = County.objects.values()
+        county_map = {c['name'].lower(): c['county_id'] for c in counties}
+        print('    Removing existing notification queries...')
         UserNotificationQuery.objects.filter(name='Imported').delete()
+        print('    Getting user categories...')
         old.execute("""
-            SELECT category_id, user_id
+            SELECT user_id, category_id
             FROM categories_users
-            INNER JOIN categories ON categories.id = category_id
         """)
-        user_to_query = defaultdict(lambda: defaultdict(list))
         for row in dictfetchall(old):
             user_id = user_id_map[row['user_id']]
-            category = 'category_id:{category_id}'.format(**row)
-            user_to_query[user_id]['categories'].append(category)
+            user_query_info[user_id]['categories'].append(row['category_id'])
+        print('    Getting user counties...')
         old.execute("""
-            SELECT user_id, label
+            SELECT user_id, label as county
             FROM regions_users
             INNER JOIN regions ON regions.id = region_id
         """)
         for row in dictfetchall(old):
             user_id = user_id_map[row['user_id']]
-            if row['label'].lower() == 'hoodriver':
-                row['label'] = 'Hood River'
-            county = 'county:({label})'.format(**row)
-            user_to_query[user_id]['counties'].append(county)
-        for user_id, info in user_to_query.items():
-            categories_query = (' OR '.join(info['categories']))
-            counties_query = (' OR '.join(info['counties']))
-            if categories_query and counties_query:
-                query = ('(%s) AND (%s)' % (categories_query, counties_query))
-            elif categories_query:
-                query = categories_query
-            elif counties_query:
-                query = counties_query
-            UserNotificationQuery.objects.create(
-                name='Imported',
-                query=urlencode({'querystring': query}),
-                user_id=user_id,
-            )
+            if row['county'].lower() == 'hoodriver':
+                row['county'] = 'Hood River'
+            county = row['county'].lower()
+            if county.endswith(' county, wa'):
+                county = county[:-len(' county, wa')]
+            if county in county_map:
+                county_pk = county_map[county]
+                user_query_info[user_id]['counties'].append(county_pk)
+            else:
+                print('    Unknown county: {county}'.format_map(row))
+        print('    Adding notification query records...')
+        for user_id, info in user_query_info.items():
+            query = urlencode({
+                'categories': info['categories'],
+                'counties': info['counties'],
+            }, doseq=True)
+            UserNotificationQuery.objects.create(name='Imported', query=query, user_id=user_id)
         print('Done')
 
     copy_species()
