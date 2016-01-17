@@ -33,7 +33,7 @@ def rebuild_index(ctx, interactive=True):
 
 
 @arctask(configured='dev', timed=True)
-def copy_records(ctx, recreate_db=False):
+def copy_records(ctx, recreate_db=False, reindex=True):
     """Copy database records from old site.
 
     This is messy because only certain records are copied from the old
@@ -101,7 +101,8 @@ def copy_records(ctx, recreate_db=False):
     expert.update(first_name='', last_name='')
     print('Done')
 
-    rebuild_index(ctx, False)
+    if reindex:
+        rebuild_index(ctx, False)
 
 
 def _copy_records(settings):
