@@ -137,6 +137,7 @@ def _copy_records(settings):
             SELECT id, category_id, severity_id, name_sci, name_comm, remedy, resources
             FROM issues
         """)
+        species = []
         for row in dictfetchall(old):
             pk = row['id']
             data = {
@@ -147,7 +148,15 @@ def _copy_records(settings):
                 'scientific_name': row['name_sci'] or '',
                 'severity_id': row['severity_id'],
             }
-            Species.objects.update_or_create(pk=pk, defaults=data)
+            if not Species.objects.filter(pk=pk).exists():
+                species.append(Species(pk=pk, **data))
+        if species:
+            print('\n    New species:')
+            for s in species:
+                print('    ', s.name)
+            Species.objects.bulk_create(species)
+        else:
+            print(' \n')
         print('Done')
 
     @transaction.atomic
