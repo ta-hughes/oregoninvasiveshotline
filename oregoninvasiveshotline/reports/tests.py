@@ -329,14 +329,14 @@ class ReportSearchFormTest(TestCase, UserMixin):
         self.assertNotIn(other_report, reports)
         self.assertEqual(len(reports), 1)
 
-    def test_sort_by_field_sorts_reports(self):
+    def test_order_by_field_sorts_reports(self):
         now = timezone.now()
         make(Report, created_on=now - timedelta(days=1))
         make(Report, created_on=now)
         make(Report, created_on=now + timedelta(days=1))
 
         form = ReportSearchForm({
-            "sort_by": "-created_on",
+            "order_by": "-created_on",
         }, user=self.user)
         results = form.search()
 
@@ -902,7 +902,7 @@ class ReportListView(TestCase, UserMixin):
         make(Report, reported_category__name="Foobarius Foobar")
 
         self.client.login(email=self.user.email, password="foo")
-        response = self.client.get(reverse("reports-list") + "?q=foobarius&sort_by=category")
+        response = self.client.get(reverse("reports-list") + "?q=foobarius&order_by=category")
         self.assertEqual(response.status_code, 200)
         self.assertIn("Foobarius Foobar", response.content.decode())
         self.assertNotIn(str(other_reports[0]), response.content.decode())

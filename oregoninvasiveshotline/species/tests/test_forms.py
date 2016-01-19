@@ -54,14 +54,14 @@ class SpeciesSearchFormTest(TestCase):
         # is in the list of ids returned by the search function
         self.assertEqual(results.name, name)
 
-    def test_sort_by_field_sorts_species(self):
+    def test_order_by_field_sorts_species(self):
         make(Species, name="albatross", scientific_name="diomedeidae")
         make(Species, name="buffalo", scientific_name="bison")
         make(Species, name="cat", scientific_name="felis catus")
 
         form = SpeciesSearchForm({
             'q': '',
-            'sort_by': 'name',
+            'order_by': 'name',
             'order': 'descending',
         }, user=self.user)
         results = form.search()

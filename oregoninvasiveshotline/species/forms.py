@@ -12,7 +12,7 @@ class SpeciesSearchForm(SearchForm):
         "placeholder": "Enter a keyword, then click \"Search\""
     }), label="Search")
 
-    sort_by = forms.ChoiceField(choices=[
+    order_by = forms.ChoiceField(choices=[
         ("name", "Name"),
         ("scientific_name", "Scientific Name"),
         ("severity", "Severity"),
@@ -39,11 +39,11 @@ class SpeciesSearchForm(SearchForm):
         if not self.is_valid():
             return self.no_query_found()
 
-        sort_by = self.cleaned_data.get("sort_by")
+        order_by = self.cleaned_data.get("order_by")
         order = self.cleaned_data.get("order")
-        if sort_by:
+        if order_by:
             if order == "descending":
-                sort_by = "-" + sort_by
-            results = results.order_by(sort_by)
+                order_by = "-" + order_by
+            results = results.order_by(order_by)
 
         return results

@@ -40,7 +40,7 @@ class ReportSearchForm(SearchForm):
 
     """
 
-    public_fields = ['q', 'sort_by', 'source', 'county']
+    public_fields = ['q', 'order_by', 'source', 'county']
 
     q = forms.CharField(
         required=False,
@@ -62,7 +62,7 @@ class ReportSearchForm(SearchForm):
 
     county = forms.ChoiceField(required=False, label='County', choices=get_county_choices)
 
-    sort_by = forms.ChoiceField(
+    order_by = forms.ChoiceField(
         required=False,
         choices=[
             ('_score', 'Relevance'),
@@ -164,7 +164,7 @@ class ReportSearchForm(SearchForm):
         report_ids = self.report_ids
         form_data = self.cleaned_data
         term = form_data.get('q')
-        sort_by = form_data.get('sort_by')
+        order_by = form_data.get('order_by')
 
         if term:
             # XXX: Not sure we want to do an auto query here; e.g., we might
@@ -173,7 +173,7 @@ class ReportSearchForm(SearchForm):
         else:
             # Don't show the relevance ordering option when there's no
             # search term.
-            self.fields['sort_by'].choices = self.fields['sort_by'].choices[1:]
+            self.fields['order_by'].choices = self.fields['order_by'].choices[1:]
 
         county = form_data.get('county')
         if county:
@@ -214,8 +214,8 @@ class ReportSearchForm(SearchForm):
             if report_ids:
                 sqs = sqs.filter(id__in=report_ids)
 
-        if sort_by:
-            sqs = sqs.order_by(sort_by)
+        if order_by:
+            sqs = sqs.order_by(order_by)
         elif not term:
             sqs = sqs.order_by('-created_on')
 
