@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from django.db import models, migrations
 
 
@@ -28,8 +25,10 @@ class Migration(migrations.Migration):
             name='UserNotificationQuery',
             fields=[
                 ('user_notification_query_id', models.AutoField(serialize=False, primary_key=True)),
-                ('query', models.TextField(help_text='A JSON encoded set of POST parameters to pass to the ReportSearchForm that match reports the user should be notified about')),
+                ('query', models.TextField(help_text='This is a string for a QueryDict of the GET parameters to pass to the ReportSearchForm that match reports the user should be notified about.')),
                 ('user', models.ForeignKey(to='users.User')),
+                ('name', models.CharField(verbose_name='To make it easier to review your subscriptions, give the search you just performed a name. For example: "Aquatic plants in Multnomah county".', max_length=255)),
+                ('created_on', models.DateTimeField(auto_now_add=True)),
             ],
             options={
                 'db_table': 'user_notification_query',
