@@ -18,7 +18,7 @@ setup(
         'django-bootstrap-form>=3.2',
         'django-cloak',
         'django-haystack>=2.4.1',
-        'django-local-settings>=1.0a10',
+        'django-local-settings>=1.0a13',
         'django-perms>=1.2.0',
         'django>=1.8.8,<1.9',
         'django-pgcli',
