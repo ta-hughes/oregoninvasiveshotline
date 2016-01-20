@@ -155,8 +155,6 @@ def _copy_records(settings):
             for s in species:
                 print('    ', s.name)
             Species.objects.bulk_create(species)
-        else:
-            print(' \n')
         print('Done')
 
     @transaction.atomic
