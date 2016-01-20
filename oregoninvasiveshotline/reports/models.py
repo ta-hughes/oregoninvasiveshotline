@@ -1,5 +1,4 @@
 import hashlib
-import itertools
 import os
 import posixpath
 
@@ -12,8 +11,11 @@ from django.db.models.signals import post_init, post_save
 from django.dispatch import receiver
 from django.template.loader import render_to_string
 
+from oregoninvasiveshotline.images.models import Image
 from oregoninvasiveshotline.utils import generate_thumbnail
-from oregoninvasiveshotline.reports.utils import generate_icon
+from oregoninvasiveshotline.visibility import Visibility
+
+from .utils import generate_icon
 
 
 class Report(models.Model):
@@ -132,20 +134,41 @@ class Report(models.Model):
 
     @property
     def image_url(self):
-        """
-        Returns the URL to the thumbnail generated for the first public image
-        attached to this report or None.
+        """Get URL for "first" public image attached to this report.
 
-        If the thumbnail doesn't exist, it is created
-        """
-        for image in itertools.chain(self.image_set.all(), *(comment.image_set.all() for comment in self.comment_set.all())):
-            if image.visibility == image.PUBLIC:
-                output_path = os.path.join(settings.MEDIA_ROOT, "generated_thumbnails", str(image.pk) + ".png")
-                if not os.path.exists(output_path):
-                    generate_thumbnail(image.image.path, output_path, width=64, height=64)
-                return settings.MEDIA_URL + os.path.relpath(output_path, settings.MEDIA_ROOT)
+        If the report has at least one public image, the thumbnail URL
+        for the newest image will be returned. Otherwise, the report's
+        comments are checked for public images.
 
-        return None
+        If the thumbnail for the selected image doesn't exist, it will
+        be created as a side effect.
+
+        If no image is found, ``None`` will be returned.
+
+        """
+        # Try to get a directly-attached image first
+        q = Image.objects.filter(report=self)
+        q = q.filter(visibility=Visibility.PUBLIC).order_by('-created_on')
+        image = q.first()
+
+        if image is None:
+            # Fall back to images attached to this report's comments
+            q = Image.objects.filter(comment__in=self.comment_set.values_list('pk', flat=True))
+            q = q.filter(visibility=Visibility.PUBLIC).order_by('-created_on')
+            image = q.first()
+
+        if image is None:
+            return None
+
+        sub_dir = 'generated_thumbnails'
+        output_dir = os.path.join(settings.MEDIA_ROOT, sub_dir)
+        media_url = posixpath.join(settings.MEDIA_URL, sub_dir)
+
+        file_name = '{image.pk}.png'.format(image=image)
+        output_path = os.path.join(output_dir, file_name)
+        if not os.path.exists(output_path):
+            generate_thumbnail(image.image.path, output_path, width=64, height=64)
+        return posixpath.join(media_url, file_name)
 
     @property
     def species(self):

@@ -3,6 +3,7 @@ import codecs
 import csv
 import json
 import os
+import posixpath
 import tempfile
 from unittest.mock import Mock, patch
 
@@ -91,24 +92,35 @@ class ReportTest(SuppressPostSaveMixin, TestCase):
 
     def test_image_url(self):
         report = make(Report)
-        # it's a private image, so it shouldn't be the image_url
-        image = make(Image, report=report, visibility=Image.PRIVATE)
-        self.assertEqual(None, report.image_url)
-        # this public image should be the image_url
+
+        # A report with only a private image shouldn't have an image URL
+        make(Image, report=report, visibility=Image.PRIVATE)
+        expected_url = None
+        self.assertEqual(report.image_url, expected_url)
+
+        # A report with a public image should have an image URL
         image = make(Image, report=report, visibility=Image.PUBLIC)
-        self.assertEqual(settings.MEDIA_URL + "generated_thumbnails/" + str(image.pk) + ".png", report.image_url)
+        file_name = '{image.pk}.png'.format(image=image)
+        expected_url = posixpath.join(settings.MEDIA_URL, 'generated_thumbnails', file_name)
+        self.assertEqual(report.image_url, expected_url)
 
-        Image.objects.all().delete()
+        path = os.path.join(settings.MEDIA_ROOT, 'generated_thumbnails', file_name)
+        self.assertTrue(os.path.exists(path))
 
-        # private images on comments shouldn't be used for the image_url
+    def test_image_url_from_comment(self):
+        report = make(Report)
+
         make(Image, comment=make(Comment, report=report), visibility=Image.PRIVATE, _quantity=2)
-        self.assertEqual(None, report.image_url)
-        # public images on comments can be used for the image_url
-        image = make(Image, comment=make(Comment, report=report), visibility=Image.PUBLIC)
-        self.assertEqual(settings.MEDIA_URL + "generated_thumbnails/" + str(image.pk) + ".png", report.image_url)
+        expected_url = None
+        self.assertEqual(report.image_url, expected_url)
 
-        # make sure the file got created
-        self.assertTrue(os.path.exists(os.path.join(settings.MEDIA_ROOT, "generated_thumbnails", str(image.pk) + ".png")))
+        image = make(Image, comment=make(Comment, report=report), visibility=Image.PUBLIC)
+        file_name = '{image.pk}.png'.format(image=image)
+        expected_url = posixpath.join(settings.MEDIA_URL, 'generated_thumbnails', file_name)
+        self.assertEqual(report.image_url, expected_url)
+
+        path = os.path.join(settings.MEDIA_ROOT, 'generated_thumbnails', file_name)
+        self.assertTrue(os.path.exists(path))
 
 
 class TestReportIconGeneration(TestCase):
