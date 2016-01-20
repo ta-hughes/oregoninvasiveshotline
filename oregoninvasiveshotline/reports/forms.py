@@ -21,7 +21,7 @@ from .models import Invite, Report
 
 def get_county_choices():
     county_choices = [('', 'Any')]
-    county_choices.extend((c.pk, c.name) for c in County.objects.all())
+    county_choices.extend((c.pk, c.name) for c in County.objects.all().order_by('name'))
     return county_choices
 
 
