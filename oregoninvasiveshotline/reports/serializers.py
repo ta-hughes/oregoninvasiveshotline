@@ -15,7 +15,6 @@ class ReportSerializer(serializers.Serializer):
     county = serializers.CharField()
     created_on = serializers.DateTimeField(format='%b %d, %Y')
     edrr_status = serializers.CharField()
-    icon = serializers.CharField(source="icon_url")
     icon_url = serializers.CharField(required=False)
     image_url = serializers.CharField(required=False)
     lat = serializers.SerializerMethodField()

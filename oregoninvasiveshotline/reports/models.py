@@ -86,7 +86,7 @@ class Report(models.Model):
         return {
             "lat": self.point.y,
             "lng": self.point.x,
-            "icon": self.icon_url,
+            "icon_url": self.icon_url,
             "title": str(self),
             "image_url": image_url,
             "content": self.__class__.TEMPLATE.render(Context({
