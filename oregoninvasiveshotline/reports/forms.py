@@ -177,14 +177,14 @@ class ReportSearchForm(SearchForm):
 
         county = form_data.get('county')
         if county:
-            sqs.filter(county_id=county)
+            sqs = sqs.filter(county_id=county)
 
         species = []
         for category in self.categories:
             category_species = form_data.get('category-{0.pk}'.format(category), ())
             species.extend(c for c in category_species)
         if species:
-            sqs.filter(species_id__in=species)
+            sqs = sqs.filter(species_id__in=species)
 
         is_archived = form_data.get('is_archived')
         if is_archived == 'archived':
