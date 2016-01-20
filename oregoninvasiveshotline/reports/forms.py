@@ -21,7 +21,14 @@ from .models import Invite, Report
 
 def get_county_choices():
     county_choices = [('', 'Any')]
-    county_choices.extend((c.pk, c.name) for c in County.objects.all().order_by('name'))
+    for county in County.objects.all().order_by('state', 'name'):
+        if county.state == 'Oregon':
+            label = county.name
+        elif county.state == 'Washington':
+            label = '{0.name}, WA'.format(county)
+        else:
+            label = '{0.name}, {0.state}'.format(county)
+        county_choices.append((county.pk, label))
     return county_choices
 
 
