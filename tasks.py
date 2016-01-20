@@ -32,7 +32,7 @@ def rebuild_index(ctx, interactive=True):
     call_command('rebuild_index', interactive=interactive)
 
 
-@arctask(configured='dev', timed=True)
+@arctask(configured=DEFAULT_ENV, timed=True)
 def copy_records(ctx, recreate_db=False, reindex=True):
     """Copy database records from old site.
 
@@ -357,7 +357,7 @@ def _copy_records(settings):
     copy_user_notification_queries()
 
 
-@arctask(configured='dev')
+@arctask(configured=DEFAULT_ENV)
 def copy_images(ctx, dry_run=False):
     """Copy images from old site."""
     settings = get_settings()
