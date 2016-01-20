@@ -72,11 +72,14 @@ class Report(models.Model):
         db_table = "report"
         ordering = ['-pk']
 
-    def __str__(self):
+    @property
+    def title(self):
         if self.species:
             return str(self.species)
-
         return self.category.name
+
+    def __str__(self):
+        return self.title
 
     def to_json(self):
         image_url = self.image_url
