@@ -10,7 +10,7 @@ from .perms import permissions
 from .reports import views as reports
 from .species import views as species
 from .users import views as users
-from .views import home
+from .views import HomeView
 
 
 urlpatterns = [
@@ -19,7 +19,7 @@ urlpatterns = [
     url(r'^reports/new/?$', lambda request: redirect('reports-create')),
     url(r'^home/search.*$', lambda request: redirect('reports-list')),
 
-    url(r'^$', home, name='home'),
+    url(r'^$', HomeView.as_view(), name='home'),
 
     url(r'^admin/', include(admin.site.urls)),
     url(r'^adminpanel/?$', species.admin_panel, name='admin-panel'),

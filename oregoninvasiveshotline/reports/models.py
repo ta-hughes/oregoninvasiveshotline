@@ -10,17 +10,13 @@ from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
 from django.db.models.signals import post_init, post_save
 from django.dispatch import receiver
-from django.template import Context
-from django.template.loader import get_template, render_to_string
+from django.template.loader import render_to_string
 
 from oregoninvasiveshotline.utils import generate_thumbnail
 from oregoninvasiveshotline.reports.utils import generate_icon
 
 
 class Report(models.Model):
-    # cache the template since Django is so slow at rendering templates and NFS
-    # makes it even worse
-    TEMPLATE = get_template("reports/_popover.html")
 
     report_id = models.AutoField(primary_key=True)
     # It may seem odd to have FKs to the species AND category, but in the case
@@ -80,20 +76,6 @@ class Report(models.Model):
 
     def __str__(self):
         return self.title
-
-    def to_json(self):
-        image_url = self.image_url
-        return {
-            "lat": self.point.y,
-            "lng": self.point.x,
-            "icon_url": self.icon_url,
-            "title": str(self),
-            "image_url": image_url,
-            "content": self.__class__.TEMPLATE.render(Context({
-                "report": self,
-                "image_url": image_url,
-            })),
-        }
 
     @property
     def icon_color(self):
