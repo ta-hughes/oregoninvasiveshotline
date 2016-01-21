@@ -7,8 +7,9 @@ from django.core.urlresolvers import reverse
 from django.core.validators import validate_email
 from django.template.loader import render_to_string
 from django.utils.safestring import mark_safe
+
 from haystack.forms import SearchForm
-from haystack.query import SQ, SearchQuerySet
+from haystack.query import AutoQuery, SQ, SearchQuerySet
 
 from oregoninvasiveshotline.comments.models import Comment
 from oregoninvasiveshotline.counties.models import County
@@ -174,9 +175,17 @@ class ReportSearchForm(SearchForm):
         order_by = form_data.get('order_by')
 
         if term:
-            # XXX: Not sure we want to do an auto query here; e.g., we might
-            #      want to boost the title field.
-            sqs = sqs.auto_query(term)
+            auto_query = AutoQuery(term)
+            query = (
+                SQ(title=auto_query) |
+                SQ(category=auto_query) |
+                SQ(county=auto_query) |
+                SQ(species=auto_query) |
+                SQ(text=auto_query)
+            )
+            if term.isdecimal():
+                query = SQ(report_id=auto_query) | query
+            sqs = sqs.filter(query)
         else:
             # Don't show the relevance ordering option when there's no
             # search term.
