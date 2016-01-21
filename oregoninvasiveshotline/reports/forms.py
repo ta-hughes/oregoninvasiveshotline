@@ -21,7 +21,7 @@ from .models import Invite, Report
 
 
 def get_county_choices():
-    county_choices = [('', 'Any')]
+    county_choices = [('', '- County -')]
     for county in County.objects.all().order_by('state', 'name'):
         if county.state == 'Oregon':
             label = county.name
@@ -52,23 +52,24 @@ class ReportSearchForm(SearchForm):
 
     q = forms.CharField(
         required=False,
-        label=mark_safe('Search <a target="_blank" class="help" href="help">[?]</a>'),
+        label='Search',
         widget=forms.widgets.TextInput(attrs={
+            'type': 'search',
             'placeholder': 'Enter a category, county, species, or other keyword'
         })
     )
 
     source = forms.ChoiceField(
         required=False,
-        label='Extra Criteria',
+        label='',
         choices=[
-            ('', 'None'),
+            ('', '- Extra Criteria -'),
             ('invited', 'Invited to Review'),
             ('reported', 'Reported by Me')
         ]
     )
 
-    county = forms.ChoiceField(required=False, label='County', choices=get_county_choices)
+    county = forms.ChoiceField(required=False, label='', choices=get_county_choices)
 
     order_by = forms.ChoiceField(
         required=False,
@@ -84,8 +85,9 @@ class ReportSearchForm(SearchForm):
     is_archived = forms.ChoiceField(
         required=False,
         initial='notarchived',
+        label='',
         choices=[
-            ('', 'Any'),
+            ('', '- Archived? -'),
             ('archived', 'Archived'),
             ('notarchived', 'Not archived'),
         ]
@@ -93,16 +95,18 @@ class ReportSearchForm(SearchForm):
 
     is_public = forms.ChoiceField(
         required=False,
+        label='',
         choices=[
-            ('', 'Any'),
+            ('', '- Public? -'),
             ('public', 'Public'),
             ('notpublic', 'Not public'),
         ])
 
     claimed_by = forms.ChoiceField(
         required=False,
+        label='',
         choices=[
-            ('', 'Any'),
+            ('', '- Claimed By -'),
             ('me', 'Me'),
             ('nobody', 'Nobody'),
         ])

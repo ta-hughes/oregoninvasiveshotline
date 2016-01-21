@@ -1,0 +1,15 @@
+<div class="form-group">
+    <label for="id_q" class="control-label">
+        <a href="help" class="help" target="_blank" title="Search help">
+            <span class="glyphicon glyphicon-question-sign"></span>
+            <span class="sr-only">[?]</span>
+        </a>
+    </label>
+    <input name="q" id="id_q" type="search" class="form-control"
+           value="{{ form.q.value|default:'' }}"
+           placeholder="Enter category, county, species, or other keyword(s)">
+</div>
+
+{{ form.county|bootstrap }}
+
+{% if form.source %}{{ form.source|bootstrap }}{% endif %}

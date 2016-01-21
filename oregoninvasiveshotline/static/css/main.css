@@ -353,10 +353,6 @@ kbd {
     font-weight:bold;
 }
 
-.reports-table-form label {
-    display:block;
-}
-
 .reports-table-img {
     width:1px;
     vertical-align:middle !important;

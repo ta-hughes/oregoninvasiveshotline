@@ -1,22 +1,15 @@
-{% extends "base.html" %}
-{% block main_class %}container-fluid{% endblock %}
+{% extends 'base.html' %}
+
+{% block title %}Report List{% endblock %}
 {% block body_class %}report-page white{% endblock %}
-{% block title %}
-Report List
-{% endblock %}
+{% block main_class %}container-fluid{% endblock %}
+
 {% block content %}
-<form class="form-inline">
-    {{ form.q|bootstrap }}
-    {{ form.county|bootstrap }}
-    {% if form.source %}{{ form.source|bootstrap }}{% endif %}
-    <input type="submit" value="Search" name="submit" class="btn btn-primary">
-    <a href="{% url 'reports-list' %}" class="btn btn-default">Reset</a>
-    <a href="#" id="expander">Advanced</a>
-    <div id="expander-content" style="display:none">
-        {% include 'reports/_category_form.html' %}
-    </div>
-</form>
-{% include "reports/_list.html" %}
+    <form class="form-inline">
+        {% include 'reports/search/_fields.html' %}
+        {% include 'reports/search/_buttons.html' %}
+    </form>
+    {% include 'reports/_list.html' %}
 {% endblock %}
 
 {% block js %}
