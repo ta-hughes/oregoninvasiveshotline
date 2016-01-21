@@ -15,18 +15,3 @@
     </fieldset>
 {% endfor %}
 
-<script>
-// shows and hides the category form fields
-$('.reports-search-category a').click(function(e){
-    e.preventDefault();
-    var pk = $(this).data("pk");
-    var div = $('#reports-search-category-' + pk);
-    if(div.is(":visible")){
-        div.hide();
-    } else {
-        $('.reports-search-species-list').hide();
-        div.show();
-    }
-});
-</script>
-

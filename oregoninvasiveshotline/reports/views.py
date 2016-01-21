@@ -1,5 +1,4 @@
 import csv
-import json
 from collections import OrderedDict
 
 from django.conf import settings
@@ -69,7 +68,6 @@ def list_(request):
         'reports': reports,
         'page': page,
         'form': form,
-        'reports_json': json.dumps(reports),
         'tab': tab,
     }
     context.update(tab_context)

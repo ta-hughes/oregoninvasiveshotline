@@ -1,5 +1,3 @@
-import json
-
 from rest_framework.renderers import TemplateHTMLRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -28,7 +26,6 @@ class HomeView(APIView):
         serializer = ReportSerializer(reports, many=True)
         return Response({
             'reports': serializer.data,
-            'reports_json': json.dumps(serializer.data)
         })
 
     def get_reports(self):

@@ -18,3 +18,8 @@ Report List
 </form>
 {% include "reports/_list.html" %}
 {% endblock %}
+
+{% block js %}
+    {{ block.super }}
+    {% include 'reports/_list.js.html' %}
+{% endblock %}

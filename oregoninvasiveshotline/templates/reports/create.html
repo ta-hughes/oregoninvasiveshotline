@@ -68,72 +68,82 @@ Report an Invader
     <a href="{% url 'reports-list' %}" class="btn btn-warning">Cancel</a>
     <div id="previews"></div>
 </form>
+{% endblock %}
 
-<script>
-var category_id_to_species_id = {{ category_id_to_species_id|safe }};
-</script>
-<script src="{% static 'js/species_selector.js' %}"></script>
-<script type="text/javascript" src="//maps.googleapis.com/maps/api/js?key=AIzaSyDRamH3fauUUQow07BOuep8gojIvCiGpm4"></script>
-<script>
-google.maps.event.addDomListener(window, 'load', function(){;
-    var map = new google.maps.Map(document.getElementById('map-canvas'), getDefaultMapOptions());
+{% block js %}
+    {{ block.super }}
 
-    // if the point field is filled out, we want to put the pin at that
-    // position, otherwise, just drop it in the center of the map
-    var point = $.trim($('#id_point').val());
-    // we need to match something like: POINT(-122.83053026562499 44.79282273106314)
-    // thanks: http://www.regular-expressions.info/floatingpoint.html
-    var parts = point.match(/([-+]?([0-9]*\.[0-9]+|[0-9]+)).+?([-+]?([0-9]*\.[0-9]+|[0-9]+))/)
+    <script src="{{ GOOGLE.maps.url }}"></script>
 
-    // Instead we will place the marker at the users current location
-    // if it is possible. If not place it at the center!
-    if(!parts){
-        var position = {lat: map.getCenter().lat(), lng: map.getCenter().lng()}
-    } else {
-        var position = {lat: parseFloat(parts[3]), lng: parseFloat(parts[1])}
-    }
+    <script>
+        var category_id_to_species_id = {{ category_id_to_species_id|safe }};
+    </script>
 
-    // Place a draggable marker on the map
-    var marker = new google.maps.Marker({
-        position: position,
-        map: map,
-        draggable: true,
-        title:"Drag me!"
-    });
+    <script src="{% static 'js/img.js' %}"></script>
+    <script src="{% static 'js/species_selector.js' %}"></script>
 
-    if(navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(function(position) {
-                console.log({lat: position.coords.latitude, lng: position.coords.longitude}) 
-                var latlng = {lat: position.coords.latitude, lng: position.coords.longitude}
-                marker.setPosition(latlng)
-                map.setZoom(10);
-                map.setCenter(latlng)
+    <script>
+        $(document).ready(function () {
+            google.maps.event.addDomListener(window, 'load', function () {
+                var map = new google.maps.Map(document.getElementById('map-canvas'), getDefaultMapOptions());
+
+                // if the point field is filled out, we want to put the pin at that
+                // position, otherwise, just drop it in the center of the map
+                var point = $.trim($('#id_point').val());
+                // we need to match something like: POINT(-122.83053026562499 44.79282273106314)
+                // thanks: http://www.regular-expressions.info/floatingpoint.html
+                var parts = point.match(/([-+]?([0-9]*\.[0-9]+|[0-9]+)).+?([-+]?([0-9]*\.[0-9]+|[0-9]+))/)
+
+                // Instead we will place the marker at the users current location
+                // if it is possible. If not place it at the center!
+                if (!parts) {
+                    var position = {lat: map.getCenter().lat(), lng: map.getCenter().lng()}
+                } else {
+                    var position = {lat: parseFloat(parts[3]), lng: parseFloat(parts[1])}
+                }
+
+                // Place a draggable marker on the map
+                var marker = new google.maps.Marker({
+                    position: position,
+                    map: map,
+                    draggable: true,
+                    title: "Drag me!"
+                });
+
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(function (position) {
+                        console.log({lat: position.coords.latitude, lng: position.coords.longitude})
+                        var latlng = {lat: position.coords.latitude, lng: position.coords.longitude}
+                        marker.setPosition(latlng)
+                        map.setZoom(10);
+                        map.setCenter(latlng)
+                    });
+                } else {
+                    // We weren't able to get the current position for some reason.
+                    // Set the pin to the center of the map in Oregon.
+                    return {lat: map.getCenter().lat(), lng: map.getCenter().lng()}
+                }
+
+                // when the marker is moved, update the point field in the hidden field
+                // with the coordinates of the marker
+                google.maps.event.addListener(marker, 'position_changed', function () {
+                    $("#id_point").val("POINT(" + this.position.lng() + " " + this.position.lat() + ")")
+                })
+
+
+                // when the map is moved or zoomed, saved those values in cookies, so when
+                // the page is reloaded (if the input was invalid) the map is exactly where
+                // the user had it before the page reloaded
+                var set_cookies = function () {
+                    Cookies.set('center', map.getCenter().toUrlValue(), {path: window.location.pathname})
+                    Cookies.set('zoom', map.getZoom(), {path: window.location.pathname})
+                }
+                google.maps.event.addListener(map, 'zoom_changed', set_cookies);
+                google.maps.event.addListener(map, 'center_changed', set_cookies);
+                google.maps.event.addListener(map, 'click', function (event) {
+                    marker.setPosition(event.latLng);
+                })
             });
-        } else {
-            // We weren't able to get the current position for some reason.
-            // Set the pin to the center of the map in Oregon.
-            return {lat: map.getCenter().lat(), lng: map.getCenter().lng()}
-        }
-
-    // when the marker is moved, update the point field in the hidden field
-    // with the coordinates of the marker
-    google.maps.event.addListener(marker, 'position_changed', function() {
-        $("#id_point").val("POINT(" + this.position.lng() + " " + this.position.lat() + ")")
-    })
-
-
-    // when the map is moved or zoomed, saved those values in cookies, so when
-    // the page is reloaded (if the input was invalid) the map is exactly where
-    // the user had it before the page reloaded
-    var set_cookies = function(){
-        Cookies.set('center', map.getCenter().toUrlValue(), {path: window.location.pathname})
-        Cookies.set('zoom', map.getZoom(), {path: window.location.pathname})
-    }
-    google.maps.event.addListener(map, 'zoom_changed', set_cookies);
-    google.maps.event.addListener(map, 'center_changed', set_cookies);
-    google.maps.event.addListener(map, 'click', function(event) {
-        marker.setPosition(event.latLng);
-    })
-});
-</script>
+        });
+    </script>
 {% endblock %}

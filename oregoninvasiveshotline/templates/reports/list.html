@@ -35,3 +35,8 @@ Report List
     </div>
 </div>
 {% endblock %}
+
+{% block js %}
+    {{ block.super }}
+    {% include 'reports/_list.js.html' %}
+{% endblock %}
