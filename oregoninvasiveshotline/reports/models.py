@@ -72,9 +72,7 @@ class Report(models.Model):
 
     @property
     def title(self):
-        if self.species:
-            return str(self.species)
-        return self.category.name
+        return self.species.title if self.species else self.category.name
 
     def __str__(self):
         return self.title
