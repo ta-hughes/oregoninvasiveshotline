@@ -49,6 +49,7 @@ def create_wsgi_application(root, settings_module=None, local_settings_file=None
         from arcutils.tasks import DailyTasksProcess
         daily_tasks = DailyTasksProcess(home=root)
         daily_tasks.add_task(call_command, 3, 1, ('rebuild_index',), {'interactive': False})
+        daily_tasks.add_task(call_command, 3, 31, ('clearsessions',))
         daily_tasks.start()
 
     return wsgi_application
