@@ -138,7 +138,9 @@ class Report(models.Model):
         #       exists, do nothing and return False.
         if cache.add(cache_key, self.pk):
             if not os.path.exists(icon_path):
-                generate_icon(icon_path, self.category.icon, self.icon_color)
+                category_icon = self.category.icon if self.category else None
+                inner_icon_path = category_icon.path if category_icon else None
+                generate_icon(icon_path, inner_icon_path, self.icon_color)
 
     @property
     def image_url(self):

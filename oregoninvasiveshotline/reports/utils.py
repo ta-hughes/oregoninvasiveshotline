@@ -8,7 +8,7 @@ log = logging.getLogger(__name__)
 
 
 def generate_icon(output_path,
-                  inner_icon=None,
+                  inner_icon_path=None,
                   color='#999',
                   generated_icon_size=(30, 45),
                   square_coords=((0, 0), (30, 30)),
@@ -75,14 +75,14 @@ def generate_icon(output_path,
                 # have its color changed to the outline color.
                 outline_pixels[i, j] = outline_color
 
-    if inner_icon:
-        if os.path.exists(inner_icon.path):
+    if inner_icon_path:
+        if os.path.exists(inner_icon_path):
             # Before we can use the inner icon, it needs to be pasted into
             # an image with the same properties as the background image.
             # Otherwise, transparency will not be preserved. To do this, we
             # simply create a new image with the same properties as the
             # canvas, and paste the icon into it.
-            inner_icon = Image.open(inner_icon.path)
+            inner_icon = Image.open(inner_icon_path)
             inner_icon_canvas = Image.new(mode, generated_icon_size)
             inner_icon_canvas.paste(inner_icon, icon_offset)
 
@@ -90,7 +90,7 @@ def generate_icon(output_path,
             # preserved while moving the icon onto the canvas.
             icon = Image.alpha_composite(icon, inner_icon_canvas)
         else:
-            log.error('Inner icon file does not exist: %s', inner_icon.path)
+            log.error('Inner icon file does not exist: %s', inner_icon_path)
 
     # Now merge the image with the outline.
     icon = Image.alpha_composite(icon, outline)
