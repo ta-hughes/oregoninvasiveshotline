@@ -1,5 +1,4 @@
 import logging
-import os
 
 from PIL import Image, ImageDraw, ImageFilter
 
@@ -76,26 +75,21 @@ def generate_icon(output_path,
                 outline_pixels[i, j] = outline_color
 
     if inner_icon_path:
-        if os.path.exists(inner_icon_path):
-            # Before we can use the inner icon, it needs to be pasted into
-            # an image with the same properties as the background image.
-            # Otherwise, transparency will not be preserved. To do this, we
-            # simply create a new image with the same properties as the
-            # canvas, and paste the icon into it.
-            inner_icon = Image.open(inner_icon_path)
-            inner_icon_canvas = Image.new(mode, generated_icon_size)
-            inner_icon_canvas.paste(inner_icon, icon_offset)
+        # Before we can use the inner icon, it needs to be pasted into
+        # an image with the same properties as the background image.
+        # Otherwise, transparency will not be preserved. To do this, we
+        # simply create a new image with the same properties as the
+        # canvas, and paste the icon into it.
+        inner_icon = Image.open(inner_icon_path)
+        inner_icon_canvas = Image.new(mode, generated_icon_size)
+        inner_icon_canvas.paste(inner_icon, icon_offset)
 
-            # Alpha composite merge is used to ensure transparency is
-            # preserved while moving the icon onto the canvas.
-            icon = Image.alpha_composite(icon, inner_icon_canvas)
-        else:
-            log.error('Inner icon file does not exist: %s', inner_icon_path)
+        # Alpha composite merge is used to ensure transparency is
+        # preserved while moving the icon onto the canvas.
+        icon = Image.alpha_composite(icon, inner_icon_canvas)
 
     # Now merge the image with the outline.
     icon = Image.alpha_composite(icon, outline)
 
-    try:
-        icon.save(output_path)
-    except IOError:
-        log.exception('Error while saving icon image')
+    icon.save(output_path)
+    return icon
