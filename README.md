@@ -35,9 +35,8 @@ as a string like "querystring=foobar&category-4=142". When a report is submitted
 contains that newly submitted report, the user gets an email. This is an expensive process, so it
 runs in a separate thread.
 
-Because cron jobs tend to get abandoned around here, the Elasticsearch index is rebuilt every
-morning(ish) via a signal receiver that calls the rebuild_index management command (see the `utils`
-module).
+Because cron jobs tend to get abandoned around here, the Elasticsearch index is rebuilt early in
+the morning via a daily task runner process.
 
 # Migrating from the old site
 
