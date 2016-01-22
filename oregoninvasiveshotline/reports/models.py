@@ -5,6 +5,7 @@ import posixpath
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.gis.db import models
+from django.core.cache import caches
 from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
 from django.db.models.signals import post_init, post_save
@@ -127,8 +128,17 @@ class Report(models.Model):
         this logic is in :meth:`icon_rel_path`.
 
         """
-        if not os.path.exists(self.icon_path):
-            generate_icon(self.icon_path, self.category.icon, self.icon_color)
+        icon_path = self.icon_path
+        cache = caches['path_exists']
+        cache_key = hashlib.md5(icon_path.encode('utf-8')).hexdigest()
+        # NOTE: cache.add() holds a lock, so this will keep two threads
+        #       from generating the same icon. The first thread will add
+        #       a cache entry if it's not already there, then proceed to
+        #       create the icon. The second thread will see that the key
+        #       exists, do nothing and return False.
+        if cache.add(cache_key, self.pk):
+            if not os.path.exists(icon_path):
+                generate_icon(icon_path, self.category.icon, self.icon_color)
 
     @property
     def image_url(self):
