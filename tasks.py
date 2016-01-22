@@ -28,8 +28,8 @@ def loaddata(ctx):
 
 
 @arctask(configured=DEFAULT_ENV)
-def rebuild_index(ctx, interactive=True):
-    call_command('rebuild_index', interactive=interactive)
+def rebuild_index(ctx, input=True):
+    call_command('rebuild_index', interactive=input)
 
 
 @arctask(configured=DEFAULT_ENV, timed=True)
