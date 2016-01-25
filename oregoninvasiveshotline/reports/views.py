@@ -1,4 +1,6 @@
 import csv
+import itertools
+import posixpath
 from collections import OrderedDict
 
 from django.conf import settings
@@ -19,13 +21,14 @@ from oregoninvasiveshotline.comments.models import Comment
 from oregoninvasiveshotline.comments.perms import can_create_comment
 from oregoninvasiveshotline.images.forms import get_image_formset
 from oregoninvasiveshotline.images.models import Image
-from oregoninvasiveshotline.species.models import Category, Severity, Species, category_id_to_species_id_json
+from oregoninvasiveshotline.species.models import Category, Severity, category_id_to_species_id_json
 from oregoninvasiveshotline.utils import get_tab_counts
 
 from .forms import InviteForm, ManagementForm, ReportForm, ReportSearchForm
 from .models import Invite, Report
 from .perms import can_manage_report, can_view_private_report, permissions
 from .serializers import ReportSerializer
+from .utils import icon_file_name
 
 
 def list_(request):
@@ -76,25 +79,18 @@ def list_(request):
 
 
 def help(request):
-    """
-    Renders a page with info about searching, and a list of all the possible
-    icons for the map
-    """
-    # generate all the possible icon URLs
     categories = OrderedDict()
-    severities = Severity.objects.all()
-    for category in Category.objects.all():
-        for severity in severities:
-            report = Report()
-            report.reported_category = category
-            report.reported_species = Species.objects.filter(severity=severity).first()
-            categories.setdefault(category, []).append({
-                "icon_url": report.icon_url,
-                "severity": severity.name
-            })
-
-    return render(request, "reports/help.html", {
-        "categories": categories,
+    base_icon_url = posixpath.join(settings.MEDIA_URL, settings.ICON_DIR)
+    pairs = itertools.product(Category.objects.all(), Severity.objects.all())
+    for category, severity in pairs:
+        file_name = icon_file_name(category.icon, severity.color)
+        icon_url = posixpath.join(base_icon_url, file_name)
+        categories.setdefault(category, []).append({
+            'icon_url': icon_url,
+            'severity': severity.name
+        })
+    return render(request, 'reports/help.html', {
+        'categories': categories,
     })
 
 
