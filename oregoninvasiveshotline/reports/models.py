@@ -182,24 +182,20 @@ class Report(models.Model):
 
     @property
     def species(self):
-        """
-        Returns the actual species if it exists, and falls back on the reported_species
-        """
+        """Return actual species if set; fall back to reported species."""
         return self.actual_species or self.reported_species
 
     @property
     def category(self):
-        """
-        Returns the Category of the actual species, falling back to the reported_category
-        """
+        """Return actual category if set; fall back to reported category."""
         return self.actual_species.category if self.actual_species else self.reported_category
 
     @property
     def is_misidentified(self):
-        """
-        Returns True if the reported_species differs from the actual species (and both fields are filled out)
-        """
-        return bool(self.reported_species and self.actual_species and self.reported_species != self.actual_species)
+        """Is reported species different from actual species?"""
+        if self.reported_species and self.actual_species:
+            return self.reported_species != self.actual_species
+        return False
 
 
 @receiver([post_save, post_init], sender=Report)
