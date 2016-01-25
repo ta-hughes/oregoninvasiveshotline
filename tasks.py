@@ -17,6 +17,7 @@ def init(ctx, overwrite=False):
     migrate(ctx)
     rebuild_index(ctx, interactive=False)
     loaddata(ctx)
+    generate_icons(ctx, clean=overwrite, input=False)
 
 
 @arctask(configured='dev')
@@ -32,8 +33,13 @@ def rebuild_index(ctx, input=True):
     call_command('rebuild_index', interactive=input)
 
 
+@arctask(configured=DEFAULT_ENV)
+def generate_icons(ctx, clean=False, force=False, input=True):
+    call_command('generate_icons', clean=clean, force=force, interactive=input)
+
+
 @arctask(configured=DEFAULT_ENV, timed=True)
-def copy_records(ctx, recreate_db=False, reindex=True):
+def copy_records(ctx, recreate_db=False, reindex=True, generate_icons=True):
     """Copy database records from old site.
 
     This is messy because only certain records are copied from the old
@@ -63,12 +69,11 @@ def copy_records(ctx, recreate_db=False, reindex=True):
     setup()
 
     from django.db import connections
-    from django.db.models.signals import post_init, post_save
+    from django.db.models.signals import post_save
     from django.contrib.auth import get_user_model
     from oregoninvasiveshotline.reports.models import Report, receiver__generate_icon
 
     # Keep icons from being generated on init and save
-    post_init.disconnect(receiver__generate_icon, sender=Report)
     post_save.disconnect(receiver__generate_icon, sender=Report)
 
     User = get_user_model()
@@ -106,6 +111,9 @@ def copy_records(ctx, recreate_db=False, reindex=True):
 
     if reindex:
         rebuild_index(ctx, False)
+
+    if generate_icons:
+        generate_report_icons(ctx, clean=True, input=False)
 
 
 def _copy_records(settings):

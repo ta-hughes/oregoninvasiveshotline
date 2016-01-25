@@ -1,14 +1,13 @@
-import hashlib
+import logging
 import os
 import posixpath
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.gis.db import models
-from django.core.cache import caches
 from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
-from django.db.models.signals import post_init, post_save
+from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.template.loader import render_to_string
 
@@ -16,7 +15,10 @@ from oregoninvasiveshotline.images.models import Image
 from oregoninvasiveshotline.utils import generate_thumbnail
 from oregoninvasiveshotline.visibility import Visibility
 
-from .utils import generate_icon
+from .utils import generate_icon, icon_file_name
+
+
+log = logging.getLogger(__name__)
 
 
 class Report(models.Model):
@@ -80,67 +82,45 @@ class Report(models.Model):
 
     @property
     def icon_color(self):
-        return '#999' if self.species is None else self.species.severity.color
+        species = self.species
+        return settings.ICON_DEFAULT_COLOR if species is None else species.severity.color
 
     @property
-    def icon_rel_path(self):
-        """Generate relative icon path.
+    def icon_file_name(self):
+        """Get base file name for this report's icon.
 
-        This path can be joined to ``MEDIA_ROOT`` or ``MEDIA_URL``.
-
-        Generally, you'd use :meth:`icon_path` or :meth:`icon_url`
-        instead of this.
+        This is used by :meth:`icon_path` and :meth:`icon_url` to
+        generate icon file system paths and URLs; generally, you'd use
+        one of those instead of using this directly.
 
         """
-        category = self.category
-        key_parts = [category.icon.path if category.icon else '', self.icon_color]
-        key = '|'.join(str(p) for p in key_parts)
-        key = hashlib.md5(key.encode('utf-8')).hexdigest()
-        path = os.path.join('generated_icons', '%s.png' % key)
-        return path
+        return icon_file_name(self.category.icon, self.icon_color)
 
     @property
     def icon_path(self):
         """Path to (generated) icon for this report."""
-        return os.path.join(settings.MEDIA_ROOT, self.icon_rel_path)
+        return os.path.join(settings.MEDIA_ROOT, settings.ICON_DIR, self.icon_file_name)
 
     @property
     def icon_url(self):
-        """Get icon URL for this report.
+        """Get icon URL for this report."""
+        return posixpath.join(settings.MEDIA_URL, settings.ICON_DIR, self.icon_file_name)
 
-        The icon is composed of a background color based on the species'
-        severity and an image from the species' category. If the icon
-        doesn't exist on disk, it will be created.
-
-        If you are going to change the design or size of the icon, you
-        will need to update the ``generateIcon`` function in
-        ``static/js/main.js`` also.
-
-        """
-        return posixpath.join(settings.MEDIA_URL, self.icon_rel_path)
-
-    def generate_icon(self):
+    def generate_icon(self, force=False):
         """Generate a map-style icon for this Report.
 
-        The file path for the generated icon is based on parameters that
-        will change the appearance of the icon. This ensures the icon is
-        updated if the Report's category changes. The implementation of
-        this logic is in :meth:`icon_rel_path`.
+        Normally, a report icon will be generated only if it doesn't
+        already exist on disk, but generation can be ``force``d.
+
+        When a report is saved, its icon will be re-generated if
+        necessary.
 
         """
         icon_path = self.icon_path
-        cache = caches['path_exists']
-        cache_key = hashlib.md5(icon_path.encode('utf-8')).hexdigest()
-        # NOTE: cache.add() holds a lock, so this will keep two threads
-        #       from generating the same icon. The first thread will add
-        #       a cache entry if it's not already there, then proceed to
-        #       create the icon. The second thread will see that the key
-        #       exists, do nothing and return False.
-        if cache.add(cache_key, self.pk):
-            if not os.path.exists(icon_path):
-                category_icon = self.category.icon if self.category else None
-                inner_icon_path = category_icon.path if category_icon else None
-                generate_icon(icon_path, inner_icon_path, self.icon_color)
+        if force or not os.path.exists(icon_path):
+            inner_icon_path = self.category.icon and self.category.icon.path
+            icon = generate_icon(icon_path, inner_icon_path, self.icon_color)
+            return icon
 
     @property
     def image_url(self):
@@ -198,16 +178,10 @@ class Report(models.Model):
         return False
 
 
-@receiver([post_save, post_init], sender=Report)
+@receiver([post_save], sender=Report)
 def receiver__generate_icon(sender, instance, **kwargs):
-    """Generate icon for Report on save and init.
-
-    If the Report is new (does not have a PK), we skip icon generation
-    here because it will either fail or generate an incorrect icon.
-
-    """
-    if instance.pk is not None:
-        instance.generate_icon()
+    """Create or update icon for Report on save."""
+    instance.generate_icon()
 
 
 class Invite(models.Model):

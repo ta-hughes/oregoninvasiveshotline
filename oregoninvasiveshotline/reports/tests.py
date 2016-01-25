@@ -155,7 +155,7 @@ class TestReportIconGeneration(TestCase):
         # Clean up
         os.unlink(report.icon_path)
 
-    def test_icon_is_generated_on_post_save_and_post_init_for_existing_reports(self):
+    def test_icon_is_generated_on_post_save_for_existing_reports(self):
         report = make(
             Report,
             actual_species__severity__color='#ff8800',
@@ -165,9 +165,10 @@ class TestReportIconGeneration(TestCase):
         # icon.
         self.assertTrue(os.path.exists(report.icon_path))
         # Remove the icon and verify that its icon is re-created the
-        # next time the report is fetched.
+        # next time the report is saved.
         os.unlink(report.icon_path)
-        Report.objects.get(pk=report.pk)
+        self.assertFalse(os.path.exists(report.icon_path))
+        report.save()
         self.assertTrue(os.path.exists(report.icon_path))
         # Clean up
         os.unlink(report.icon_path)
