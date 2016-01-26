@@ -48,13 +48,15 @@ def create_wsgi_application(root, settings_module=None, local_settings_file=None
     if not settings.DEBUG:
         from arcutils.tasks import DailyTasksProcess
         daily_tasks = DailyTasksProcess(home=root)
-        daily_tasks.add_task(call_command, 3, 1, ('clearsessions',))
+        daily_tasks.add_task(call_command, 3, 1, ('clearsessions',), name='clearsessions')
         daily_tasks.add_task(call_command, 3, 16, ('generate_icons',), {
             'clean': True,
             'interactive': False,
             'quiet': True,
-        })
-        daily_tasks.add_task(call_command, 3, 17, ('rebuild_index',), {'interactive': False})
+        }, name='generate_icons')
+        daily_tasks.add_task(call_command, 3, 17, ('rebuild_index',), {
+            'interactive': False
+        }, name='rebuild_index')
         daily_tasks.start()
 
     return wsgi_application
