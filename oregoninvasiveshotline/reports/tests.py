@@ -910,16 +910,6 @@ class ReportListView(TestCase, UserMixin):
         self.assertEqual(response.status_code, 200)
         self.assertIn(str(reports[0]), response.content.decode())
 
-    def test_search(self):
-        other_reports = make(Report, _quantity=3)
-        make(Report, reported_category__name="Foobarius Foobar")
-
-        self.client.login(email=self.user.email, password="foo")
-        response = self.client.get(reverse("reports-list") + "?q=foobarius&order_by=category")
-        self.assertEqual(response.status_code, 200)
-        self.assertIn("Foobarius Foobar", response.content.decode())
-        self.assertNotIn(str(other_reports[0]), response.content.decode())
-
 
 class UnclaimViewTest(TestCase, UserMixin):
 

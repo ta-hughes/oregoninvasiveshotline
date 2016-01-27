@@ -1,4 +1,3 @@
-import itertools
 from collections import namedtuple
 
 from django import forms
@@ -6,7 +5,6 @@ from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
 from django.core.validators import validate_email
 from django.template.loader import render_to_string
-from django.utils.safestring import mark_safe
 
 from haystack.forms import SearchForm
 from haystack.query import AutoQuery, SQ, SearchQuerySet
@@ -18,6 +16,13 @@ from oregoninvasiveshotline.species.models import Category, Severity, Species
 from oregoninvasiveshotline.users.models import User
 
 from .models import Invite, Report
+
+
+def get_category_choices():
+    categories = Category.objects.all().order_by('name')
+    category_choices = [('', '- Category -')]
+    category_choices.extend((c.pk, c.name) for c in categories)
+    return category_choices
 
 
 def get_county_choices():
@@ -48,7 +53,7 @@ class ReportSearchForm(SearchForm):
 
     """
 
-    public_fields = ['q', 'order_by', 'source', 'county']
+    public_fields = ['q', 'order_by', 'source', 'category', 'county']
 
     q = forms.CharField(
         required=False,
@@ -69,6 +74,7 @@ class ReportSearchForm(SearchForm):
         ]
     )
 
+    category = forms.ChoiceField(required=False, label='', choices=get_category_choices)
     county = forms.ChoiceField(required=False, label='', choices=get_county_choices)
 
     order_by = forms.ChoiceField(
@@ -143,26 +149,6 @@ class ReportSearchForm(SearchForm):
             else:
                 self.fields.pop('source')
 
-        # Add a MultipleChoiceField listing the species for each category
-        species = Species.objects.all()
-        species = species.select_related('category')
-        species = species.order_by('category__name', 'category__pk', 'name')
-        groups = itertools.groupby(species, key=lambda item: item.category)
-        self.categories = []
-        for category, species in groups:
-            self.categories.append(category)
-            self.fields['category-{0.pk}'.format(category)] = forms.MultipleChoiceField(
-                choices=[(s.pk, str(s)) for s in species],
-                required=False,
-                label='',
-                widget=forms.widgets.CheckboxSelectMultiple
-            )
-
-    def iter_categories(self):
-        """Make it a little easier to look through category fields."""
-        for category in self.categories:
-            yield category, self['category-{0.pk}'.format(category)]
-
     def no_query_found(self):
         """Return all reports when query is invalid."""
         return self.searchqueryset.all()
@@ -199,12 +185,9 @@ class ReportSearchForm(SearchForm):
         if county:
             sqs = sqs.filter(county_id=county)
 
-        species = []
-        for category in self.categories:
-            category_species = form_data.get('category-{0.pk}'.format(category), ())
-            species.extend(c for c in category_species)
-        if species:
-            sqs = sqs.filter(species_id__in=species)
+        category = form_data.get('category')
+        if category:
+            sqs = sqs.filter(category_id=category)
 
         is_archived = form_data.get('is_archived')
         if is_archived == 'archived':

@@ -51,40 +51,5 @@
 
             })
         });
-
-
-        $("#expander").click(function(e){
-            e.preventDefault();
-            var closed = $("#expander-content").is(":hidden");
-            if(closed == true){
-                $("#expander-content").show();
-            } else {
-                $("#expander-content").hide();
-            }
-            Cookies.set('open', closed, {path: window.location.pathname})
-        });
-
-        var openToggle = Cookies.get('open')
-        console.log(openToggle);
-        if( openToggle == 'true'){
-            $("#expander-content").show();
-        }
-        else {
-            $("#expander-content").hide();
-        }
-
-
-        // shows and hides the category form fields
-        $('.reports-search-category a').click(function(e){
-            e.preventDefault();
-            var pk = $(this).data("pk");
-            var div = $('#reports-search-category-' + pk);
-            if(div.is(":visible")){
-                div.hide();
-            } else {
-                $('.reports-search-species-list').hide();
-                div.show();
-            }
-        });
     });
 </script>

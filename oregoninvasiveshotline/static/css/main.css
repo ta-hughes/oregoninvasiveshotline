@@ -378,44 +378,6 @@ kbd {
     }
 }
 
-.reports-search-species-list {
-    display:none;
-}
-
-.reports-search-species-list .check-all {
-    display:block;
-}
-
-.reports-search-species-list ul {
-    list-style-type:none;
-    padding-left:0;
-}
-
-.reports-search-species-list label {
-    font-weight:normal;
-}
-
-.reports-search-species-list-field {
-    max-height:300px;
-    overflow:auto;
-}
-
-fieldset.reports-search-species-list {
-    border: 1px solid #E5E5E5;
-    padding: 10px;
-}
-
-fieldset.reports-search-species-list legend {
-    border-bottom:none;
-    display:inline;
-    width:auto;
-    padding:5px;
-    margin-bottom:0;
-    font-size:14px;
-    font-style:italic;
-    line-height:0;
-}
-
 blockquote {
     font-style:normal;
     font-size:14px;
