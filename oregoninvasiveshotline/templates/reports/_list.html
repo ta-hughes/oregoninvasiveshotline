@@ -20,7 +20,9 @@
                 </span>
             {% endfor %}
             {% if user.is_active %}
-                | <a href="{% url 'notifications-create' %}?{{ request.GET.urlencode }}">Subscribe to this search</a>
+                {% if subscription_url %}
+                    | <a href="{{ subscription_url }}">Subscribe to this search</a>
+                {% endif %}
                 | Export: <a href="{% add_get export='csv' %}">CSV</a>, <a href="{% add_get export='kml' %}">KML</a>
             {% endif %}
         </p>
