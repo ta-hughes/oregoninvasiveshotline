@@ -4,7 +4,15 @@
         {% if reports %}
             <div id="map-canvas" style="height: 550px;"></div>
         {% else %}
-            <div class="alert alert-warning">No matching reports found!</div>
+            <div class="alert alert-warning">
+                <p>
+                    No matching reports found.
+                </p>
+                <p>
+                    You can <a href="{{ subscription_url }}">subscribe to this search</a> to be
+                    alerted when a matching report is added.
+                </p>
+            </div>
         {% endif %}
         <br>
     </div>
