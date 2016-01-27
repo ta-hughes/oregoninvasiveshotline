@@ -39,7 +39,7 @@ def generate_icons(ctx, clean=False, force=False, input=True):
 
 
 @arctask(configured=DEFAULT_ENV, timed=True)
-def copy_records(ctx, recreate_db=False, reindex=True, generate_icons=True):
+def copy_records(ctx, recreate_db=False, icons=True, reindex=True):
     """Copy database records from old site.
 
     This is messy because only certain records are copied from the old
@@ -109,11 +109,11 @@ def copy_records(ctx, recreate_db=False, reindex=True, generate_icons=True):
     expert.update(first_name='', last_name='')
     print('Done')
 
+    if icons:
+        generate_icons(ctx, clean=True, input=False)
+
     if reindex:
         rebuild_index(ctx, False)
-
-    if generate_icons:
-        generate_report_icons(ctx, clean=True, input=False)
 
 
 def _copy_records(settings):
