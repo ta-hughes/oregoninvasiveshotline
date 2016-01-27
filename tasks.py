@@ -88,7 +88,7 @@ def copy_records(ctx, recreate_db=False, icons=True, reindex=True):
     from django.contrib.auth import get_user_model
     from oregoninvasiveshotline.reports.models import Report, receiver__generate_icon
 
-    # Keep icons from being generated on init and save
+    # Keep icons from being generated on save
     post_save.disconnect(receiver__generate_icon, sender=Report)
 
     User = get_user_model()
