@@ -29,6 +29,21 @@ def loaddata(ctx):
 
 
 @arctask(configured=DEFAULT_ENV)
+def post_deploy(ctx):
+    """A set of tasks that commonly needs to be run after deploying.
+
+    This is pretty brutish and doesn't necessarily always need to be
+    run. After we get out of the beta phase of this project, this can
+    be removed.
+
+    """
+    copy_records(ctx, icons=False, reindex=False)
+    copy_images(ctx)
+    generate_icons(ctx, clean=True, input=False)
+    rebuild_index(ctx, input=False)
+
+
+@arctask(configured=DEFAULT_ENV)
 def rebuild_index(ctx, input=True):
     call_command('rebuild_index', interactive=input)
 
