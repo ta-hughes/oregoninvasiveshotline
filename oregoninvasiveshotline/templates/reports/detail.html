@@ -174,7 +174,6 @@ Report #{{ report.pk }} - {{ report }}
                     {% csrf_token %}
                     This report is unclaimed...
                     <button class="btn btn-warning btn-xs" type="submit">Claim it!</button>
-                    <a href="{% url 'reports-delete' report.pk %}" class="btn btn-default btn-xs">Delete it</a>
                 </form>
             </div>
         {% elif report.claimed_by and report.claimed_by != user %}
@@ -198,6 +197,15 @@ Report #{{ report.pk }} - {{ report }}
         {% if user|can_edit_report:report %}
             <div class="alert alert-warning text-center sidebar-block">
                 <a href="{% url 'admin:reports_report_change' report.pk %}">Edit this report</a>
+            </div>
+        {% endif %}
+
+        {% if user|can_delete_report:report %}
+            <div class="alert alert-danger text-center sidebar-block">
+                <a href="{% url 'reports-delete' report.pk %}" class="text-danger">
+                    Delete this Report
+                    <small>(will ask for confirmation first)</small>
+                </a>
             </div>
         {% endif %}
 
