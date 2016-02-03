@@ -195,6 +195,12 @@ Report #{{ report.pk }} - {{ report }}
             </div>
         {% endif %}
 
+        {% if user|can_edit_report:report %}
+            <div class="alert alert-warning text-center sidebar-block">
+                <a href="{% url 'admin:reports_report_change' report.pk %}">Edit this report</a>
+            </div>
+        {% endif %}
+
         {% if report.actual_species.remedy %}
             <div class="clearfix sidebar-block">
                 <h4>Remedy</h4>
