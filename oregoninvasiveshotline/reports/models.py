@@ -25,7 +25,7 @@ class Report(models.Model):
 
     class Meta:
         db_table = 'report'
-        ordering = ['-pk']
+        ordering = ['-created_on']
 
     objects = models.GeoManager()
 
