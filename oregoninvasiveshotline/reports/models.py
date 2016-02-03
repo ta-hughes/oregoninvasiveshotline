@@ -77,9 +77,6 @@ class Report(models.Model):
     def title(self):
         return self.species.title if self.species else self.category.name
 
-    def __str__(self):
-        return self.title
-
     @property
     def icon_color(self):
         species = self.species
@@ -176,6 +173,9 @@ class Report(models.Model):
         if self.reported_species and self.actual_species:
             return self.reported_species != self.actual_species
         return False
+
+    def __str__(self):
+        return 'Report: {0.title}'.format(self)
 
 
 @receiver([post_save], sender=Report)
