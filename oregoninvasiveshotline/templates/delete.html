@@ -19,6 +19,17 @@
                         {{ items|length }}
                         <strong>{{ cls|model_name }}</strong>
                         object{{ items|length|pluralize}}
+                        <ul>
+                            {% for item in items %}
+                                <li>
+                                    {% if item.get_absolute_url %}
+                                        <a href="{{ item.get_absolute_url }}">{{ item }}</a>
+                                    {% else %}
+                                        {{ item }}
+                                    {% endif %}
+                                </li>
+                            {% endfor %}
+                        </ul>
                     </li>
                 {% empty %}
                     <li><em>N/A</em></li>
