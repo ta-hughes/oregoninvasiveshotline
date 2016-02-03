@@ -23,6 +23,12 @@ log = logging.getLogger(__name__)
 
 class Report(models.Model):
 
+    class Meta:
+        db_table = 'report'
+        ordering = ['-pk']
+
+    objects = models.GeoManager()
+
     report_id = models.AutoField(primary_key=True)
     # It may seem odd to have FKs to the species AND category, but in the case
     # where the user doesn't know what species it is, we fall back to just a
@@ -66,12 +72,6 @@ class Report(models.Model):
 
     is_archived = models.BooleanField(default=False)
     is_public = models.BooleanField(default=False, help_text="This report can be viewed by the public")
-
-    objects = models.GeoManager()
-
-    class Meta:
-        db_table = "report"
-        ordering = ['-pk']
 
     @property
     def title(self):
