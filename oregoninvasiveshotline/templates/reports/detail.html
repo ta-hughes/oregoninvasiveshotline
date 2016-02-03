@@ -170,10 +170,10 @@ Report #{{ report.pk }} - {{ report }}
             </div>
         {% elif user|can_claim_report:report and not report.claimed_by %}
             <div class="alert alert-warning text-center sidebar-block">
-                <form method="post" action="{% url 'reports-claim' report.pk %}" style="display:inline">
+                <p>This report is unclaimed</p>
+                <form method="post" action="{% url 'reports-claim' report.pk %}">
                     {% csrf_token %}
-                    This report is unclaimed...
-                    <button class="btn btn-warning btn-xs" type="submit">Claim it!</button>
+                    <button class="btn-link" type="submit">Claim it!</button>
                 </form>
             </div>
         {% elif report.claimed_by and report.claimed_by != user %}
