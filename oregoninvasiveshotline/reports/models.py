@@ -174,6 +174,9 @@ class Report(models.Model):
             return self.reported_species != self.actual_species
         return False
 
+    def get_absolute_url(self):
+        return reverse('reports-detail', args=(self.pk,))
+
     def __str__(self):
         return 'Report: {0.title}'.format(self)
 
