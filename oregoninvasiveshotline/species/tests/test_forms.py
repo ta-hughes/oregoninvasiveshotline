@@ -27,16 +27,16 @@ class SpeciesSearchFormTest(TestCase):
         self.index.clear()
 
     def test_get_initial_queryset(self):
-        form = SpeciesSearchForm(user=self.user, data={'q': ''})
+        form = SpeciesSearchForm(data={'q': ''})
         results = form.search()
         self.assertEqual(len(results), SpeciesIndex.objects.all().models(Species).count())
 
     def test_valid_form(self):
-        form = SpeciesSearchForm({'q': 'other'}, user=self.user)
+        form = SpeciesSearchForm({'q': 'other'})
         self.assertTrue(form.is_valid())
 
     def test_form_with_empty_querystring_returns_everything(self):
-        form = SpeciesSearchForm({'q': ''}, user=self.user)
+        form = SpeciesSearchForm({'q': ''})
         self.assertTrue(form.is_valid())
         results = form.search()
         self.assertEqual(len(results), SpeciesIndex.objects.all().models(Species).count())
@@ -46,7 +46,7 @@ class SpeciesSearchFormTest(TestCase):
         name = "other"
         make(Species, name=name)
         # set it all up
-        form = SpeciesSearchForm({'q': 'other'}, user=self.user)
+        form = SpeciesSearchForm({'q': 'other'})
         # make sure the form is valid
         self.assertTrue(form.is_valid())
         results = form.search()[0]
@@ -63,7 +63,7 @@ class SpeciesSearchFormTest(TestCase):
             'q': '',
             'order_by': 'name',
             'order': 'descending',
-        }, user=self.user)
+        })
         results = form.search()
 
         species = list()
