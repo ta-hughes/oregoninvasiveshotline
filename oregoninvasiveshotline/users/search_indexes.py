@@ -11,6 +11,7 @@ class UserIndex(indexes.SearchIndex, indexes.Indexable):
     last_name = indexes.CharField(model_attr='last_name')
 
     # Data fields (stored by not indexed)
+    full_name = indexes.CharField(model_attr='full_name', indexed=False)
     is_active = indexes.BooleanField(model_attr='is_active', indexed=False)
     is_staff = indexes.BooleanField(model_attr='is_staff', indexed=False)
 
