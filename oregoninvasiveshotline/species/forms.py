@@ -32,11 +32,4 @@ class SpeciesSearchForm(SearchForm):
         if not self.is_valid():
             return self.no_query_found()
 
-        order_by = self.cleaned_data.get('order_by')
-        order = self.cleaned_data.get('order')
-        if order_by:
-            if order == 'descending':
-                order_by = '-{order_by}'.format_map(locals())
-            results = results.order_by(order_by)
-
         return results
