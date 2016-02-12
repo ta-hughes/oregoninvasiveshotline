@@ -52,9 +52,7 @@
         </table>
 
         {% include '_pagination.html' with items=users %}
-    {% elif form.in_search_mode %}
-        <div class="alert alert-warning">No matching results!</div>
     {% else %}
-        <div class="alert alert-warning">You haven't created any users!</div>
+        <div class="alert alert-warning">No users matching those search criteria were found.</div>
     {% endif %}
 {% endblock %}

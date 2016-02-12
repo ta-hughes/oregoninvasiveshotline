@@ -13,10 +13,6 @@ class UserSearchForm(SearchForm):
 
     is_manager = forms.BooleanField(initial=True, required=False)
 
-    @property
-    def in_search_mode(self):
-        return User.objects.count() > 0
-
     def no_query_found(self):
         return self.searchqueryset.all().models(User)
 
