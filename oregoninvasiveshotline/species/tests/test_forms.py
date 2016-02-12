@@ -9,17 +9,14 @@ from ..search_indexes import SpeciesIndex
 
 
 class SpeciesSearchFormTest(TestCase):
-    """
-    Some unit tests to ensure forms in the species app work as they should.
 
-    """
     def setUp(self):
-        super(SpeciesSearchFormTest, self).setUp()
-        make(Species, name="stuff")
-        self.user = User(first_name="foo", last_name="bar", email="foobar@example.com", is_staff=True)
-        self.user.set_password("foobar")
+        super().setUp()
+        make(Species, name='stuff')
+        self.user = User(first_name='foo', last_name='bar', email='foobar@example.com', is_staff=True)
+        self.user.set_password('foobar')
         self.user.save()
-        self.client.login(username="foobar@example.com", password="foobar")
+        self.client.login(username='foobar@example.com', password='foobar')
         self.index = SpeciesIndex()
         self.index.clear()
 
@@ -43,7 +40,7 @@ class SpeciesSearchFormTest(TestCase):
 
     def test_search_returns_correct_object(self):
         # test object
-        name = "other"
+        name = 'other'
         make(Species, name=name)
         # set it all up
         form = SpeciesSearchForm({'q': 'other'})
@@ -55,9 +52,9 @@ class SpeciesSearchFormTest(TestCase):
         self.assertEqual(results.name, name)
 
     def test_order_by_field_sorts_species(self):
-        make(Species, name="albatross", scientific_name="diomedeidae")
-        make(Species, name="buffalo", scientific_name="bison")
-        make(Species, name="cat", scientific_name="felis catus")
+        make(Species, name='albatross', scientific_name='diomedeidae')
+        make(Species, name='buffalo', scientific_name='bison')
+        make(Species, name='cat', scientific_name='felis catus')
 
         form = SpeciesSearchForm({
             'q': '',
