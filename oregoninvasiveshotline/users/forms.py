@@ -29,10 +29,10 @@ class UserSearchForm(SearchForm):
         return results
 
 
-class LoginForm(forms.Form):
     """
     This form allows users to login via the authentication_url
     """
+class PublicLoginForm(forms.Form):
     email = forms.EmailField()
 
     def clean_email(self):

@@ -14,7 +14,7 @@ from arcutils.db import will_be_deleted_with
 from oregoninvasiveshotline.reports.models import Invite, Report
 from oregoninvasiveshotline.utils import get_tab_counts
 
-from .forms import LoginForm, UserForm, UserSearchForm
+from .forms import PublicLoginForm, UserForm, UserSearchForm
 from .models import User
 from .perms import can_list_users, permissions
 
@@ -32,13 +32,13 @@ def login(request, *args, **kwargs):
         # make it look like the django login form wasn't filled out
         response.context_data['form'] = response.context_data['form'].__class__(request)
         # now do the regular form processing stuff...
-        other_form = LoginForm(request.POST)
+        other_form = PublicLoginForm(request.POST)
         if other_form.is_valid():
             other_form.save(request=request)
             messages.success(request, "Check your email! You have been sent the login link.")
             return redirect(request.get_full_path())
     else:
-        other_form = LoginForm()
+        other_form = PublicLoginForm()
 
     # patch in the other_form variable, so the template can render it.
     # Sometimes the django_login_view returns an HttpResponseRedirect, which

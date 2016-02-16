@@ -12,7 +12,7 @@ from arcutils.test.user import UserMixin
 
 from oregoninvasiveshotline.reports.models import Invite, Report
 
-from .forms import LoginForm, UserForm, UserSearchForm
+from .forms import PublicLoginForm, UserForm, UserSearchForm
 from .models import User
 from .search_indexes import UserIndex
 
@@ -304,7 +304,7 @@ class UserTest(TestCase, UserMixin):
 
 class LoginFormTest(TestCase, UserMixin):
     def test_clean_email_raises_validation_error_for_non_existing_user(self):
-        form = LoginForm({
+        form = PublicLoginForm({
             "email": "foo@pdx.edu"
         })
         self.assertFalse(form.is_valid())
@@ -312,7 +312,7 @@ class LoginFormTest(TestCase, UserMixin):
 
     def test_save_sends_email_to_user_with_login_link(self):
         user = self.create_user(username="foo@example.com")
-        form = LoginForm({
+        form = PublicLoginForm({
             "email": user.email
         })
         self.assertTrue(form.is_valid())
