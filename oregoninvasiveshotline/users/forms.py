@@ -43,6 +43,9 @@ class PublicLoginForm(forms.Form):
         except User.DoesNotExist:
             raise forms.ValidationError('Could not find an account with that email address')
 
+        if user.is_active:
+            raise forms.ValidationError('You must log in with your username and password')
+
         return email
 
     def save(self, request):

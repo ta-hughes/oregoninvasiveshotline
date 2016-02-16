@@ -311,7 +311,7 @@ class LoginFormTest(TestCase, UserMixin):
         self.assertTrue(form.has_error("email"))
 
     def test_save_sends_email_to_user_with_login_link(self):
-        user = self.create_user(username="foo@example.com")
+        user = self.create_user(username="foo@example.com", is_active=False)
         form = PublicLoginForm({
             "email": user.email
         })
@@ -328,7 +328,7 @@ class LoginViewTest(TestCase, UserMixin):
         self.assertEqual(response.status_code, 200)
 
     def test_logging_in_via_email_sends_an_email(self):
-        user = self.create_user(username="foo@example.com")
+        user = self.create_user(username="foo@example.com", is_active=False)
         response = self.client.post(reverse("login"), {
             "email": user.email,
             "form": "OTHER_LOGIN",
