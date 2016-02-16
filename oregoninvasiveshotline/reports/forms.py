@@ -1,6 +1,7 @@
 from collections import namedtuple
 
 from django import forms
+from django.conf import settings
 from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
 from django.core.validators import validate_email
@@ -224,21 +225,22 @@ class ReportSearchForm(SearchForm):
 
 
 class ReportForm(forms.ModelForm):
-    """
-    Form for the public to submit reports
-    """
-    questions = forms.CharField(
-        label="Do you have additional questions for the invasive species expert who will review this report?",
-        widget=forms.Textarea,
-        required=False
-    )
+
+    email = forms.EmailField()
+    prefix = forms.CharField(required=False)
     first_name = forms.CharField()
     last_name = forms.CharField()
-    prefix = forms.CharField(required=False)
     suffix = forms.CharField(required=False)
-    email = forms.EmailField()
     phone = forms.CharField(required=False)
     has_completed_ofpd = forms.BooleanField(required=False)
+    questions = forms.CharField(
+        required=False,
+        widget=forms.Textarea,
+        label=(
+            'Do you have additional questions for the invasive species expert who will review '
+            'this report?'
+        ),
+    )
 
     class Meta:
         model = Report
@@ -256,49 +258,61 @@ class ReportForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['reported_species'].empty_label = "Unknown"
+
+        self.fields['reported_species'].empty_label = 'Unknown'
         self.fields['reported_species'].required = False
-        self.fields['has_completed_ofpd'].label = User._meta.get_field("has_completed_ofpd").verbose_name
+
+        has_completed_ofpd_label = User._meta.get_field('has_completed_ofpd').verbose_name
+        self.fields['has_completed_ofpd'].label = has_completed_ofpd_label
+
+    def clean_email(self):
+        # NOTE: Technically, email addresses are case-sensitive, but in
+        #       practice we can ignore that.
+        email = self.cleaned_data['email']
+        email = email.lower()
+        return email
 
     def save(self, *args, request, **kwargs):
-        # first thing we need to do is create or find the right User object
-        try:
-            user = User.objects.get(email__iexact=self.cleaned_data['email'])
-        except User.DoesNotExist:
-            user = User(
-                email=self.cleaned_data['email'],
-                first_name=self.cleaned_data['first_name'],
-                last_name=self.cleaned_data['last_name'],
-                prefix=self.cleaned_data.get('prefix', ""),
-                suffix=self.cleaned_data.get('suffix', ""),
-                phone=self.cleaned_data.get('phone', ""),
-                has_completed_ofpd=self.cleaned_data.get("has_completed_ofpd"),
-                is_active=False
-            )
-            user.save()
+        report = self.instance
 
-        self.instance.created_by = user
-        self.instance.county = County.objects.filter(the_geom__intersects=self.instance.point).first()
+        # NOTE: If the user doesn't exist, a new inactive account is
+        #       automatically created here, which seems to me like a
+        #       tremendously bad idea (still trying to work out how to
+        #       fix this).
+        email = self.cleaned_data['email']
+        defaults = {
+            'email': email,
+            'prefix': self.cleaned_data.get('prefix', ''),
+            'first_name': self.cleaned_data.get('first_name', ''),
+            'last_name': self.cleaned_data.get('last_name', ''),
+            'suffix': self.cleaned_data.get('suffix', ''),
+            'phone': self.cleaned_data.get('phone', ''),
+            'has_completed_ofpd': self.cleaned_data.get('has_completed_ofpd'),
+            'is_active': False,
+        }
+        user, _ = User.objects.get_or_create(email__iexact=email, defaults=defaults)
+
+        report.created_by = user
+        report.county = County.objects.filter(the_geom__intersects=report.point).first()
+
         super().save(*args, **kwargs)
 
-        # if the submitter left a question, add it as a comment
-        if self.cleaned_data.get("questions"):
-            c = Comment(report=self.instance, created_by=user, body=self.cleaned_data['questions'], visibility=Comment.PROTECTED)
-            c.save()
+        questions = self.cleaned_data.get('questions')
+        if questions:
+            Comment.objects.create(
+                report=report, created_by=user, body=questions, visibility=Comment.PROTECTED)
 
-        send_mail(
-            "OregonInvasivesHotline.org - Thank you for your submission",
-            render_to_string("reports/_submission.txt", {
-                "user": user,
-                "url": user.get_authentication_url(request, next=reverse("reports-detail", args=[self.instance.pk]))
-            }),
-            "noreply@pdx.edu",
-            [user.email]
-        )
+        subject = '{0.PROJECT[title]} - Thank you for your report'.format(settings)
+        body = render_to_string('reports/_submission.txt', {
+            'user': user,
+            'url': user.get_authentication_url(request, next=reverse('reports-detail', args=[report.pk]))
+        })
+        from_email = 'noreply@pdx.edu'
+        recipients = [user.email]
+        send_mail(subject, body, from_email, recipients)
 
-        UserNotificationQuery.notify(self.instance, request)
-
-        return self.instance
+        UserNotificationQuery.notify(report, request)
+        return report
 
 
 class InviteForm(forms.Form):
