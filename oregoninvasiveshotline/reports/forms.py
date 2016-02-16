@@ -303,9 +303,14 @@ class ReportForm(forms.ModelForm):
                 report=report, created_by=user, body=questions, visibility=Comment.PROTECTED)
 
         subject = '{0.PROJECT[title]} - Thank you for your report'.format(settings)
+        path = reverse('reports-detail', args=[report.pk])
+        if user.is_active:
+            url = request.build_absolute_uri(path)
+        else:
+            url = user.get_authentication_url(request, next=path)
         body = render_to_string('reports/_submission.txt', {
             'user': user,
-            'url': user.get_authentication_url(request, next=reverse('reports-detail', args=[report.pk]))
+            'url': url,
         })
         from_email = 'noreply@pdx.edu'
         recipients = [user.email]
