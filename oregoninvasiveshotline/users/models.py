@@ -35,11 +35,6 @@ class User(AbstractBaseUser):
         Extension.""")
 
 
-    def get_avatar_url(self):
-        if self.photo:
-            return self.photo.url
-        return reverse("users-avatar", args=[self.pk])
-
     def get_authentication_url(self, request, next=None):
         signer = Signer("user-authentication")
         sig = signer.sign(self.email)
@@ -85,6 +80,11 @@ class User(AbstractBaseUser):
                 name = '{name}, {self.suffix}'.format_map(locals())
             return name
         return self.email
+
+    def get_avatar_url(self):
+        if self.photo:
+            return self.photo.url
+        return reverse("users-avatar", args=[self.pk])
 
     # we don't need granular permissions; all staff will have access to
     # everything
