@@ -29,33 +29,46 @@ class UserSearchForm(SearchForm):
         return results
 
 
-    """
-    This form allows users to login via the authentication_url
-    """
 class PublicLoginForm(forms.Form):
+
+    """Allows users to log in via a link sent via email."""
+
     email = forms.EmailField()
 
     def clean_email(self):
         email = self.cleaned_data['email']
-        if not User.objects.filter(email__iexact=email).exists():
-            raise forms.ValidationError("A user with that email address does not exist")
+
+        try:
+            user = User.objects.get(email__iexact=email)
+        except User.DoesNotExist:
+            raise forms.ValidationError('Could not find an account with that email address')
 
         return email
 
     def save(self, request):
-        """
-        Send an email to the user with a link that allows them to login
-        """
-        user = User.objects.get(email__iexact=self.cleaned_data['email'])
-        send_mail(
-            "OregonInvasivesHotline.org - Login Link",
-            render_to_string("users/_login.txt", {
-                "user": user,
-                "url": user.get_authentication_url(request, next=reverse("users-home"))
-            }),
-            "noreply@pdx.edu",
-            [user.email]
-        )
+        email = self.cleaned_data['email']
+
+        # XXX: This can fail because there are several duplicate
+        #      accounts that have the same email address with a
+        #      different case. This SQL query will reveal the dupes:
+        #
+        #      SELECT user_id, email, first_name, last_name, is_active, is_staff
+        #      FROM "user" u1
+        #      WHERE (SELECT count(*) FROM "user" u2 WHERE lower(u2.email) = lower(u1.email )) > 1
+        #      ORDER BY lower(email);
+        #
+        #      Cleaning up the dupes is going to be... fun.
+        user = User.objects.get(email__iexact=email)
+
+        subject = 'Oregon Invasives Hotline - Login Link'
+        body = render_to_string('users/_login.txt', {
+            'user': user,
+            'url': user.get_authentication_url(request, next=reverse('users-home'))
+        })
+        from_email = 'noreply@pdx.edu'
+        recipients = [user.email]
+
+        send_mail(subject, body, from_email, recipients)
 
 
 class UserForm(forms.ModelForm):
