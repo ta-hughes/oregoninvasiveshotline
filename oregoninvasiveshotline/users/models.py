@@ -7,6 +7,15 @@ from django.db import models
 
 
 class User(AbstractBaseUser):
+
+    class Meta:
+        db_table = 'user'
+        ordering = ['first_name', 'last_name']
+
+    USERNAME_FIELD = 'email'
+
+    objects = UserManager()
+
     user_id = models.AutoField(primary_key=True)
     email = models.EmailField(max_length=255, unique=True)
     first_name = models.CharField(max_length=255)
@@ -25,13 +34,6 @@ class User(AbstractBaseUser):
         Forest Pest Detector training, offered by Oregon State
         Extension.""")
 
-    USERNAME_FIELD = 'email'
-
-    objects = UserManager()
-
-    class Meta:
-        db_table = "user"
-        ordering = ['first_name', 'last_name']
 
     def get_avatar_url(self):
         if self.photo:
