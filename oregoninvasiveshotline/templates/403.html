@@ -1,13 +1,10 @@
-{% extends "base.html" %}
-{% block title %}
-Permission Denied
-{% endblock %}
-{% block content %}
+{% extends 'error.html' %}
 
-<div class="alert alert-danger">
-    <strong><big>403 Permission Denied</big></strong>
+{% block error_title %}Permission Denied{% endblock %}
+
+{% block error_message %}
+    <p>You are not allowed to view this page.</p>
     {% if request.permission_name %}
-        <p>You need the permission {{ request.permission_name }} to access this page.</p>
+        <p>The {{ request.permission_name }} permission is required.</p>
     {% endif %}
-</div>
 {% endblock %}
