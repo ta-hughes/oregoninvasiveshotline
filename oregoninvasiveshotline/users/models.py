@@ -1,4 +1,5 @@
 import base64
+import binascii
 from datetime import datetime, timedelta
 from urllib.parse import urlencode
 
@@ -40,7 +41,11 @@ class User(AbstractBaseUser):
     def from_signature(cls, signature):
         signer = Signer()
         value = signer.unsign(signature)
-        value = base64.urlsafe_b64decode(value).decode('utf-8')
+        try:
+            value = base64.urlsafe_b64decode(value).decode('utf-8')
+        except binascii.Error:
+            # Typically, this would indicate a non-base64-encoded value
+            return None
         email, timestamp = value.rsplit(':', 1)
         timestamp = float(timestamp)
         elapsed = datetime.utcnow() - datetime.utcfromtimestamp(timestamp)
