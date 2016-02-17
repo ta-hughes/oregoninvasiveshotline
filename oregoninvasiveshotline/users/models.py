@@ -38,7 +38,7 @@ class User(AbstractBaseUser):
 
     @classmethod
     def from_signature(cls, signature):
-        signer = Signer('user-authentication')
+        signer = Signer()
         value = signer.unsign(signature)
         value = base64.urlsafe_b64decode(value).decode('utf-8')
         email, timestamp = value.rsplit(':', 1)
@@ -49,7 +49,7 @@ class User(AbstractBaseUser):
         return cls.objects.get(email=email)
 
     def get_authentication_url(self, request, next=None):
-        signer = Signer('user-authentication')
+        signer = Signer()
         value = ':'.join((self.email, str(datetime.utcnow().timestamp())))
         value = base64.urlsafe_b64encode(value.encode('utf-8'))
         signature = signer.sign(value)
