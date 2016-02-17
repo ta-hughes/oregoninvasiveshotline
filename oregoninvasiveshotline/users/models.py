@@ -1,4 +1,5 @@
 import base64
+import binascii
 from datetime import datetime, timedelta
 from urllib.parse import urlencode
 
@@ -38,9 +39,13 @@ class User(AbstractBaseUser):
 
     @classmethod
     def from_signature(cls, signature):
-        signer = Signer('user-authentication')
+        signer = Signer()
         value = signer.unsign(signature)
-        value = base64.urlsafe_b64decode(value).decode('utf-8')
+        try:
+            value = base64.urlsafe_b64decode(value).decode('utf-8')
+        except binascii.Error:
+            # Typically, this would indicate a non-base64-encoded value
+            return None
         email, timestamp = value.rsplit(':', 1)
         timestamp = float(timestamp)
         elapsed = datetime.utcnow() - datetime.utcfromtimestamp(timestamp)
@@ -49,7 +54,7 @@ class User(AbstractBaseUser):
         return cls.objects.get(email=email)
 
     def get_authentication_url(self, request, next=None):
-        signer = Signer('user-authentication')
+        signer = Signer()
         value = ':'.join((self.email, str(datetime.utcnow().timestamp())))
         value = base64.urlsafe_b64encode(value.encode('utf-8'))
         signature = signer.sign(value)
