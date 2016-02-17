@@ -299,7 +299,7 @@ class UserTest(TestCase, UserMixin):
         self.assertEqual(parts.path, reverse("users-authenticate"))
         query = urllib.parse.parse_qs(parts.query)
         self.assertEqual(query['next'][0], "lame")
-        self.assertEqual(self.user, User.authenticate(query['sig'][0]))
+        self.assertEqual(self.user, User.from_signature(query['sig'][0]))
 
 
 class LoginFormTest(TestCase, UserMixin):

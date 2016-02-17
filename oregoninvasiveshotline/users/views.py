@@ -51,21 +51,30 @@ def login(request, *args, **kwargs):
 
 
 def authenticate(request):
-    sig = request.GET.get("sig", "")
+    params = request.GET
+    signature = params.get('sig', '')
+
     try:
-        user = User.authenticate(sig)
+        user = User.from_signature(signature)
     except BadSignature:
-        messages.error(request, "Bad Signature")
-        return redirect("home")
+        messages.error(request, 'Unable to login with that URL')
+        return redirect('home')
+
+    if user is None:
+        # Signature expired
+        messages.error(request, 'That login URL has expired')
+        return redirect('login')
 
     if user.is_active or Invite.objects.filter(user=user).exists():
         user.backend = settings.AUTHENTICATION_BACKENDS[0]
         django_login(request, user)
 
-    # populate the report_ids session variable with all the reports the user made
-    request.session['report_ids'] = list(Report.objects.filter(created_by=user).values_list('pk', flat=True))
+    # Add user's reports to their session
+    report_ids = Report.objects.filter(created_by=user).values_list('pk', flat=True)
+    request.session['report_ids'] = list(report_ids)
 
-    return redirect(request.GET.get("next") or settings.LOGIN_REDIRECT_URL)
+    next_url = params.get('next') or settings.LOGIN_REDIRECT_URL
+    return redirect(next_url)
 
 
 def avatar(request, user_id, colors=AVATAR_COLORS):

@@ -1,3 +1,5 @@
+import base64
+from datetime import datetime, timedelta
 from urllib.parse import urlencode
 
 from django.contrib.auth.models import AbstractBaseUser, UserManager
@@ -34,21 +36,31 @@ class User(AbstractBaseUser):
         Forest Pest Detector training, offered by Oregon State
         Extension.""")
 
+    @classmethod
+    def from_signature(cls, signature):
+        signer = Signer('user-authentication')
+        value = signer.unsign(signature)
+        value = base64.urlsafe_b64decode(value).decode('utf-8')
+        email, timestamp = value.rsplit(':', 1)
+        timestamp = float(timestamp)
+        elapsed = datetime.utcnow() - datetime.utcfromtimestamp(timestamp)
+        if elapsed > timedelta(days=1):
+            return None
+        return cls.objects.get(email=email)
 
     def get_authentication_url(self, request, next=None):
-        signer = Signer("user-authentication")
-        sig = signer.sign(self.email)
-        querystring = urlencode({
-            "sig": sig,
-            "next": next or '',
+        signer = Signer('user-authentication')
+        value = ':'.join((self.email, str(datetime.utcnow().timestamp())))
+        value = base64.urlsafe_b64encode(value.encode('utf-8'))
+        signature = signer.sign(value)
+        query_string = urlencode({
+            'sig': signature,
+            'next': next or '',
         })
-        return request.build_absolute_uri(reverse("users-authenticate")) + "?" + querystring
-
-    @classmethod
-    def authenticate(cls, sig):
-        signer = Signer("user-authentication")
-        email = signer.unsign(sig)
-        return cls.objects.get(email=email)
+        path = reverse('users-authenticate')
+        url = request.build_absolute_uri(path)
+        url = '?'.join((url, query_string))
+        return url
 
     @property
     def full_name(self):
