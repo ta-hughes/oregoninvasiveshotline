@@ -44,7 +44,7 @@ Account Home
             {% endif %}
 
             <div class="col-md-8">
-                <h3>Hello, {{ user.prefix }} {{ user.first_name }} {{ user.last_name }} {{ user.suffix }}</h3>
+                <h3>Hello, {{ user.full_name }}</h3>
                 <p>Use the tabs above to find specific reports.</p>
                 {% if user.biography %}
                     <p><strong>Biography:</strong> {{ user.biography|linebreaksbr }}</p>
