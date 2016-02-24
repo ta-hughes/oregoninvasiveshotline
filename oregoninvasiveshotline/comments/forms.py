@@ -5,7 +5,6 @@ from django.template.loader import render_to_string
 
 from ..reports.models import Invite
 from ..reports.perms import can_adjust_visibility
-from ..users.models import User
 
 from .models import Comment
 
@@ -54,34 +53,38 @@ class CommentForm(forms.ModelForm):
 
         # Notify staff & managers who commented on the report
         q = Comment.objects.filter(report=report, created_by__is_active=True)
-        recipients.update(q.values_list('created_by__email', flat=True))
+        q = q.prefetch_related('created_by')
+        recipients.update(c.created_by for c in q)
 
         # Notify the user who claimed the report
-        if comment.report.claimed_by:
-            recipients.add(report.claimed_by.email)
+        if report.claimed_by:
+            recipients.add(report.claimed_by)
 
         # Notify invited experts
-        q = Invite.objects.filter(report=report)
-        recipients.update(q.values_list('user__email', flat=True))
+        q = Invite.objects.filter(report=report).prefetch_related('user')
+        q = q.prefetch_related('user')
+        recipients.update(invite.user for invite in q)
 
         # Notify the user that submitted the report
         if comment.visibility in (Comment.PROTECTED, Comment.PUBLIC):
-            recipients.add(report.created_by.email)
+            recipients.add(report.created_by)
 
         # Don't notify the user who made the comment
-        recipients.discard(comment.created_by.email)
+        recipients.discard(comment.created_by)
 
         emails = []
         subject = '{0.PROJECT[title]} - New Comment on Report'.format(settings)
 
-        for recipient in recipients:
-            user = User(email=recipient)
-            url = user.get_authentication_url(request, next=comment.get_absolute_url())
+        for user in recipients:
+            if user.is_active:
+                url = request.build_absolute_uri(comment.get_absolute_url())
+            else:
+                url = user.get_authentication_url(request, next=comment.get_absolute_url())
             body = render_to_string('reports/_new_comment.txt', {
                 'user': comment.created_by,
                 'body': comment.body,
                 'url': url,
             })
-            emails.append((subject, body, 'noreply@pdx.edu', (recipient,)))
+            emails.append((subject, body, 'noreply@pdx.edu', (user.email,)))
 
         send_mass_mail(emails)
