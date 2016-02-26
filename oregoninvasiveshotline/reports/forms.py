@@ -281,7 +281,7 @@ class ReportForm(forms.ModelForm):
         #       fix this).
         email = self.cleaned_data['email']
         defaults = {
-            'email': email,
+            'email': email.lower(),
             'prefix': self.cleaned_data.get('prefix', ''),
             'first_name': self.cleaned_data.get('first_name'),
             'last_name': self.cleaned_data.get('last_name'),
