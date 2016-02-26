@@ -146,10 +146,12 @@ def list_(request):
     q = params.get('q')
     is_manager = params.get('is_manager')
 
-    if q or is_manager:
+    if q:
         users = form.search()
     else:
         users = User.objects.all()
+        if is_manager:
+            users = users.filter(is_active=True)
 
     active_page = params.get('page')
     paginator = Paginator(users, settings.ITEMS_PER_PAGE)
