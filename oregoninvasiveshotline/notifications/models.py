@@ -57,7 +57,10 @@ class UserNotificationQuery(models.Model):
                     form = ReportSearchForm(QueryDict(query), user=user)
                     if form.is_valid() and form.search().filter(id=report.pk).count():
                         next_url = reverse('reports-detail', args=[report.pk])
-                        url = user.get_authentication_url(request=request, next=next_url)
+                        if user.is_active:
+                            url = request.build_absolute_uri(next_url)
+                        else:
+                            url = user.get_authentication_url(request=request, next=next_url)
                         body = render_to_string('notifications/email.txt', {
                             'user': user,
                             'name': user_notification_query.name,

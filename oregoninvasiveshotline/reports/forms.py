@@ -283,8 +283,8 @@ class ReportForm(forms.ModelForm):
         defaults = {
             'email': email,
             'prefix': self.cleaned_data.get('prefix', ''),
-            'first_name': self.cleaned_data.get('first_name', ''),
-            'last_name': self.cleaned_data.get('last_name', ''),
+            'first_name': self.cleaned_data.get('first_name'),
+            'last_name': self.cleaned_data.get('last_name'),
             'suffix': self.cleaned_data.get('suffix', ''),
             'phone': self.cleaned_data.get('phone', ''),
             'has_completed_ofpd': self.cleaned_data.get('has_completed_ofpd'),
