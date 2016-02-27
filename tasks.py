@@ -44,8 +44,16 @@ def generate_icons(ctx, clean=False, force=False, input=True):
 @arctask(configured=DEFAULT_ENV)
 def remove_duplicate_users(ctx):
     setup()
+    from django.apps import apps
     from django.contrib.auth import get_user_model
     from arcutils.db import will_be_deleted_with
+
+    Comment = apps.get_model('comments', 'Comment')
+    Image = apps.get_model('images', 'Image')
+    Notification = apps.get_model('notifications', 'Notification')
+    UserNotificationQuery = apps.get_model('notifications', 'UserNotificationQuery')
+    Invite = apps.get_model('reports', 'Invite')
+    Report = apps.get_model('reports', 'Report')
 
     user_model = get_user_model()
     dupes = user_model.objects.raw(
@@ -76,6 +84,7 @@ def remove_duplicate_users(ctx):
             if confirm(ctx, 'Delete {email}?'.format_map(f), yes_values=('yes',)):
                 print('Okay, deleting {email}...'.format_map(f), end='')
                 user.delete()
+                dupes.remove(user)
                 print('Deleted')
         else:
             print(
@@ -109,7 +118,16 @@ def remove_duplicate_users(ctx):
         if winner is None:
             winner = users[0]
         losers = [user for user in users if user != winner]
-        print('Winner:', winner.full_name, '<{0.email}>'.format(winner), winner.is_active, winner.is_staff)
+        print('Winner:', winner.full_name, '<{0.email}>'.format(winner))
         for loser in losers:
-            print('Loser:', loser.full_name, '<{0.email}>'.format(loser), loser.is_active, loser.is_staff)
-        print_warning('Moving records has not yet been implemented :(')
+            print('Loser:', loser.full_name, '<{0.email}>'.format(loser))
+            print('Re-associating loser objects...', end='')
+            Comment.objects.filter(created_by=loser).update(created_by=winner)
+            Image.objects.filter(created_by=loser).update(created_by=winner)
+            Invite.objects.filter(user=loser).update(user=winner)
+            Invite.objects.filter(created_by=loser).update(created_by=winner)
+            Notification.objects.filter(user=loser).update(user=winner)
+            Report.objects.filter(claimed_by=loser).update(claimed_by=winner)
+            Report.objects.filter(created_by=loser).update(created_by=winner)
+            UserNotificationQuery.objects.filter(user=loser).update(user=winner)
+            print('Done')
