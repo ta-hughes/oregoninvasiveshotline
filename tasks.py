@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 from arctasks import *
 from arctasks.django import call_command, manage, setup
 from arctasks.util import confirm, print_info, print_warning
@@ -44,6 +46,7 @@ def remove_duplicate_users(ctx):
     setup()
     from django.contrib.auth import get_user_model
     from arcutils.db import will_be_deleted_with
+
     user_model = get_user_model()
     dupes = user_model.objects.raw(
         'SELECT * from "user" u1 '
@@ -53,7 +56,12 @@ def remove_duplicate_users(ctx):
         'ORDER BY lower(email)'
     )
     dupes = [d for d in dupes]
+
     print_info('Found {n} duplicates'.format(n=len(dupes)))
+
+    # Delete any dupes we can.
+    # Active and staff users are never deleted.
+    # Public users with no associated records will be deleted.
     for user in dupes:
         email = user.email
         objects = list(will_be_deleted_with(user))
@@ -72,3 +80,36 @@ def remove_duplicate_users(ctx):
         else:
             print(
                 'Deleting {email} would cascade to {num_objects} objects. Skipping.'.format_map(f))
+
+    # Group the remaining duplicates by email address
+    grouped_dupes = defaultdict(list)
+    for user in dupes:
+        email = user.email.lower()
+        grouped_dupes[email].append(user)
+    grouped_dupes = {email: users for (email, users) in grouped_dupes.items() if len(users) > 1}
+
+    # For each group, find the "best" user (staff > active > inactive).
+    # The other users' associated records will be associated with this
+    # "winner".
+    for email, users in grouped_dupes.items():
+        winner = None
+        for user in users:
+            if user.is_staff:
+                winner = user
+                break
+        if winner is None:
+            for user in users:
+                if user.is_active:
+                    winner = user
+                    break
+        if winner is None:
+            for user in users:
+                if user.full_name:
+                    winner = user
+        if winner is None:
+            winner = users[0]
+        losers = [user for user in users if user != winner]
+        print('Winner:', winner.full_name, '<{0.email}>'.format(winner), winner.is_active, winner.is_staff)
+        for loser in losers:
+            print('Loser:', loser.full_name, '<{0.email}>'.format(loser), loser.is_active, loser.is_staff)
+        print_warning('Moving records has not yet been implemented :(')
