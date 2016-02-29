@@ -1,5 +1,8 @@
+from collections import defaultdict
+
 from arctasks import *
-from arctasks.django import call_command, manage
+from arctasks.django import call_command, manage, setup
+from arctasks.util import confirm, print_info, print_warning
 
 
 @arctask(configured='dev', timed=True)
@@ -36,3 +39,95 @@ def rebuild_index(ctx, input=True):
 @arctask(configured=DEFAULT_ENV)
 def generate_icons(ctx, clean=False, force=False, input=True):
     call_command('generate_icons', clean=clean, force=force, interactive=input)
+
+
+@arctask(configured=DEFAULT_ENV)
+def remove_duplicate_users(ctx):
+    setup()
+    from django.apps import apps
+    from django.contrib.auth import get_user_model
+    from arcutils.db import will_be_deleted_with
+
+    Comment = apps.get_model('comments', 'Comment')
+    Image = apps.get_model('images', 'Image')
+    Notification = apps.get_model('notifications', 'Notification')
+    UserNotificationQuery = apps.get_model('notifications', 'UserNotificationQuery')
+    Invite = apps.get_model('reports', 'Invite')
+    Report = apps.get_model('reports', 'Report')
+
+    user_model = get_user_model()
+    dupes = user_model.objects.raw(
+        'SELECT * from "user" u1 '
+        'WHERE ('
+        '    SELECT count(*) FROM "user" u2 WHERE lower(u2.email) = lower(u1.email )'
+        ') > 1 '
+        'ORDER BY lower(email)'
+    )
+    dupes = [d for d in dupes]
+
+    print_info('Found {n} duplicates'.format(n=len(dupes)))
+
+    # Delete any dupes we can.
+    # Active and staff users are never deleted.
+    # Public users with no associated records will be deleted.
+    for user in dupes:
+        email = user.email
+        objects = list(will_be_deleted_with(user))
+        num_objects = len(objects)
+        f = locals()
+        if user.is_active:
+            print('Skipping active user: {email}.'.format_map(f))
+        elif user.is_staff:
+            print('Skipping inactive staff user: {email}.'.format_map(f))
+        elif num_objects == 0:
+            print_warning('Deleting {email} will *not* cascade.'.format_map(f))
+            if confirm(ctx, 'Delete {email}?'.format_map(f), yes_values=('yes',)):
+                print('Okay, deleting {email}...'.format_map(f), end='')
+                user.delete()
+                dupes.remove(user)
+                print('Deleted')
+        else:
+            print(
+                'Deleting {email} would cascade to {num_objects} objects. Skipping.'.format_map(f))
+
+    # Group the remaining duplicates by email address
+    grouped_dupes = defaultdict(list)
+    for user in dupes:
+        email = user.email.lower()
+        grouped_dupes[email].append(user)
+    grouped_dupes = {email: users for (email, users) in grouped_dupes.items() if len(users) > 1}
+
+    # For each group, find the "best" user (staff > active > inactive).
+    # The other users' associated records will be associated with this
+    # "winner".
+    for email, users in grouped_dupes.items():
+        winner = None
+        for user in users:
+            if user.is_staff:
+                winner = user
+                break
+        if winner is None:
+            for user in users:
+                if user.is_active:
+                    winner = user
+                    break
+        if winner is None:
+            for user in users:
+                if user.full_name:
+                    winner = user
+        if winner is None:
+            winner = users[0]
+        losers = [user for user in users if user != winner]
+        print('Winner:', winner.full_name, '<{0.email}>'.format(winner))
+        for loser in losers:
+            print('Loser:', loser.full_name, '<{0.email}>'.format(loser))
+            print('Re-associating loser objects...', end='')
+            Comment.objects.filter(created_by=loser).update(created_by=winner)
+            Image.objects.filter(created_by=loser).update(created_by=winner)
+            Invite.objects.filter(user=loser).update(user=winner)
+            Invite.objects.filter(created_by=loser).update(created_by=winner)
+            Notification.objects.filter(user=loser).update(user=winner)
+            Report.objects.filter(claimed_by=loser).update(claimed_by=winner)
+            Report.objects.filter(created_by=loser).update(created_by=winner)
+            UserNotificationQuery.objects.filter(user=loser).update(user=winner)
+            print('Done')

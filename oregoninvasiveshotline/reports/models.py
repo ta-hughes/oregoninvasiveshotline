@@ -210,10 +210,12 @@ class Invite(models.Model):
         has already been invited before)
         """
         user_model = get_user_model()
-        try:
-            user = user_model.objects.get(email__iexact=email)
-        except user_model.DoesNotExist:
-            user = user_model.objects.create(email=email, is_active=False)
+
+        defaults = {
+            'email': email.lower(),
+            'is_active': False,
+        }
+        user = user_model.objects.get_or_create(email__iexact=email, defaults=defaults)
 
         if Invite.objects.filter(user=user, report=report).exists():
             return False
@@ -228,7 +230,7 @@ class Invite(models.Model):
                 "url": user.get_authentication_url(request, next=reverse("reports-detail", args=[report.pk]))
             }),
             "noreply@pdx.edu",
-            [email]
+            [user.email]
         )
 
         invite.save()
