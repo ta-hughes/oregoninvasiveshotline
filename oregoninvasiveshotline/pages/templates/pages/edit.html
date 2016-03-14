@@ -9,10 +9,17 @@
 
     <form method="post">
         {% csrf_token %}
-        <div class="row">
-            <div class="col-md-6">{{ form.url|bootstrap }}</div>
-            <div class="col-md-6">{{ form.title|bootstrap }}</div>
-        </div>
+
+        {% if form.url or form.title %}
+            <div class="row">
+                {% if form.url %}
+                    <div class="col-md-6">{{ form.url|bootstrap }}</div>
+                {% endif %}
+                {% if form.title %}
+                    <div class="col-md-6">{{ form.title|bootstrap }}</div>
+                {% endif %}
+            </div>
+        {% endif %}
 
         {{ form.content|bootstrap }}
         <hr />
