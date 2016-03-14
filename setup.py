@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 
-VERSION = '1.8.0'
+VERSION = '1.8.1'
 
 
 setup(
@@ -20,7 +20,7 @@ setup(
         'django-haystack>=2.4.1',
         'django-local-settings>=1.0a13',
         'django-perms>=1.2.0',
-        'django>=1.8.9,<1.9',
+        'django>=1.8.11,<1.9',
         'django-pgcli',
         'djangorestframework>=3.3.2',
         'elasticsearch>=1.9.0,<2.0.0',
