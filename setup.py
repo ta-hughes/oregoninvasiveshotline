@@ -22,7 +22,7 @@ setup(
         'django-local-settings>=1.0a20',
         'django-perms>=1.2.1',
         'django-pgcli',
-        'djangorestframework>=3.3.2',
+        'djangorestframework>=3.3.3',
         'elasticsearch>=1.9.0,<2.0.0',
         'Markdown>=2.6.4',
         'Pillow>=3.1.0',
