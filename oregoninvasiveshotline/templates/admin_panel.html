@@ -2,14 +2,5 @@
 
 {% block content %}
     <h3>Admin Panel</h3>
-
-    <ul class="nav nav-pills nav-stacked">
-        <li><a href="{% url 'species-list' %}">Species</a></li>
-        <li><a href="{% url 'categories-list' %}">Categories</a></li>
-        <li><a href="{% url 'severities-list' %}">Severities</a></li>
-        <li><a href="{% url 'pages-list' %}">Static Pages</a></li>
-        <li><a href="{% url 'users-list' %}">Users</a></li>
-        <li><a href="{% url 'admin:reports_report_changelist' %}">Reports</a></li>
-        <li><a href="{% url 'notifications-admin-list' %}">Subscriptions</a></li>
-    </ul>
+    {% include '_admin_panel_nav.html' with nav_stacked=True %}
 {% endblock %}

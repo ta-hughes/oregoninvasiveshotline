@@ -1,13 +1,14 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <div class="pull-right">
-        <a class="btn btn-primary" href="{% url 'species-create' %}">Create a new species</a>
-    </div>
+    {% include '_admin_panel_nav.html' with nav_home=True nav_active='species' %}<hr>
 
-    <h3>Species</h3>
+    <h3 class="clearfix">
+        Species
+        <a href="{% url 'species-create' %}" class="pull-right btn btn-primary">Create a new species</a>
+    </h3>
 
-    <form class="form-inline">
+    <form class="form-inline" style="margin: 15px 0;">
         {{ form.non_field_errors }}
         {{ form.q|bootstrap }}
         {{ form.order_by|bootstrap }}
@@ -17,8 +18,6 @@
             <a class="btn btn-warning" href="{% url 'species-list' %}">Reset</a>
         </div>
     </form>
-
-    <br>
 
     {% if all_species %}
         <table class="table table-condensed table-striped">
