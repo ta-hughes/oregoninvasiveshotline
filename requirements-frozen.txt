@@ -1,1 +1,3 @@
+-f https://cdn.research.pdx.edu/pypi/dist/
 psu.oit.arc.oregoninvasiveshotline
+psu.oit.arc.tasks
