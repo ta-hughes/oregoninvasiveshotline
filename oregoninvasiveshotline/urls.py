@@ -10,7 +10,7 @@ from .perms import permissions
 from .reports import views as reports
 from .species import views as species
 from .users import views as users
-from .views import HomeView
+from .views import HomeView, AdminPanelView
 
 
 urlpatterns = [
@@ -22,7 +22,7 @@ urlpatterns = [
     url(r'^$', HomeView.as_view(), name='home'),
 
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^adminpanel/?$', species.admin_panel, name='admin-panel'),
+    url(r'^adminpanel/?$', AdminPanelView.as_view(), name='admin-panel'),
 
     url(r'^categories/create/?$', permissions.is_staff(species.CategoryCreateView.as_view()), name='categories-create'),
     url(r'^categories/delete/(?P<pk>\d+)/?$', permissions.is_staff(species.CategoryDeleteView.as_view()), name='categories-delete'),

@@ -1,3 +1,4 @@
+from rest_framework.permissions import IsAdminUser
 from rest_framework.renderers import TemplateHTMLRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -38,3 +39,13 @@ class HomeView(APIView):
         q = Report.objects.filter(**self.report_filters)
         q = q.order_by(self.order_reports_by)
         return q[:self.show_n_reports]
+
+
+class AdminPanelView(APIView):
+
+    permission_classes = [IsAdminUser]
+    renderer_classes = [TemplateHTMLRenderer]
+    template_name = 'admin_panel.html'
+
+    def get(self, request):
+        return Response({})
