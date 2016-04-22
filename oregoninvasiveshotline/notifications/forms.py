@@ -9,7 +9,20 @@ class UserNotificationQueryForm(forms.ModelForm):
 
     class Meta:
         model = UserNotificationQuery
-        fields = ['name']
+        fields = (
+            'name',
+            'user',  # Only admins can set this field
+        )
+        labels = {
+            'user': 'Assign subscription to user (admin only)'
+        }
+
+    def __init__(self, *args, **kwargs):
+        current_user = kwargs.pop('current_user', None)
+        is_staff = current_user and current_user.is_staff
+        super().__init__(*args, **kwargs)
+        if not is_staff:
+            self.fields.pop('user')
 
 
 class UserSubscriptionAdminForm(forms.ModelForm):

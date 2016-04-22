@@ -16,18 +16,19 @@ from .models import UserNotificationQuery
 
 @permissions.is_active
 def create(request):
+    user = request.user
     query = request.GET.copy()
     query.pop('tabs', None)
     query = query.urlencode()
-    instance = UserNotificationQuery(user=request.user, query=query)
+    instance = UserNotificationQuery(user=user, query=query)
     if request.method == 'POST':
-        form = UserNotificationQueryForm(request.POST, instance=instance)
+        form = UserNotificationQueryForm(request.POST, instance=instance, current_user=user)
         if form.is_valid():
             instance = form.save()
             messages.success(request, 'New search subscription "{0.name}" added'.format(instance))
             return HttpResponseRedirect(reverse('reports-list') + '?' + request.GET.urlencode())
     else:
-        form = UserNotificationQueryForm(instance=instance)
+        form = UserNotificationQueryForm(instance=instance, current_user=user)
     return render(request, 'notifications/create.html', {
         'form': form,
     })
