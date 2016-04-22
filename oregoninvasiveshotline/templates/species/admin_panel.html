@@ -1,11 +1,15 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
+
 {% block content %}
-<h3>Admin Panel</h3>
-<p><a href="{% url 'species-list' %}">Species list</a></p>
-<p><a href="{% url 'categories-list' %}">Categories list</a></p>
-<p><a href="{% url 'severities-list' %}">Severities list</a></p>
-<p><a href="{% url 'pages-list' %}">Static Pages</a></p>
-<p><a href="{% url 'users-list' %}">Users List</a></p>
-<p><a href="{% url 'admin:reports_report_changelist' %}">Reports List</a></p>
-<p><a href="{% url 'notifications-admin-list' %}">Subscriptions</a></p>
+    <h3>Admin Panel</h3>
+
+    <ul class="nav nav-pills nav-stacked">
+        <li><a href="{% url 'species-list' %}">Species</a></li>
+        <li><a href="{% url 'categories-list' %}">Categories</a></li>
+        <li><a href="{% url 'severities-list' %}">Severities</a></li>
+        <li><a href="{% url 'pages-list' %}">Static Pages</a></li>
+        <li><a href="{% url 'users-list' %}">Users</a></li>
+        <li><a href="{% url 'admin:reports_report_changelist' %}">Reports</a></li>
+        <li><a href="{% url 'notifications-admin-list' %}">Subscriptions</a></li>
+    </ul>
 {% endblock %}
