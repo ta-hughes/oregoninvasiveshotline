@@ -27,7 +27,7 @@ setup(
         'Markdown>=2.6.6',
         'Pillow>=3.2.0',
         'psycopg2>=2.6.1',
-        'pytz>=2015.7',
+        'pytz>=2016.4',
     ],
     extras_require={
         'dev': [
