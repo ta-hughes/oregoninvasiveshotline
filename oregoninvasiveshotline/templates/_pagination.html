@@ -1,7 +1,20 @@
 <div class="text-center">
     <ul class="pagination" style="margin: 0;">
         <li {% if not items.has_previous %}class="disabled"{% endif %}>
-            <a title="Previous" aria-label="Previous"
+            <a title="First page" aria-label="First page"
+               {% if items.has_previous %}
+                   href="{% add_get page=1 %}"
+               {% else %}
+                   href="#"
+               {% endif %}>
+                {# This long line avoids a space between the two chevron arrows #}
+                <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span><span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
+                <span class="sr-only">First page</span>
+            </a>
+        </li>
+
+        <li {% if not items.has_previous %}class="disabled"{% endif %}>
+            <a title="Previous page" aria-label="Previous page"
                {% if items.has_previous %}
                    href="{% add_get page=items.previous_page_number %}"
                {% else %}
@@ -13,7 +26,7 @@
         </li>
 
         <li {% if not items.has_next %}class="disabled"{% endif %}>
-            <a title="Next" aria-label="Next"
+            <a title="Next page" aria-label="Next page"
                {% if items.has_next %}
                    href="{% add_get page=items.next_page_number %}"
                {% else %}
@@ -21,6 +34,19 @@
                {% endif %}>
                 <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
                 <span class="sr-only">Next</span>
+            </a>
+        </li>
+
+        <li {% if not items.has_next %}class="disabled"{% endif %}>
+            <a title="Last page" aria-label="Last page"
+               {% if items.has_next %}
+                   href="{% add_get page=items.paginator.num_pages %}"
+               {% else %}
+                   href="#"
+               {% endif %}>
+                {# This long line avoids a space between the two chevron arrows #}
+                <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span><span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
+                <span class="sr-only">Last page</span>
             </a>
         </li>
     </ul>
