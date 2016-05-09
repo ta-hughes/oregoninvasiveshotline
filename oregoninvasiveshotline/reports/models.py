@@ -215,7 +215,7 @@ class Invite(models.Model):
             'email': email.lower(),
             'is_active': False,
         }
-        user = user_model.objects.get_or_create(email__iexact=email, defaults=defaults)
+        user, _ = user_model.objects.get_or_create(email__iexact=email, defaults=defaults)
 
         if Invite.objects.filter(user=user, report=report).exists():
             return False
