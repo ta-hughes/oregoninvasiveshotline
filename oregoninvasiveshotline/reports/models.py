@@ -188,50 +188,59 @@ def receiver__generate_icon(sender, instance, **kwargs):
 
 
 class Invite(models.Model):
+
+    """An invitation to review a report.
+
+    Arbitrary people can be invited (via email) to review and leave
+    comments on a report.
+
     """
-    Abitrary people can be invited (via email) to leave comments on a report
-    """
-    invite_id = models.AutoField(primary_key=True)
-    # the person invited (a User object will be created for them)
-    user = models.ForeignKey("users.User", related_name="invites")
-    created_on = models.DateTimeField(auto_now_add=True)
-    created_by = models.ForeignKey("users.User", related_name="+")
-    report = models.ForeignKey(Report)
 
     class Meta:
-        db_table = "invite"
+        db_table = 'invite'
+
+    invite_id = models.AutoField(primary_key=True)
+    created_by = models.ForeignKey('users.User', related_name='+')
+    created_on = models.DateTimeField(auto_now_add=True)
+    report = models.ForeignKey(Report)
+
+    # The invitee
+    user = models.ForeignKey('users.User', related_name='invites')
 
     @classmethod
     def create(cls, *, email, report, inviter, message, request):
-        """
-        Create and send an invitation to the person with the given email address
+        """Send an invitation to the specified ``email`` address.
 
-        Returns True if the invite was sent, otherwise False (meaning the user
-        has already been invited before)
+        If an invite has already been sent to the ``email`` address for
+        the specified ``report``, nothing will be done. Otherwise, an
+        ``Invite`` record is created and an email is sent.
+
+        Returns:
+            bool: True if the invite was sent; False if an invite has
+                already been sent to the email address for the specified
+                report.
+
         """
         user_model = get_user_model()
 
-        defaults = {
+        user, _ = user_model.objects.get_or_create(email__iexact=email, defaults={
             'email': email.lower(),
             'is_active': False,
-        }
-        user, _ = user_model.objects.get_or_create(email__iexact=email, defaults=defaults)
+        })
 
-        if Invite.objects.filter(user=user, report=report).exists():
-            return False
+        invite, invited = cls.objects.get_or_create(user=user, report=report, defaults={
+            'created_by': inviter,
+        })
 
-        invite = Invite(user=user, created_by=inviter, report=report)
+        if invited:
+            subject = '{0.PROJECT[title]} - Submission Review Request'.format(settings)
+            next_url = reverse('reports-detail', args=[report.pk])
+            url = user.get_authentication_url(request, next=next_url)
+            body = render_to_string('reports/_invite_expert.txt', {
+                'inviter': inviter,
+                'message': message,
+                'url': url,
+            })
+            send_mail(subject, body, 'noreply@pdx.edu', [user.email])
 
-        send_mail(
-            "Invasive Species Hotline Submission Review Request",
-            render_to_string("reports/_invite_expert.txt", {
-                "inviter": inviter,
-                "message": message,
-                "url": user.get_authentication_url(request, next=reverse("reports-detail", args=[report.pk]))
-            }),
-            "noreply@pdx.edu",
-            [user.email]
-        )
-
-        invite.save()
-        return True
+        return invited
