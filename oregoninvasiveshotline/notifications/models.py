@@ -8,9 +8,11 @@ from django.template.loader import render_to_string
 
 from arcutils.settings import get_setting
 
+from oregoninvasiveshotline.species.models import Category
+from oregoninvasiveshotline.counties.models import County
+
 
 class UserNotificationQuery(models.Model):
-
     class Meta:
         db_table = 'user_notification_query'
 
@@ -94,12 +96,30 @@ class UserNotificationQuery(models.Model):
 
         threading.Thread(target=runnable).start()
 
+    @property
+    def pretty_query(self):
+        """
+        Returns a dictionary of human-readable names for select query parameters
+        """
+        query = QueryDict(self.query)
+        query_items = {}
+        if query.get('categories'):
+            categories = Category.objects.filter(pk__in=query.getlist('categories'))
+            categories = categories.values_list('name', flat=True).order_by('name')
+            query_items['Categories'] = ", ".join(categories)
+        if query.get('counties'):
+            counties = County.objects.filter(pk__in=query.getlist('counties'))
+            counties = counties.values_list('name', flat=True).order_by('name')
+            query_items['Counties'] = ", ".join(counties)
+        if query.get('q'):
+            query_items['Keyword'] = query['q']
+        return query_items
+
     def __str__(self):
         return self.name
 
 
 class Notification(models.Model):
-
     """Keeps track of notifications to users.
 
     This keeps track of which users have been notified about which
