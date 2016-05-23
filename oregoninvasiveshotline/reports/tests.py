@@ -14,6 +14,7 @@ from django.core.files.base import File
 from django.core.urlresolvers import reverse
 from django.db.models.signals import post_save
 from django.test import TestCase
+from django.test.client import RequestFactory
 from django.utils import timezone
 
 from model_mommy.mommy import make, prepare
@@ -830,25 +831,27 @@ class InviteFormTest(TestCase, UserMixin):
         self.assertIn("invalid@@", str(form.errors))
 
     def test_save(self):
-        """
-        Ensure the Invite.create method is called, and that the InviteReport we
-        get back is correct
-        """
+        inviter = self.create_user()
+        report = make(Report)
+        request = RequestFactory().get(reverse('reports-detail', args=(report.pk,)))
+
         form = InviteForm({
-            "emails": "already_invited@pdx.edu,foo@pdx.edu",
-            "body": "foo",
+            'emails': 'foo@pdx.edu',
+            'body': 'body',
         })
         self.assertTrue(form.is_valid())
-        with patch("oregoninvasiveshotline.reports.forms.Invite.create", side_effect=lambda *args, **kwargs: kwargs['email'] == "foo@pdx.edu") as m:
-            user = self.create_user()
-            report = make(Report)
-            request = Mock()
-            invite_report = form.save(user=user, report=report, request=request)
-            self.assertTrue(m.call_count, 2)
-            m.assert_any_call(email="foo@pdx.edu", report=report, inviter=user, message="foo", request=request)
+        invite_report = form.save(user=inviter, report=report, request=request)
+        self.assertEqual(invite_report.invited, ['foo@pdx.edu'])
+        self.assertEqual(invite_report.already_invited, [])
 
-            self.assertEqual(invite_report.invited, ["foo@pdx.edu"])
-            self.assertEqual(invite_report.already_invited, ["already_invited@pdx.edu"])
+        form = InviteForm({
+            'emails': 'foo@pdx.edu, bar@pdx.edu',
+            'body': 'body',
+        })
+        self.assertTrue(form.is_valid())
+        invite_report = form.save(user=inviter, report=report, request=request)
+        self.assertEqual(invite_report.invited, ['bar@pdx.edu'])
+        self.assertEqual(invite_report.already_invited, ['foo@pdx.edu'])
 
 
 class ClaimViewTest(TestCase, UserMixin):

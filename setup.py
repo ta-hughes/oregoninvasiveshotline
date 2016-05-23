@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 
-VERSION = '1.8.1'
+VERSION = '1.9.0'
 
 
 setup(
@@ -14,20 +14,20 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=[
-        'django-arcutils>=2.0.0',
-        'django-bootstrap-form>=3.2',
+        'django>=1.8.13,<1.9',
+        'django-arcutils>=2.10.0',
+        'django-bootstrap-form>=3.2.1',
         'django-cloak',
         'django-haystack>=2.4.1',
-        'django-local-settings>=1.0a13',
-        'django-perms>=1.2.0',
-        'django>=1.8.11,<1.9',
+        'django-local-settings>=1.0a20',
+        'django-perms>=1.2.1',
         'django-pgcli',
-        'djangorestframework>=3.3.2',
+        'djangorestframework>=3.3.3',
         'elasticsearch>=1.9.0,<2.0.0',
-        'Markdown>=2.6.4',
-        'Pillow>=3.1.0',
+        'Markdown>=2.6.6',
+        'Pillow>=3.2.0',
         'psycopg2>=2.6.1',
-        'pytz>=2015.7',
+        'pytz>=2016.4',
     ],
     extras_require={
         'dev': [
@@ -40,12 +40,4 @@ setup(
             'psu.oit.arc.tasks',
         ]
     },
-    classifiers=[
-        'Development Status :: 4 - Beta',
-        'Environment :: Web Environment',
-        'Framework :: Django',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.3',
-        'Programming Language :: Python :: 3.4',
-    ],
 )

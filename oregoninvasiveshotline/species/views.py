@@ -178,8 +178,3 @@ class SeverityDetailView(SuccessMessageMixin, UpdateView):
 
     def get_success_url(self):
         return reverse("severities-list")
-
-
-@permissions.is_staff
-def admin_panel(request):
-    return render(request, 'species/admin_panel.html')

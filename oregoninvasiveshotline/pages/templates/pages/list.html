@@ -1,27 +1,33 @@
 {% extends 'base.html' %}
+
 {% block content %}
-<a href="{% url 'pages-create' %}" class="pull-right btn btn-primary"><strong>Create</strong> a new Page</a>
-<h3>Pages</h3>
-{% if pages %}
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Title</th>
-                <th>URL</th>
-                <th>Content</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for page in pages %}
+    {% include '_admin_panel_nav.html' with nav_home=True nav_active='pages' %}<hr>
+
+    <h3 class="clearfix">
+        Pages
+        <a href="{% url 'pages-create' %}" class="pull-right btn btn-primary">Create a new page</a>
+    </h3>
+
+    {% if pages %}
+        <table class="table table-striped">
+            <thead>
                 <tr>
-                    <td><a href="{% url 'pages-edit' page.pk %}" title="Edit page">{{ page.title }}</a></td>
-                    <td><a href="{{ page.url }}"l title="View page">{{ page.url }}</a></td>
-                    <td>{{ page.content|striptags|truncatewords:10 }}</td>
+                    <th>Title</th>
+                    <th>URL</th>
+                    <th>Content</th>
                 </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-{% else %}
-    <div class="alert alert-warning">No pages!</div>
-{% endif %}
+            </thead>
+            <tbody>
+                {% for page in pages %}
+                    <tr>
+                        <td><a href="{% url 'pages-edit' page.pk %}" title="Edit page">{{ page.title }}</a></td>
+                        <td><a href="{{ page.url }}"l title="View page">{{ page.url }}</a></td>
+                        <td>{{ page.content|striptags|truncatewords:10 }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="alert alert-warning">No pages!</div>
+    {% endif %}
 {% endblock %}

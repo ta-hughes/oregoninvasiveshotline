@@ -8,9 +8,11 @@ from django.template.loader import render_to_string
 
 from arcutils.settings import get_setting
 
+from oregoninvasiveshotline.species.models import Category
+from oregoninvasiveshotline.counties.models import County
+
 
 class UserNotificationQuery(models.Model):
-
     class Meta:
         db_table = 'user_notification_query'
 
@@ -30,6 +32,27 @@ class UserNotificationQuery(models.Model):
         )
     )
     created_on = models.DateTimeField(auto_now_add=True)
+
+    @classmethod
+    def notify_new_owner(cls, subscription, request):
+        """Notify the new owner of a subscription when ownership has changed"""
+
+        subject = get_setting('NOTIFICATIONS.notify_new_owner__subject')
+        from_email = get_setting('NOTIFICATIONS.from_email')
+        new_owner = subscription.user
+        next_url = reverse('reports-list') + '?' + subscription.query
+
+        if new_owner.is_active:
+            url = request.build_absolute_uri(next_url)
+        else:
+            url = new_owner.get_authentication_url(request, next=next_url)
+
+        body = render_to_string('notifications/notify_new_owner.txt', {
+            'assigner': request.user,
+            'name': subscription.name,
+            'url': url,
+        })
+        send_mail(subject, body, from_email, [new_owner.email])
 
     @classmethod
     def notify(cls, report, request):
@@ -73,12 +96,30 @@ class UserNotificationQuery(models.Model):
 
         threading.Thread(target=runnable).start()
 
+    @property
+    def pretty_query(self):
+        """
+        Returns a dictionary of human-readable names for select query parameters
+        """
+        query = QueryDict(self.query)
+        query_items = {}
+        if query.get('categories'):
+            categories = Category.objects.filter(pk__in=query.getlist('categories'))
+            categories = categories.values_list('name', flat=True).order_by('name')
+            query_items['Categories'] = ", ".join(categories)
+        if query.get('counties'):
+            counties = County.objects.filter(pk__in=query.getlist('counties'))
+            counties = counties.values_list('name', flat=True).order_by('name')
+            query_items['Counties'] = ", ".join(counties)
+        if query.get('q'):
+            query_items['Keyword'] = query['q']
+        return query_items
+
     def __str__(self):
         return self.name
 
 
 class Notification(models.Model):
-
     """Keeps track of notifications to users.
 
     This keeps track of which users have been notified about which
