@@ -1,5 +1,11 @@
 # Change log for Oregon Invasives Hotline
 
+## 1.10.0 - 2016-08-16
+
+- Change default visibility of comments to protected (only allow
+  reporter and commenter to view).
+- Constrain  Django Haystack version.
+
 ## 1.9.0 - 2016-05-23
 
 ### Added

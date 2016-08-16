@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 
-VERSION = '1.9.0'
+VERSION = '1.10.0'
 
 
 setup(
@@ -18,7 +18,7 @@ setup(
         'django-arcutils>=2.10.0',
         'django-bootstrap-form>=3.2.1',
         'django-cloak',
-        'django-haystack>=2.4.1',
+        'django-haystack>=2.4.1,<2.5',
         'django-local-settings>=1.0a20',
         'django-perms>=1.2.1',
         'django-pgcli',
