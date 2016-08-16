@@ -1,5 +1,10 @@
 # Change log for Oregon Invasives Hotline
 
+## 1.11.0 - unreleased
+
+In progress...
+
+
 ## 1.10.0 - 2016-08-16
 
 - Change default visibility of comments to protected (only allow
