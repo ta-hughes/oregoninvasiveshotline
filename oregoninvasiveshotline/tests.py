@@ -1,4 +1,5 @@
 from django.contrib.auth.models import AnonymousUser
+from django.contrib.gis.geos import Point
 from django.test import TestCase
 
 from model_mommy.mommy import make
@@ -8,6 +9,9 @@ from arcutils.test.user import UserMixin
 from .notifications.models import UserNotificationQuery
 from .reports.models import Invite, Report
 from .utils import get_tab_counts
+
+
+ORIGIN = Point(0, 0)
 
 
 class GetTabCountsTest(TestCase, UserMixin):
@@ -27,31 +31,31 @@ class GetTabCountsTest(TestCase, UserMixin):
         self.assertEqual(context['subscribed'], 1)
 
     def test_invited_to(self):
-        make(Invite, user=self.user, report=make(Report))
-        make(Invite, report=make(Report))
+        make(Invite, user=self.user, report=make(Report, point=ORIGIN))
+        make(Invite, report=make(Report, point=ORIGIN))
         context = get_tab_counts(self.user, [])
         self.assertEqual(context['invited_to'], 1)
 
     def test_reported(self):
-        make(Report, created_by=self.user)
-        make(Report)
-        report_id = make(Report).pk
+        make(Report, created_by=self.user, point=ORIGIN)
+        make(Report, point=ORIGIN)
+        report_id = make(Report, point=ORIGIN).pk
         context = get_tab_counts(self.user, [report_id])
         self.assertEqual(context['reported'], 2)
 
     def test_open_and_claimed(self):
-        make(Report)
+        make(Report, point=ORIGIN)
         user = AnonymousUser()
         context = get_tab_counts(user, [])
         self.assertEqual(context['open_and_claimed'], 0)
 
-        make(Report, claimed_by=self.user)
+        make(Report, claimed_by=self.user, point=ORIGIN)
         context = get_tab_counts(self.user, [])
         self.assertEqual(context['open_and_claimed'], 1)
 
     def test_unclaimed_reports(self):
-        make(Report, claimed_by=self.user)
-        make(Report)
+        make(Report, claimed_by=self.user, point=ORIGIN)
+        make(Report, point=ORIGIN)
         user = AnonymousUser()
         context = get_tab_counts(user, [])
         self.assertEqual(context['unclaimed_reports'], 0)

@@ -12,6 +12,7 @@ from django.conf import settings
 from django.core.exceptions import NON_FIELD_ERRORS
 from django.core.files.base import File
 from django.core.urlresolvers import reverse
+from django.contrib.gis.geos import Point
 from django.db.models.signals import post_save
 from django.test import TestCase
 from django.test.client import RequestFactory
@@ -31,6 +32,9 @@ from .forms import InviteForm, ManagementForm, ReportForm, ReportSearchForm
 from .models import Invite, Report, receiver__generate_icon
 from .search_indexes import ReportIndex
 from .views import _export
+
+
+ORIGIN = Point(0, 0)
 
 
 class SuppressPostSaveMixin:
@@ -62,39 +66,39 @@ class ReportTest(SuppressPostSaveMixin, TestCase):
         reported_species = make(Species)
         actual_species = make(Species)
 
-        self.assertEqual(make(Report, actual_species=None, reported_species=reported_species).species, reported_species)
-        self.assertEqual(make(Report, actual_species=actual_species, reported_species=reported_species).species, actual_species)
-        self.assertEqual(make(Report, actual_species=None, reported_species=None).species, None)
+        self.assertEqual(make(Report, actual_species=None, reported_species=reported_species, point=ORIGIN).species, reported_species)
+        self.assertEqual(make(Report, actual_species=actual_species, reported_species=reported_species, point=ORIGIN).species, actual_species)
+        self.assertEqual(make(Report, actual_species=None, reported_species=None, point=ORIGIN).species, None)
 
     def test_category(self):
         reported_species = make(Species)
         actual_species = make(Species)
 
         self.assertEqual(
-            make(Report, actual_species=None, reported_species=None, reported_category=reported_species.category).category,
+            make(Report, actual_species=None, reported_species=None, reported_category=reported_species.category, point=ORIGIN).category,
             reported_species.category
         )
-        self.assertEqual(make(Report, actual_species=actual_species, reported_species=reported_species).category, actual_species.category)
+        self.assertEqual(make(Report, actual_species=actual_species, reported_species=reported_species, point=ORIGIN).category, actual_species.category)
 
     def test_is_misidentified(self):
         reported_species = make(Species)
         actual_species = make(Species)
 
         # if they didn't identify the species, then it can't be misidentified
-        self.assertEqual(make(Report, actual_species=None, reported_species=None).is_misidentified, False)
+        self.assertEqual(make(Report, actual_species=None, reported_species=None, point=ORIGIN).is_misidentified, False)
         # if the reported and actual species are the same, it's not misidentified
-        self.assertEqual(make(Report, actual_species=actual_species, reported_species=actual_species).is_misidentified, False)
+        self.assertEqual(make(Report, actual_species=actual_species, reported_species=actual_species, point=ORIGIN).is_misidentified, False)
         # if the species differ, then it is misidentified
-        self.assertEqual(make(Report, actual_species=actual_species, reported_species=reported_species).is_misidentified, True)
+        self.assertEqual(make(Report, actual_species=actual_species, reported_species=reported_species, point=ORIGIN).is_misidentified, True)
 
     def test_title(self):
-        report = make(Report, actual_species=None, reported_species=None, reported_category=make(Category, name='Foo'))
+        report = make(Report, actual_species=None, reported_species=None, reported_category=make(Category, name='Foo'), point=ORIGIN)
         self.assertEqual(report.title, 'Foo')
-        report = make(Report, actual_species=None, reported_species=make(Species, name='Bar', scientific_name='Foo'))
+        report = make(Report, actual_species=None, reported_species=make(Species, name='Bar', scientific_name='Foo'), point=ORIGIN)
         self.assertEqual(report.title, 'Bar (Foo)')
 
     def test_image_url(self):
-        report = make(Report)
+        report = make(Report, point=ORIGIN)
 
         # A report with only a private image shouldn't have an image URL
         make(Image, report=report, visibility=Image.PRIVATE)
@@ -111,7 +115,7 @@ class ReportTest(SuppressPostSaveMixin, TestCase):
         self.assertTrue(os.path.exists(path))
 
     def test_image_url_from_comment(self):
-        report = make(Report)
+        report = make(Report, point=ORIGIN)
 
         make(Image, comment=make(Comment, report=report), visibility=Image.PRIVATE, _quantity=2)
         expected_url = None
@@ -147,8 +151,9 @@ class TestReportIconGeneration(TestCase):
         return icon_file
 
     def test_generate_icon_manually(self):
-        report = make.prepare(
+        report = prepare(
             Report,
+            point=ORIGIN,
             actual_species__severity__color='#ff8800',
             actual_species__category__icon=self._make_category_icon(),
         )
@@ -161,6 +166,7 @@ class TestReportIconGeneration(TestCase):
     def test_icon_is_generated_on_post_save_for_existing_reports(self):
         report = make(
             Report,
+            point=ORIGIN,
             actual_species__severity__color='#ff8800',
             actual_species__category__icon=self._make_category_icon(),
         )
@@ -196,8 +202,8 @@ class ReportSearchFormTest(TestCase, UserMixin):
         self.index.clear()
 
     def test_filter_by_claimed_reports(self):
-        claimed_report = make(Report, claimed_by=self.user)
-        unclaimed_report = make(Report, claimed_by=None)
+        claimed_report = make(Report, claimed_by=self.user, point=ORIGIN)
+        unclaimed_report = make(Report, claimed_by=None, point=ORIGIN)
 
         form = ReportSearchForm({
             "q": "",
@@ -216,8 +222,8 @@ class ReportSearchFormTest(TestCase, UserMixin):
         self.assertEqual(len(reports), 1)
 
     def test_filter_by_unclaimed_reports(self):
-        claimed_report = make(Report, claimed_by=self.user)
-        unclaimed_report = make(Report, claimed_by=None)
+        claimed_report = make(Report, claimed_by=self.user, point=ORIGIN)
+        unclaimed_report = make(Report, claimed_by=None, point=ORIGIN)
 
         form = ReportSearchForm({
             "q": "",
@@ -236,8 +242,8 @@ class ReportSearchFormTest(TestCase, UserMixin):
         self.assertEqual(len(reports), 1)
 
     def test_filter_by_archived_reports(self):
-        archived_report = make(Report, is_archived=True)
-        unarchived_report = make(Report, is_archived=False)
+        archived_report = make(Report, is_archived=True, point=ORIGIN)
+        unarchived_report = make(Report, is_archived=False, point=ORIGIN)
 
         form = ReportSearchForm({
             "q": "",
@@ -254,8 +260,8 @@ class ReportSearchFormTest(TestCase, UserMixin):
         self.assertEqual(len(reports), 1)
 
     def test_filter_by_unarchived_reports(self):
-        archived_report = make(Report, is_archived=True)
-        unarchived_report = make(Report, is_archived=False)
+        archived_report = make(Report, is_archived=True, point=ORIGIN)
+        unarchived_report = make(Report, is_archived=False, point=ORIGIN)
 
         form = ReportSearchForm({
             "q": "",
@@ -272,8 +278,8 @@ class ReportSearchFormTest(TestCase, UserMixin):
         self.assertEqual(len(reports), 1)
 
     def test_filter_by_public_reports(self):
-        pub_report = make(Report, is_public=True)
-        priv_report = make(Report, is_public=False)
+        pub_report = make(Report, is_public=True, point=ORIGIN)
+        priv_report = make(Report, is_public=False, point=ORIGIN)
 
         form = ReportSearchForm({
             "q": "",
@@ -290,8 +296,8 @@ class ReportSearchFormTest(TestCase, UserMixin):
         self.assertEqual(len(reports), 1)
 
     def test_filter_by_not_public_reports(self):
-        pub_report = make(Report, is_public=True)
-        priv_report = make(Report, is_public=False)
+        pub_report = make(Report, is_public=True, point=ORIGIN)
+        priv_report = make(Report, is_public=False, point=ORIGIN)
 
         form = ReportSearchForm({
             "q": "",
@@ -309,8 +315,8 @@ class ReportSearchFormTest(TestCase, UserMixin):
 
     def test_filter_by_reports_user_was_invited_to(self):
         inviter = self.create_user(username="inviter@example.com")
-        invited_report = make(Report, created_by=inviter)
-        other_report = make(Report)
+        invited_report = make(Report, created_by=inviter, point=ORIGIN)
+        other_report = make(Report, point=ORIGIN)
         make(Invite, user=self.user, created_by=inviter, report=invited_report)
 
         form = ReportSearchForm({
@@ -328,8 +334,8 @@ class ReportSearchFormTest(TestCase, UserMixin):
         self.assertEqual(len(reports), 1)
 
     def test_filter_by_reports_user_reported(self):
-        my_report = make(Report, created_by=self.user)
-        other_report = make(Report)
+        my_report = make(Report, created_by=self.user, point=ORIGIN)
+        other_report = make(Report, point=ORIGIN)
 
         form = ReportSearchForm({
             "q": "",
@@ -347,9 +353,9 @@ class ReportSearchFormTest(TestCase, UserMixin):
 
     def test_order_by_field_sorts_reports(self):
         now = timezone.now()
-        make(Report, created_on=now - timedelta(days=1))
-        make(Report, created_on=now)
-        make(Report, created_on=now + timedelta(days=1))
+        make(Report, created_on=now - timedelta(days=1), point=ORIGIN)
+        make(Report, created_on=now, point=ORIGIN)
+        make(Report, created_on=now + timedelta(days=1), point=ORIGIN)
 
         form = ReportSearchForm({
             "order_by": "-created_on",
@@ -373,9 +379,9 @@ class ReportSearchFormTest(TestCase, UserMixin):
     def test_inactive_users_only_see_public_reports_and_reports_they_created(self):
         self.user.is_active = False
         self.user.save()
-        pub_report = make(Report, is_public=True)
-        priv_report = make(Report, is_public=False)
-        my_report = make(Report, created_by=self.user)
+        pub_report = make(Report, is_public=True, point=ORIGIN)
+        priv_report = make(Report, is_public=False, point=ORIGIN)
+        my_report = make(Report, created_by=self.user, point=ORIGIN)
 
         # Since we aren't creating reports through a view, manually assign the
         # created report to report_ids (already covered in view tests)
@@ -465,12 +471,12 @@ class DetailViewTest(TestCase, UserMixin):
         self.index.clear()
 
     def test_anonymous_users_cant_view_non_public_reports_and_is_prompted_to_login(self):
-        report = make(Report, is_public=False)
+        report = make(Report, is_public=False, point=ORIGIN)
         response = self.client.get(reverse("reports-detail", args=[report.pk]))
         self.assertRedirects(response, reverse("login") + "?next=" + reverse("reports-detail", args=[report.pk]))
 
     def test_anonymous_users_with_proper_session_state_can_view_non_public_reports(self):
-        report = make(Report, is_public=False, created_by=self.inactive_user)
+        report = make(Report, is_public=False, created_by=self.inactive_user, point=ORIGIN)
         session = self.client.session
         session['report_ids'] = [report.pk]
         session.save()
@@ -478,7 +484,7 @@ class DetailViewTest(TestCase, UserMixin):
         self.assertEqual(response.status_code, 200)
 
     def test_anonymous_users_with_proper_session_state_should_be_prompted_to_login_if_the_report_was_created_by_an_active_user(self):
-        report = make(Report, is_public=False, created_by=self.user)
+        report = make(Report, is_public=False, created_by=self.user, point=ORIGIN)
         session = self.client.session
         session['report_ids'] = [report.pk]
         session.save()
@@ -486,7 +492,7 @@ class DetailViewTest(TestCase, UserMixin):
         self.assertRedirects(response, reverse("login") + "?next=" + reverse("reports-detail", args=[report.pk]))
 
     def test_invited_experts_cannot_see_every_report(self):
-        report = make(Report, is_public=False)
+        report = make(Report, is_public=False, point=ORIGIN)
         # we set is_active to True just so self.client.login works, but we have
         # to set it back to False
         invited_expert = self.user
@@ -505,7 +511,7 @@ class DetailViewTest(TestCase, UserMixin):
         self.assertEqual(response.status_code, 200)
 
     def test_comment_form_dependent_on_the_can_create_comment_check(self):
-        report = make(Report, is_public=True)
+        report = make(Report, is_public=True, point=ORIGIN)
         with patch("oregoninvasiveshotline.reports.views.can_create_comment", return_value=True) as perm_check:
             with patch("oregoninvasiveshotline.reports.views.CommentForm"):
                 response = self.client.get(reverse("reports-detail", args=[report.pk]))
@@ -519,7 +525,7 @@ class DetailViewTest(TestCase, UserMixin):
         self.assertEqual(None, response.context['comment_form'])
 
     def test_display_of_comments_for_each_permission_level(self):
-        report = make(Report, is_public=True, created_by=self.inactive_user)
+        report = make(Report, is_public=True, created_by=self.inactive_user, point=ORIGIN)
         public = make(Comment, report=report, visibility=Comment.PUBLIC)
         protected = make(Comment, report=report, visibility=Comment.PROTECTED)
         private = make(Comment, report=report, visibility=Comment.PRIVATE)
@@ -562,7 +568,7 @@ class DetailViewTest(TestCase, UserMixin):
         self.assertIn(private.body, response.content.decode())
 
     def test_create_comment(self):
-        report = make(Report)
+        report = make(Report, point=ORIGIN)
         self.client.login(email=self.user.email, password="foo")
         data = {
             "body": "foo",
@@ -578,7 +584,7 @@ class DetailViewTest(TestCase, UserMixin):
         self.assertEqual(1, Comment.objects.filter(report=report).count())
 
     def test_forms_are_none_for_anonymous_users(self):
-        report = make(Report, is_public=True)
+        report = make(Report, is_public=True, point=ORIGIN)
         response = self.client.get(reverse("reports-detail", args=[report.pk]))
         forms = [
             "comment_form",
@@ -591,7 +597,7 @@ class DetailViewTest(TestCase, UserMixin):
 
     def test_forms_are_initialized_for_admins(self):
         self.client.login(email=self.admin.email, password="admin")
-        report = make(Report)
+        report = make(Report, point=ORIGIN)
         response = self.client.get(reverse("reports-detail", args=[report.pk]))
         forms = [
             "comment_form",
@@ -603,7 +609,7 @@ class DetailViewTest(TestCase, UserMixin):
             self.assertNotEqual(None, response.context[form])
 
     def test_forms_filled_out(self):
-        report = make(Report)
+        report = make(Report, point=ORIGIN)
         self.client.login(email=self.admin.email, password="admin")
 
         with patch("oregoninvasiveshotline.reports.views.ManagementForm", SUBMIT_FLAG="foo") as m:
@@ -650,7 +656,7 @@ class ReportFormTest(TestCase):
             "suffix": "PHD",
         })
         self.assertFalse(form.is_valid())
-        report = prepare(Report, pk=1)
+        report = prepare(Report, pk=1, point=ORIGIN)
         pre_count = User.objects.count()
         request = Mock(build_absolute_uri=Mock(return_value=""))
 
@@ -689,7 +695,7 @@ class ReportFormTest(TestCase):
             "questions": "hello world",
         })
         self.assertFalse(form.is_valid())
-        report = make(Report)
+        report = make(Report, point=ORIGIN)
         form.instance = report
         with patch("oregoninvasiveshotline.reports.forms.forms.ModelForm.save"):
             form.save(request=Mock(build_absolute_uri=Mock(return_value="")))
@@ -708,7 +714,7 @@ class ManagementFormTest(SuppressPostSaveMixin, TestCase):
 
     def test_species_and_category_initialized(self):
         species = make(Species)
-        report = make(Report, reported_species=species, reported_category=species.category)
+        report = make(Report, reported_species=species, reported_category=species.category, point=ORIGIN)
         form = ManagementForm(instance=report)
         self.assertEqual(form.initial['category'], species.category)
         self.assertEqual(form.initial['actual_species'], species)
@@ -718,13 +724,13 @@ class ManagementFormTest(SuppressPostSaveMixin, TestCase):
         The javascript for the category/species selector expects the ids for
         the category and species fields to be something particular
         """
-        report = make(Report)
+        report = make(Report, point=ORIGIN)
         form = ManagementForm(instance=report)
         self.assertEqual(form.fields['category'].widget.attrs['id'], 'id_reported_category')
         self.assertEqual(form.fields['actual_species'].widget.attrs['id'], 'id_reported_species')
 
     def test_either_a_new_species_is_entered_xor_an_existing_species_is_selected(self):
-        report = make(Report)
+        report = make(Report, point=ORIGIN)
         data = {
             "new_species": "Yeti",
             "actual_species": make(Species).pk
@@ -741,7 +747,7 @@ class ManagementFormTest(SuppressPostSaveMixin, TestCase):
         self.assertFalse(form.has_error(NON_FIELD_ERRORS, code="species_contradiction"))
 
     def test_if_new_species_is_entered_severity_is_required(self):
-        report = make(Report)
+        report = make(Report, point=ORIGIN)
         data = {
             "new_species": "Yeti",
         }
@@ -750,7 +756,7 @@ class ManagementFormTest(SuppressPostSaveMixin, TestCase):
         self.assertTrue(form.has_error("severity", code="required"))
 
     def test_new_species_is_saved(self):
-        report = make(Report)
+        report = make(Report, point=ORIGIN)
         category = make(Category)
         severity = make(Severity)
         data = {
@@ -765,7 +771,7 @@ class ManagementFormTest(SuppressPostSaveMixin, TestCase):
         self.assertEqual(report.actual_species, species)
 
     def test_is_public_field_disabled_for_is_confidential_species(self):
-        report = make(Report, actual_species__is_confidential=True)
+        report = make(Report, actual_species__is_confidential=True, point=ORIGIN)
         form = ManagementForm(instance=report, data={
             # even though this was submitted with a True-y value, the form
             # should override it so it is always False
@@ -780,7 +786,7 @@ class ManagementFormTest(SuppressPostSaveMixin, TestCase):
         self.assertFalse(report.is_public)
 
     def test_settings_the_actual_species_to_a_confidential_species_raises_an_error_if_the_report_is_public_too(self):
-        report = make(Report)
+        report = make(Report, point=ORIGIN)
         form = ManagementForm(instance=report, data={
             "actual_species": make(Species, is_confidential=True).pk,
             "is_public": 1,
@@ -832,7 +838,7 @@ class InviteFormTest(TestCase, UserMixin):
 
     def test_save(self):
         inviter = self.create_user()
-        report = make(Report)
+        report = make(Report, point=ORIGIN)
         request = RequestFactory().get(reverse('reports-detail', args=(report.pk,)))
 
         form = InviteForm({
@@ -876,18 +882,18 @@ class ClaimViewTest(TestCase, UserMixin):
         self.index.clear()
 
     def test_claim_unclaimed_report_immediately_claims_it(self):
-        report = make(Report, claimed_by=None)
+        report = make(Report, claimed_by=None, point=ORIGIN)
         response = self.client.post(reverse("reports-claim", args=[report.pk]))
         self.assertEqual(Report.objects.get(claimed_by=self.user), report)
         self.assertRedirects(response, reverse("reports-detail", args=[report.pk]))
 
     def test_already_claimed_report_renders_confirmation_page(self):
-        report = make(Report, claimed_by=self.other_user)
+        report = make(Report, claimed_by=self.other_user, point=ORIGIN)
         response = self.client.post(reverse("reports-claim", args=[report.pk]))
         self.assertIn("Are you sure you want to steal", response.content.decode())
 
     def test_stealing_already_claimed_report(self):
-        report = make(Report, claimed_by=self.other_user)
+        report = make(Report, claimed_by=self.other_user, point=ORIGIN)
         response = self.client.post(reverse("reports-claim", args=[report.pk]), {"steal": 1})
         self.assertEqual(Report.objects.get(claimed_by=self.user), report)
         self.assertRedirects(response, reverse("reports-detail", args=[report.pk]))
@@ -909,7 +915,7 @@ class ReportListView(TestCase, UserMixin):
         self.index.clear()
 
     def test_get(self):
-        reports = make(Report, _quantity=3)
+        reports = make(Report, _quantity=3, point=ORIGIN)
         self.client.login(email=self.user.email, password="foo")
         response = self.client.get(reverse("reports-list"))
         self.assertEqual(response.status_code, 200)
@@ -932,7 +938,7 @@ class UnclaimViewTest(TestCase, UserMixin):
         self.index.clear()
 
     def test_only_person_who_claimed_report_can_unclaim_it(self):
-        report = make(Report)
+        report = make(Report, point=ORIGIN)
         # to set it back to False
         self.client.login(email=self.user.email, password="foo")
 
@@ -959,7 +965,7 @@ class ExportTest(TestCase):
         self.index.clear()
 
     def test_csv(self):
-        reports = make(Report, _quantity=3)
+        reports = make(Report, _quantity=3, point=ORIGIN)
         response = _export(reports, format="csv")
         reader = csv.DictReader(codecs.iterdecode(response, "utf8"))
         rows = list(reader)
@@ -967,7 +973,7 @@ class ExportTest(TestCase):
         self.assertEqual(rows[2]['Description'], reports[2].description)
 
     def test_kml(self):
-        reports = make(Report, _quantity=3)
+        reports = make(Report, _quantity=3, point=ORIGIN)
         response = _export(reports, format="kml")
         # this is harder to test without trying to parse the XML
         self.assertIn(reports[0].description, response.content.decode())
@@ -989,7 +995,7 @@ class DeleteViewTest(TestCase, UserMixin):
         self.index.clear()
 
     def test_permissions(self):
-        report = make(Report)
+        report = make(Report, point=ORIGIN)
         response = self.client.get(reverse("reports-delete", args=[report.pk]))
         self.assertRedirects(response, reverse("login") + "?next=" + reverse("reports-delete", args=[report.pk]))
 
@@ -1001,14 +1007,14 @@ class DeleteViewTest(TestCase, UserMixin):
 
     def test_get(self):
         self.client.login(email=self.user.email, password="foo")
-        report = make(Report)
+        report = make(Report, point=ORIGIN)
         response = self.client.get(reverse("reports-delete", args=[report.pk]))
         self.assertEqual(response.status_code, 200)
 
     def test_post(self):
         self.client.login(email=self.user.email, password="foo")
-        report = make(Report)
-        make(Report)
+        report = make(Report, point=ORIGIN)
+        make(Report, point=ORIGIN)
         response = self.client.post(reverse("reports-delete", args=[report.pk]))
         self.assertRedirects(response, reverse("reports-list"))
         self.assertFalse(Report.objects.filter(pk=report.pk).exists())

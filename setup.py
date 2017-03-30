@@ -35,7 +35,6 @@ setup(
             'coverage',
             'flake8',
             'model_mommy',
-            'mommy-spatial-generators',
             'psu.oit.arc.tasks',
         ]
     },

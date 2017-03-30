@@ -3,6 +3,7 @@ from base64 import b64decode
 from unittest.mock import patch
 
 from django import forms
+from django.contrib.gis.geos import Point
 from django.forms.models import modelformset_factory
 from django.test import TestCase
 
@@ -15,6 +16,9 @@ from oregoninvasiveshotline.reports.models import Report
 from .fields import ClearableImageInput
 from .forms import BaseImageFormSet, ImageForm, get_image_formset
 from .models import Image
+
+
+ORIGIN = Point(0, 0)
 
 
 class ImageFormTest(TestCase, UserMixin):
@@ -43,7 +47,7 @@ class BaseImageFormSetTest(TestCase, UserMixin):
             "form-0-name": "Hello world",
         })
         self.assertTrue(formset.is_valid())
-        report = make(Report)
+        report = make(Report, point=ORIGIN)
         user = self.create_user(username="foo@example.com")
         formset.save(fk=report, user=user)
         self.assertEqual(Image.objects.filter(report=report, created_by=user).count(), 1)
@@ -63,7 +67,7 @@ class GetImageFormSetTest(TestCase, UserMixin):
             "form-0-visibility": Image.PUBLIC,
         })
         self.assertTrue(formset.is_valid())
-        report = make(Report)
+        report = make(Report, point=ORIGIN)
         formset.save(fk=report, user=user)
         self.assertEqual(Image.objects.filter(report=report, created_by=user, visibility=Image.PUBLIC).count(), 1)
 
