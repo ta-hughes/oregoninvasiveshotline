@@ -1,0 +1,30 @@
+version: "3"
+
+networks:
+    oregoninvasiveshotline:
+        external: true
+
+volumes:
+    oregoninvasiveshotline-elasticsearch-data:
+        external: true
+    oregoninvasiveshotline-postgres-data:
+        external: true
+
+services:
+    elasticsearch:
+        image: elasticsearch:1.7
+        networks:
+            - oregoninvasiveshotline
+        ports:
+            - 9200:9200
+        volumes:
+            - oregoninvasiveshotline-elasticsearch-data:/usr/share/elasticsearch/data
+
+    postgres:
+        image: mdillon/postgis:9.4
+        networks:
+            - oregoninvasiveshotline
+        ports:
+            - 5432:5432
+        volumes:
+            - oregoninvasiveshotline-postgres-data:/var/lib/pgsql/9.4/data

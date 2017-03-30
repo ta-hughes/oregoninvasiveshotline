@@ -18,6 +18,7 @@ You can log in with the username "foobar@example.com" and the password "foobar".
 - Python 3.3
 - Django 1.8.x
 - Google Maps
+- Docker (in development only for now)
 
 # Notable Hackiness
 

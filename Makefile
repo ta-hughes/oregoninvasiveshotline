@@ -39,6 +39,12 @@ test: install
 coverage: install
 	$(bin)/runcommand coverage
 
+run-services:
+	docker network create --driver bridge $(package) || echo "$(package) network exists"
+	docker volume create --name $(package)-elasticsearch-data
+	docker volume create --name $(package)-postgres-data
+	docker-compose --file docker-compose.services.yaml up
+
 run:
 	@$(bin)/runcommand runserver
 
@@ -76,6 +82,7 @@ clean-venv:
     reinstall-arctasks \
     test \
     coverage \
+    run-services \
     run \
     deploy \
     clean \
