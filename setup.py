@@ -23,11 +23,11 @@ setup(
         'django-perms>=2.0.0',
         'django-pgcli',
         'elasticsearch>=1.9.0,<2.0.0',
-        'pytz>=2016.4',
         'djangorestframework>=3.6.2',
         'Markdown>=2.6.8',
         'Pillow>=4.0.0',
         'psycopg2>=2.7.1',
+        'pytz>=2017.2',
     ],
     extras_require={
         'dev': [
