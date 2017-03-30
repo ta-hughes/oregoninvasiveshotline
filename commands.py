@@ -16,9 +16,10 @@ def init(config, overwrite=False):
     install(config)
     createdb(config, drop=overwrite)
     migrate(config)
-    rebuild_index(config, input=False)
     loaddata(config)
+    rebuild_index(config, input=False)
     generate_icons(config, clean=overwrite, input=False)
+    test(config, with_coverage=True, force_env='test')
 
 
 @command(env='dev')

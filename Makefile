@@ -15,8 +15,6 @@ env ?= stage
 
 init: $(venv) $(arctasks)
 	@$(bin)/runcommand init
-	@$(bin)/runcommand test
-	@$(bin)/runcommand coverage
 reinit: clean-egg-info clean-venv init
 
 venv: $(venv)
