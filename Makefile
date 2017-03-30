@@ -14,9 +14,9 @@ arctasks_url = https://github.com/PSU-OIT-ARC/arctasks/archive/master.tar.gz#egg
 env ?= stage
 
 init: $(venv) $(arctasks)
-	@$(bin)/inv init
-	@$(bin)/inv test
-	@$(bin)/inv coverage
+	@$(bin)/runcommand init
+	@$(bin)/runcommand test
+	@$(bin)/runcommand coverage
 reinit: clean-egg-info clean-venv init
 
 venv: $(venv)
@@ -37,15 +37,15 @@ install-arctasks: $(arctasks)
 reinstall-arctasks: clean-arctasks $(arctasks)
 
 test: install
-	@$(bin)/inv test
+	@$(bin)/runcommand test
 coverage: install
-	$(bin)/inv coverage
+	$(bin)/runcommand coverage
 
 run:
-	@$(bin)/inv runserver
+	@$(bin)/runcommand runserver
 
 deploy:
-	$(bin)/inv configure --env $(env) deploy
+	$(bin)/runcommand --echo --env $(env) deploy
 
 clean: clean-pyc
 clean-all: clean-build clean-coverage clean-dist clean-egg-info clean-pyc clean-venv
