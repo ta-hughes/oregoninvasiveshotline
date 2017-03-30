@@ -22,12 +22,12 @@ setup(
         'django-local-settings>=1.0b6',
         'django-perms>=2.0.0',
         'django-pgcli',
-        'djangorestframework>=3.3.3',
         'elasticsearch>=1.9.0,<2.0.0',
         'Markdown>=2.6.6',
         'Pillow>=3.2.0',
         'psycopg2>=2.6.1',
         'pytz>=2016.4',
+        'djangorestframework>=3.6.2',
     ],
     extras_require={
         'dev': [
