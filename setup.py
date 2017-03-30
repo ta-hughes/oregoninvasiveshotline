@@ -34,7 +34,6 @@ setup(
             'bpython',
             'coverage',
             'flake8',
-            'isort',
             'model_mommy',
             'mommy-spatial-generators',
             'psu.oit.arc.tasks',
