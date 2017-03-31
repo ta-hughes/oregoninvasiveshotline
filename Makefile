@@ -54,7 +54,7 @@ deploy:
 clean: clean-pyc
 clean-all: clean-build clean-coverage clean-dist clean-egg-info clean-pyc clean-venv
 clean-arctasks:
-	test -d $(arctasks) && $(bin)/pip uninstall --yes psu.oit.arc.tasks || echo "ARCTasks not installed"
+	$(bin)/pip uninstall --yes psu.oit.arc.tasks || echo "ARCTasks not installed"
 clean-build:
 	rm -rf build
 clean-coverage:
