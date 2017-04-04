@@ -1,11 +1,17 @@
-/variables.py
-*.pyc
-/.env
-/media/*
-/tmp/*
+# Root
+/.env/
+/build/
+/dist/
+/media/
+/static/
+/*.egg-info/
 /.coverage
-/htmlcov
-/static
 /local.cfg
 /local.stage.cfg
 /local.prod.cfg
+
+# Anywhere
+node_modules/
+__pycache__/
+*.pyc
+*.pyo
