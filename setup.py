@@ -23,6 +23,7 @@ setup(
         'django-perms>=2.0.0',
         'django-pgcli',
         'djangorestframework>=3.6.2',
+        # 'django-storages>=1.5.2',
         'elasticsearch>=1.9.0,<2.0.0',
         'Markdown>=2.6.8',
         'Pillow>=4.1.0',
