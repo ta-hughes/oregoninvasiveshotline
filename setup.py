@@ -28,6 +28,7 @@ setup(
         'Pillow>=4.1.0',
         'psycopg2>=2.7.1',
         'pytz>=2017.2',
+        'psu.oit.arc.tasks',
     ],
     extras_require={
         'dev': [
@@ -35,7 +36,6 @@ setup(
             'coverage',
             'flake8',
             'model_mommy',
-            'psu.oit.arc.tasks',
         ]
     },
 )
