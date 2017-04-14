@@ -25,7 +25,7 @@ setup(
         'djangorestframework>=3.6.2',
         'elasticsearch>=1.9.0,<2.0.0',
         'Markdown>=2.6.8',
-        'Pillow>=4.0.0',
+        'Pillow>=4.1.0',
         'psycopg2>=2.7.1',
         'pytz>=2017.2',
     ],
