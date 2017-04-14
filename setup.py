@@ -14,7 +14,7 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=[
-        'django>=1.8.17,<1.9',
+        'django>=1.8.18,<1.9',
         'django-arcutils>=2.16.0',
         'django-bootstrap-form>=3.2.1',
         'django-cloak',
