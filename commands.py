@@ -4,7 +4,6 @@ from runcommands import DEFAULT_ENV, command, configure
 from runcommands.util import confirm, printer
 
 from arctasks.commands import *
-from arctasks.aws import *
 from arctasks.django import call_command, manage, setup
 
 

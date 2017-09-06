@@ -8,7 +8,6 @@
 /.coverage
 /local.cfg
 /local.stage.cfg
-/local.testing.cfg
 /local.prod.cfg
 
 # Anywhere
