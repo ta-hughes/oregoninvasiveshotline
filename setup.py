@@ -36,6 +36,7 @@ setup(
             'coverage',
             'flake8',
             'model_mommy',
+            'docker-compose'
         ]
     },
 )
