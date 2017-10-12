@@ -1,49 +1,55 @@
 from collections import defaultdict
 
-from arctasks import *
+from runcommands import DEFAULT_ENV, command, configure
+from runcommands.util import confirm, printer
+
+from arctasks.commands import *
 from arctasks.django import call_command, manage, setup
-from arctasks.util import confirm, print_info, print_warning
 
 
-@arctask(configured='dev', timed=True)
-def init(ctx, overwrite=False):
-    virtualenv(ctx, overwrite=overwrite)
-    install(ctx)
-    createdb(ctx, drop=overwrite)
-    migrate(ctx)
-    rebuild_index(ctx, input=False)
-    loaddata(ctx)
-    generate_icons(ctx, clean=overwrite, input=False)
+configure(default_env='dev')
 
 
-@arctask(configured='dev')
-def loaddata(ctx):
-    manage(ctx, (
+@command(env='dev', timed=True)
+def init(config, overwrite=False):
+    virtualenv(config, overwrite=overwrite)
+    install(config)
+    createdb(config, drop=overwrite)
+    migrate(config)
+    loaddata(config)
+    rebuild_index(config, input=False)
+    generate_icons(config, clean=overwrite, input=False)
+    test(config, with_coverage=True, force_env='test')
+
+
+@command(env='dev')
+def loaddata(config):
+    manage(config, (
         'loaddata',
         'dummy_user.json category.json severity.json counties.json pages.json',
     ))
 
 
-@arctask(configured=DEFAULT_ENV)
-def post_deploy(ctx):
+@command(default_env=DEFAULT_ENV)
+def post_deploy(config):
     """A set of tasks that commonly needs to be run after deploying."""
-    generate_icons(ctx, clean=True, input=False)
-    rebuild_index(ctx, input=False)
+    generate_icons(config, clean=True, input=False)
+    rebuild_index(config, input=False)
 
 
-@arctask(configured=DEFAULT_ENV)
-def rebuild_index(ctx, input=True):
-    call_command('rebuild_index', interactive=input)
+@command(default_env=DEFAULT_ENV)
+def rebuild_index(config, input=True):
+    call_command(config, 'rebuild_index', interactive=input)
 
 
-@arctask(configured=DEFAULT_ENV)
-def generate_icons(ctx, clean=False, force=False, input=True):
-    call_command('generate_icons', clean=clean, force=force, interactive=input)
+@command(default_env=DEFAULT_ENV)
+def generate_icons(config, clean=False, force=False, input=True):
+    call_command(config, 'generate_icons', clean=clean, force=force, interactive=input)
 
 
-@arctask(configured=DEFAULT_ENV)
-def remove_duplicate_users(ctx):
-    setup()
+@command(default_env=DEFAULT_ENV)
+def remove_duplicate_users(config):
+    setup(config)
     from django.apps import apps
     from django.contrib.auth import get_user_model
     from arcutils.db import will_be_deleted_with
@@ -65,7 +71,7 @@ def remove_duplicate_users(ctx):
     )
     dupes = [d for d in dupes]
 
-    print_info('Found {n} duplicates'.format(n=len(dupes)))
+    printer.info('Found {n} duplicates'.format(n=len(dupes)))
 
     # Delete any dupes we can.
     # Active and staff users are never deleted.
@@ -80,8 +86,8 @@ def remove_duplicate_users(ctx):
         elif user.is_staff:
             print('Skipping inactive staff user: {email}.'.format_map(f))
         elif num_objects == 0:
-            print_warning('Deleting {email} will *not* cascade.'.format_map(f))
-            if confirm(ctx, 'Delete {email}?'.format_map(f), yes_values=('yes',)):
+            printer.warning('Deleting {email} will *not* cascade.'.format_map(f))
+            if confirm(config, 'Delete {email}?'.format_map(f), yes_values=('yes',)):
                 print('Okay, deleting {email}...'.format_map(f), end='')
                 user.delete()
                 dupes.remove(user)

@@ -2,6 +2,7 @@ from unittest.mock import Mock, patch
 
 from django.core import mail
 from django.core.urlresolvers import reverse
+from django.contrib.gis.geos import Point
 from django.test import TestCase
 
 from model_mommy.mommy import make
@@ -12,6 +13,9 @@ from oregoninvasiveshotline.reports.models import Report
 from oregoninvasiveshotline.species.models import Category
 
 from .models import UserNotificationQuery
+
+
+ORIGIN = Point(0, 0)
 
 
 class CreateViewTest(TestCase, UserMixin):
@@ -69,14 +73,14 @@ class UserNotificationQueryTest(TestCase, UserMixin):
 
         # This report does *not* have the words "foobarius" in it, so no
         # email should be sent.
-        report = make(Report)
+        report = make(Report, point=ORIGIN)
         UserNotificationQuery.notify(report, request=Mock())
         thread.call_args[1]['target']()
         self.assertEqual(len(mail.outbox), 0)
 
         # This report *does* have the word "foobarius" in it, so it
         # should trigger an email to be sent.
-        report = make(Report, reported_category__name='foobarius')
+        report = make(Report, reported_category__name='foobarius', point=ORIGIN)
         request = Mock(build_absolute_uri=Mock(return_value=''))
         UserNotificationQuery.notify(report, request=request)
         thread.call_args[1]['target']()

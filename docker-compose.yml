@@ -1,0 +1,24 @@
+version: "3"
+
+networks:
+  default:
+    driver: bridge
+
+services:
+    elasticsearch:
+        image: elasticsearch:1.7
+        networks:
+            - default
+        ports:
+            - 9200:9200
+        volumes:
+            - ./volumes/elasticsearch:/usr/share/elasticsearch/data
+
+    postgres:
+        image: mdillon/postgis:9.4
+        networks:
+            - default
+        ports:
+            - 5432:5432
+        volumes:
+            - ./volumes/postgres:/var/lib/postgresql

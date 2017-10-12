@@ -4,6 +4,7 @@ from unittest.mock import Mock, patch
 from django.conf import settings
 from django.core import mail
 from django.core.urlresolvers import reverse
+from django.contrib.gis.geos import Point
 from django.test import TestCase
 
 from model_mommy.mommy import make, prepare
@@ -15,6 +16,9 @@ from oregoninvasiveshotline.reports.models import Invite, Report
 from .forms import PublicLoginForm, UserForm, UserSearchForm
 from .models import User
 from .search_indexes import UserIndex
+
+
+ORIGIN = Point(0, 0)
 
 
 class DetailViewTest(TestCase, UserMixin):
@@ -74,7 +78,7 @@ class AuthenticateViewTest(TestCase, UserMixin):
 
     def test_active_or_invited_users_are_logged_in(self):
         # test for an invited user
-        invite = make(Invite, report=make(Report))
+        invite = make(Invite, report=make(Report, point=ORIGIN))
         url = invite.user.get_authentication_url(request=Mock(build_absolute_uri=lambda a: a))
         response = self.client.get(url)
         self.assertRedirects(response, self.login_redirect_url)
@@ -87,7 +91,7 @@ class AuthenticateViewTest(TestCase, UserMixin):
 
     def test_report_ids_session_variable_is_populated(self):
         user = self.create_user(username="foo@example.com", is_active=True)
-        report = make(Report, created_by=user)
+        report = make(Report, created_by=user, point=ORIGIN)
         url = user.get_authentication_url(request=Mock(build_absolute_uri=lambda a: a))
         response = self.client.get(url)
         self.assertRedirects(response, self.login_redirect_url)
@@ -102,9 +106,9 @@ class UserHomeViewTest(TestCase):
     def test_anonymous_user_with_report_ids_session_variable(self):
         # they should be able to see the reports they submitted that are in the
         # session var
-        r1 = make(Report)
-        r2 = make(Report)
-        make(Report)  # this report shouldn't show up in the reported queryset
+        r1 = make(Report, point=ORIGIN)
+        r2 = make(Report, point=ORIGIN)
+        make(Report, point=ORIGIN)  # this report shouldn't show up in the reported queryset
         session = self.client.session
         session['report_ids'] = [r1.pk, r2.pk]
         session.save()

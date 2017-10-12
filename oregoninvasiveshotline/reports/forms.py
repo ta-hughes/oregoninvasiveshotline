@@ -135,7 +135,7 @@ class ReportSearchForm(SearchForm):
         # Only certain fields on this form can be used by members of the
         # public.
         if not user.is_active:
-            for name in self.fields.keys():
+            for name in list(self.fields):
                 if name not in self.public_fields:
                     self.fields.pop(name)
 
