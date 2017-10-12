@@ -21,7 +21,7 @@ setup(
         'django-haystack>=2.4.1,<2.5',
         'django-perms>=2.0.0',
         'django-pgcli>=0.0.2',
-        'djangorestframework>=3.6.4',
+        'djangorestframework>=3.6.4,<3.7',
         'elasticsearch>=1.9.0,<2.0.0',
         'Markdown>=2.6.8',
         'Pillow>=4.3.0',
