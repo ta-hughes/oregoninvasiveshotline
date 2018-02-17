@@ -1,6 +1,10 @@
 from haystack import indexes
+import logging
+
 
 from .models import Report
+
+log = logging.getLogger(__name__)
 
 
 class ReportIndex(indexes.SearchIndex, indexes.Indexable):
@@ -43,8 +47,20 @@ class ReportIndex(indexes.SearchIndex, indexes.Indexable):
     icon_url = indexes.CharField(model_attr='icon_url', indexed=False)
     image_url = indexes.CharField(model_attr='image_url', default=None, indexed=False)
 
-    lat = indexes.FloatField(model_attr='point__y', indexed=False)
-    lng = indexes.FloatField(model_attr='point__x', indexed=False)
+    lat = indexes.FloatField(indexed=False)
+    lng = indexes.FloatField(indexed=False)
 
     def get_model(self):
         return Report
+
+    def prepare_lat(self, obj):
+        try:
+            return obj.point.y
+        except:
+            return None
+
+    def prepare_lng(self, obj):
+        try:
+            return obj.point.x
+        except:
+            return None

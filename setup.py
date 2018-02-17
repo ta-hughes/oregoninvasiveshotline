@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 
-VERSION = '1.11.0'
+VERSION = '1.12.0.dev'
 
 
 setup(
@@ -14,19 +14,19 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=[
-        'django>=1.8.18,<1.9',
+        'django>=1.11.10,<2.0',
         'django-arcutils>=2.24.0',
-        'django-bootstrap-form>=3.2.1',
+        'django-bootstrap-form>=3.3',
         'django-cloak',
-        'django-haystack>=2.4.1,<2.5',
+        'django-haystack>=2.6',
         'django-perms>=2.0.0',
         'django-pgcli>=0.0.2',
-        'djangorestframework>=3.6.4,<3.7',
-        'elasticsearch>=1.9.0,<2.0.0',
-        'Markdown>=2.6.8',
-        'Pillow>=4.3.0',
-        'psycopg2>=2.7.3.1',
-        'pytz>=2017.2',
+        'djangorestframework>=3.7',
+        'elasticsearch>=2.0.0,<3.0.0',
+        'Markdown>=2.6.11',
+        'Pillow>=4.3.0',  # can't move to 5 until prod python is > 3.3
+        'psycopg2>=2.7.4',
+        'pytz>=2018.3',
         'psu.oit.arc.tasks',
     ],
     extras_require={

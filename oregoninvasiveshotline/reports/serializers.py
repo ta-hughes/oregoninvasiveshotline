@@ -32,7 +32,7 @@ class ReportSerializer(serializers.Serializer):
         if isinstance(instance, Report):
             point = instance.point
             return point.y if point else None
-        elif isinstance(instance, SearchResult) and instance.model is Report:
+        elif isinstance(instance, SearchResult):
             return instance.lat
         else:
             raise TypeError(instance.__class__)
@@ -41,7 +41,7 @@ class ReportSerializer(serializers.Serializer):
         if isinstance(instance, Report):
             point = instance.point
             return point.x if point else None
-        elif isinstance(instance, SearchResult) and instance.model is Report:
+        elif isinstance(instance, SearchResult):
             return instance.lng
         else:
             raise TypeError(instance.__class__)
