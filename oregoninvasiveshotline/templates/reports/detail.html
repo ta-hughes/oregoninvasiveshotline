@@ -260,6 +260,14 @@ Report #{{ report.pk }} - {{ report }}
             });
         });
 
+        $('#cancel-comment').click(function(e){
+            e.preventDefault();
+            $('#create-comment').slideUp().promise().done(function(){
+                $('#add-comment').css("display", "block");
+                $('#add-comment').css("visibility", "visible");
+            });
+        });
+
         $('#id_new_species').keydown(function(){
             $('#id_reported_species').val("");
         });
