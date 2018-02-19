@@ -269,11 +269,6 @@ class UserTest(TestCase, UserMixin):
         self.assertFalse(self.user.has_module_perms("foo"), self.user)
         self.assertTrue(self.admin.has_module_perms("foo"), self.admin)
 
-    def test_can_cloak_as(self):
-        """Only staffers can cloak"""
-        self.assertFalse(self.user.has_module_perms("foo"), self.user)
-        self.assertTrue(self.admin.has_module_perms("foo"), self.admin)
-
     def test_get_proper_name(self):
         user = self.create_user(
             username="asdf",

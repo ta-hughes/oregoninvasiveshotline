@@ -69,10 +69,6 @@ urlpatterns = [
     url(r'', include('django.contrib.auth.urls')),
 
     url(r'pages/', include('oregoninvasiveshotline.pages.urls')),
-
-    # These routes allow you to masquerade as a user and log in as them
-    # from the command line.
-    url(r'^cloak/', include('cloak.urls'))
 ]
 
 

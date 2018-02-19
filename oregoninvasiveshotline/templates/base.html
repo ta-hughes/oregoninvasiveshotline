@@ -26,18 +26,7 @@
 
     <body class="{% block body_class %}{% endblock %}">
         {% block body %}
-            {% if user.is_cloaked %}
-                <div class="alert alert-danger" id="mask-alert">
-                    <strong class="text-danger">You are masquerading as {{ user }}</strong>
-                    <form method="post" action="{% url 'uncloak' %}" style="display: inline;">
-                        {% csrf_token %}
-                        <input type="hidden" name="next" value="{{ on_uncloak_goto }}">
-                        <input type="submit" name="submit" value="Un-masquerade" class="btn btn-danger btn-xs">
-                    </form>
-                </div>
-            {% endif %}
-
-            <div class="{% if user.is_cloaked %}cloak-pushdown{% endif %}">
+            <div>
                 <div id="header" class="container">
                     <div class="row">
                         <div class="col-lg-4 col-md-5 col-sm-12">

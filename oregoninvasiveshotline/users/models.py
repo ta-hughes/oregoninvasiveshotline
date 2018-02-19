@@ -111,12 +111,5 @@ class User(AbstractBaseUser):
     def has_module_perms(self, app_label):
         return self.is_staff
 
-    def can_cloak_as(self, other_user):
-        """
-        This method is used by the `cloak` package to determine if a user is
-        allowed to cloak as another user
-        """
-        return self.is_staff
-
     def __str__(self):
         return self.get_full_name()
