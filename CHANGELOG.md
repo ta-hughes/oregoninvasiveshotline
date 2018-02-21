@@ -1,7 +1,14 @@
 # Changelog for Oregon Invasives Hotline
 
-## 1.12.0 - Unreleased
-IN PROGRESS
+## 1.12.0 - 2018-02-21
+
+### Maintenance
+- Update to Django 1.11.x
+- Update python dependencies
+- Update JS dependencies
+
+### Feature
+- Added address Geocoder (Google maps API) to report form
 
 ## 1.11.0 - 2017-10-12
 
