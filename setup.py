@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 
-VERSION = '1.12.0.dev'
+VERSION = '1.12.0'
 
 
 setup(
@@ -23,10 +23,13 @@ setup(
         'djangorestframework>=3.7',
         'elasticsearch>=2.0.0,<3.0.0',
         'Markdown>=2.6.11',
-        'Pillow>=4.3.0',  # can't move to 5 until prod python is > 3.3
+        #'Pillow=4.3.0,
+        'Pillow>=5.0',  #can't move to 5 until prod python is > 3.3
         'psycopg2>=2.7.4',
         'pytz>=2018.3',
         'psu.oit.arc.tasks',
+        'runcommands==1.0a26.dev0',
+        #'olefile==0.44' #must specify while using py3.3
     ],
     extras_require={
         'dev': [
