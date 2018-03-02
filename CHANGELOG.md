@@ -1,5 +1,11 @@
 # Changelog for Oregon Invasives Hotline
 
+## 1.13.0 - unreleased
+
+### Added
+
+- Configures the project to use 'emcee'.
+
 ## 1.12.0 - 2018-02-21
 
 ### Maintenance
@@ -31,7 +37,6 @@
 - Revises docker-compose definitions.
 - Remove mommy-spatial-generators dependency
 - Various build/deploy tooling updates
-
 
 ## 1.10.0 - 2016-08-16
 
