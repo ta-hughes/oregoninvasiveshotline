@@ -1,139 +1,70 @@
-from collections import defaultdict
+from runcommands.commands import remote
+from runcommands import command
 
-from runcommands import DEFAULT_ENV, command, configure
-from runcommands.util import confirm, printer
+from emcee.commands import *
+from emcee.commands.deploy import deploy
+from emcee.commands.django import manage, manage_remote
+from emcee.commands.files import rsync
 
-from arctasks.commands import *
-from arctasks.django import call_command, manage, setup
+from emcee.backends.dev.db import provision_database as provision_database_local
+from emcee.backends.aws.provision.base import provision_volume, patch_host
+from emcee.backends.aws.provision.gis import provision_gis
+from emcee.backends.aws.provision.python import provision_python
+from emcee.backends.aws.provision.services.local import provision_nginx
+from emcee.backends.aws.provision.services.remote import provision_database
+from emcee.backends.aws.deploy import AWSDjangoDeployer
+from emcee.backends.aws.infrastructure.commands import *
 
 
-configure(default_env='dev')
+@command
+def loaddata(config):
+    manage(config,
+           'loaddata dummy_user.json category.json severity.json counties.json pages.json')
 
 
 @command(env='dev', timed=True)
 def init(config, overwrite=False):
-    virtualenv(config, overwrite=overwrite)
+    virtualenv(config, config.venv, overwrite=overwrite)
     install(config)
-    createdb(config, drop=overwrite)
-    migrate(config)
+    # provision_database_local(config, drop=overwrite, with_postgis=True)
+    manage(config, 'migrate --no-input')
     loaddata(config)
-    rebuild_index(config, input=False)
-    generate_icons(config, clean=overwrite, input=False)
-    test(config, with_coverage=True, force_env='test')
+    manage(config, 'rebuild_index --noinput')
+    manage(config, 'generate_icons --no-input --clean --force')
+    # test(config, with_coverage=True, force_env='test')
 
 
-@command(env='dev')
-def loaddata(config):
-    manage(config, (
-        'loaddata',
-        'dummy_user.json category.json severity.json counties.json pages.json',
-    ))
+class Deployer(AWSDjangoDeployer):
+    def bootstrap_application(self):
+        super(Deployer, self).bootstrap_application()
+
+        # Create media directory on EBS mount, link to it from app root
+        # and apply the correct permissions.
+        
+
+        remote(self.config, ('mkdir', '-p', '/vol/store/media'), sudo=True)
+        remote(self.config, ('mkdir', '-p', '{remote.path.root}/media'), sudo=True)
+        remote(self.config, ('ln', '-sf', '/vol/store/media', '{remote.path.media}'), sudo=True)
+        remote(self.config, ('chown', '-R', '{service.user}:nginx', '/vol/store/media'), sudo=True)
+
+        # Synchronize icons and assorted media assets
+        rsync(self.config, 'media/*', self.config.remote.path.media)
+
+        # Rebuild search index
+        manage_remote(self.config, 'rebuild_index --noinput')
+
+        # Generate icons
+        manage_remote(self.config, 'generate_icons --no-input')
 
 
-@command(default_env=DEFAULT_ENV)
-def post_deploy(config):
-    """A set of tasks that commonly needs to be run after deploying."""
-    generate_icons(config, clean=True, input=False)
-    rebuild_index(config, input=False)
+@command(env=True)
+def deploy_app(config, provision=False, createdb=False):
+    if provision:
+        provision_volume(config, mount_point='/vol/store')
+        provision_python(config)
+        provision_gis(config)
+        provision_nginx(config)
+    if createdb:
+        provision_database(config, with_postgis=True)
 
-
-@command(default_env=DEFAULT_ENV)
-def rebuild_index(config, input=True):
-    call_command(config, 'rebuild_index', interactive=input)
-
-
-@command(default_env=DEFAULT_ENV)
-def generate_icons(config, clean=False, force=False, input=True):
-    call_command(config, 'generate_icons', clean=clean, force=force, interactive=input)
-
-
-@command(default_env=DEFAULT_ENV)
-def remove_duplicate_users(config):
-    setup(config)
-    from django.apps import apps
-    from django.contrib.auth import get_user_model
-    from arcutils.db import will_be_deleted_with
-
-    Comment = apps.get_model('comments', 'Comment')
-    Image = apps.get_model('images', 'Image')
-    Notification = apps.get_model('notifications', 'Notification')
-    UserNotificationQuery = apps.get_model('notifications', 'UserNotificationQuery')
-    Invite = apps.get_model('reports', 'Invite')
-    Report = apps.get_model('reports', 'Report')
-
-    user_model = get_user_model()
-    dupes = user_model.objects.raw(
-        'SELECT * from "user" u1 '
-        'WHERE ('
-        '    SELECT count(*) FROM "user" u2 WHERE lower(u2.email) = lower(u1.email )'
-        ') > 1 '
-        'ORDER BY lower(email)'
-    )
-    dupes = [d for d in dupes]
-
-    printer.info('Found {n} duplicates'.format(n=len(dupes)))
-
-    # Delete any dupes we can.
-    # Active and staff users are never deleted.
-    # Public users with no associated records will be deleted.
-    for user in dupes:
-        email = user.email
-        objects = list(will_be_deleted_with(user))
-        num_objects = len(objects)
-        f = locals()
-        if user.is_active:
-            print('Skipping active user: {email}.'.format_map(f))
-        elif user.is_staff:
-            print('Skipping inactive staff user: {email}.'.format_map(f))
-        elif num_objects == 0:
-            printer.warning('Deleting {email} will *not* cascade.'.format_map(f))
-            if confirm(config, 'Delete {email}?'.format_map(f), yes_values=('yes',)):
-                print('Okay, deleting {email}...'.format_map(f), end='')
-                user.delete()
-                dupes.remove(user)
-                print('Deleted')
-        else:
-            print(
-                'Deleting {email} would cascade to {num_objects} objects. Skipping.'.format_map(f))
-
-    # Group the remaining duplicates by email address
-    grouped_dupes = defaultdict(list)
-    for user in dupes:
-        email = user.email.lower()
-        grouped_dupes[email].append(user)
-    grouped_dupes = {email: users for (email, users) in grouped_dupes.items() if len(users) > 1}
-
-    # For each group, find the "best" user (staff > active > inactive).
-    # The other users' associated records will be associated with this
-    # "winner".
-    for email, users in grouped_dupes.items():
-        winner = None
-        for user in users:
-            if user.is_staff:
-                winner = user
-                break
-        if winner is None:
-            for user in users:
-                if user.is_active:
-                    winner = user
-                    break
-        if winner is None:
-            for user in users:
-                if user.full_name:
-                    winner = user
-        if winner is None:
-            winner = users[0]
-        losers = [user for user in users if user != winner]
-        print('Winner:', winner.full_name, '<{0.email}>'.format(winner))
-        for loser in losers:
-            print('Loser:', loser.full_name, '<{0.email}>'.format(loser))
-            print('Re-associating loser objects...', end='')
-            Comment.objects.filter(created_by=loser).update(created_by=winner)
-            Image.objects.filter(created_by=loser).update(created_by=winner)
-            Invite.objects.filter(user=loser).update(user=winner)
-            Invite.objects.filter(created_by=loser).update(created_by=winner)
-            Notification.objects.filter(user=loser).update(user=winner)
-            Report.objects.filter(claimed_by=loser).update(claimed_by=winner)
-            Report.objects.filter(created_by=loser).update(created_by=winner)
-            UserNotificationQuery.objects.filter(user=loser).update(user=winner)
-            print('Done')
+    deploy(config, Deployer)
