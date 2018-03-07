@@ -4,11 +4,9 @@
 /dist/
 /media/
 /static/
+/volumes/
 /*.egg-info/
 /.coverage
-/local.cfg
-/local.dev.cfg
-/local.test.cfg
 
 # Anywhere
 node_modules/

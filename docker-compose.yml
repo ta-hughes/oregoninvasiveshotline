@@ -3,22 +3,53 @@ version: "3"
 networks:
   default:
     driver: bridge
+    ipam:
+      config:
+        # this value is a soft-reservation of the subnet in
+        # order to reduce friction w.r.t. a given local docker
+        # environment and project configuration.
+        # 
+        # if you encounter network definition conflicts, change
+        # the value below and revise its use in 'local.*.cfg'.
+        - subnet: 172.23.0.0/16
 
 services:
-    elasticsearch:
-        image: elasticsearch:1.7
-        networks:
-            - default
-        ports:
-            - 9200:9200
-        volumes:
-            - ./volumes/elasticsearch:/usr/share/elasticsearch/data
+  postgres:
+    image: kartoza/postgis:9.6-2.4
+    networks:
+      - default
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=invasives
+      - POSTGRES_PASS=invasives
+      - POSTGRES_DBNAME=invasives
+    volumes:
+      - ./volumes/postgres:/var/lib/postgresql
 
-    postgres:
-        image: mdillon/postgis:9.4
-        networks:
-            - default
-        ports:
-            - 5432:5432
-        volumes:
-            - ./volumes/postgres:/var/lib/postgresql
+  elasticsearch:
+    image: elasticsearch:1.7
+    networks:
+      - default
+    ports:
+      - 9200:9200
+    volumes:
+      - ./volumes/elasticsearch:/usr/share/elasticsearch/data
+
+  oregoninvasiveshotline:
+    image: psu.oit.wdt/oregoninvasiveshotline
+    build: app
+    user: oregoninvasiveshotline
+    environment:
+      - LOCAL_SETTINGS_FILE=local.docker.cfg
+      - WSGI_ROOT=/webapps/oregoninvasiveshotline
+      - WSGI_VENV=/webapps/oregoninvasiveshotline/venv-docker
+    networks:
+      - default
+    ports:
+      - 8000:8000
+    volumes:
+      - ./:/webapps/oregoninvasiveshotline
+    depends_on:
+      - postgres
+      - elasticsearch
