@@ -1,12 +1,13 @@
 from runcommands.commands import remote
 from runcommands import command
 
-from emcee.commands import *
 from emcee.commands.deploy import deploy
+from emcee.commands.python import virtualenv, install
 from emcee.commands.django import manage, manage_remote
 from emcee.commands.files import rsync
 
 from emcee.backends.dev.db import provision_database as provision_database_local
+from emcee.backends.aws.provision.base import patch_host
 from emcee.backends.aws.provision.base import provision_volume, patch_host
 from emcee.backends.aws.provision.gis import provision_gis
 from emcee.backends.aws.provision.python import provision_python
