@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 
-VERSION = '1.12.0'
+VERSION = '1.12.1'
 
 
 setup(
@@ -17,7 +17,7 @@ setup(
         'django>=1.11.10,<2.0',
         'django-arcutils>=2.24.0',
         'django-bootstrap-form>=3.3',
-        'django-haystack>=2.6',
+        'django-haystack>=2.8',
         'django-perms>=2.0.0',
         'django-pgcli>=0.0.2',
         'djangorestframework>=3.7',
