@@ -6,6 +6,14 @@
 
 - Configures the project to use 'emcee'.
 
+## 1.12.1 - 2018-03-12
+
+### Fixed
+- Fixed Haystack indexing error on report.claimed_by_id
+
+### Maintenance
+- Bump Haystack to newest release 2.8
+
 ## 1.12.0 - 2018-02-21
 
 ### Maintenance
