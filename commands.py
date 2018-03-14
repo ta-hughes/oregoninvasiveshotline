@@ -65,6 +65,7 @@ class Deployer(AWSDjangoDeployer):
         # Rebuild search index
         manage_remote(self.config, 'rebuild_index --noinput')
 
+
 @command(env=True)
 def deploy_app(config, provision=False, createdb=False):
     if provision:
