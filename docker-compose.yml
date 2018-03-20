@@ -28,7 +28,7 @@ services:
       - ./volumes/postgres:/var/lib/postgresql
 
   elasticsearch:
-    image: elasticsearch:1.7
+    image: elasticsearch:2
     networks:
       - default
     ports:
