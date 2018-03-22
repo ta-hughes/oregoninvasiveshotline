@@ -36,6 +36,12 @@ def init(config, overwrite=False):
     # test(config, with_coverage=True, force_env='test')
 
 
+@command
+def loaddata(config):
+    manage(config, 'loaddata {}'.format(DEFAULT_FIXTURES))
+    manage(config, 'loaddata {}'.format(DEVELOPMENT_FIXTURES))
+
+
 @command(env=True)
 def provision_app(config, createdb=False):
     provision_volume(config, mount_point='/vol/store')
