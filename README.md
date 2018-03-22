@@ -4,23 +4,38 @@ This project allows members of the public to submit reports of invasive species 
 review. Experts can login and review the reports, comment on them, and make a final determination
 about the species that was reported
 
-# To Install
+## Technology stack
+
+- PostgreSQL 9.6
+- PostGIS 2.x
+- Elasticsearch 2.x
+- Python 3.6
+- Django 1.11.x
+- Google Maps
+
+## Getting started
+
+To build the application dependencies in your host's environment:
 
     make init
 
-You can log in with the username "foobar@example.com" and the password "foobar".
+To use the provided Docker container definitions:
 
-# Tech Used
+    venv/bin/pip install -r requirements.txt
+    venv/bin/docker-compose up -d
 
-- PostgreSQL 9.4
-- PostGIS 2.x
-- Elasticsearch 1.x
-- Python 3.3
-- Django 1.8.x
-- Google Maps
-- Docker (in development only for now)
+To authenticate with the provided default user:
 
-# Notable Hackiness
+    username: foobar@example.com
+    password: foobar
+
+## Deploying
+
+This project using the Emcee tooling to define and orchestrate resource provisioning and deployment.
+See the AWS cloudformation templates in `cloudformation` and the command definitions in `commands.py`
+for more information.
+
+## Notable Hackiness
 
 The Sites framework is used here only so we can use flatpages. To avoid having to update the stupid
 domain column all the time, the Site.objects attribute has been monkey-patched in the `utils`
@@ -38,10 +53,3 @@ runs in a separate thread.
 
 Because cron jobs tend to get abandoned around here, the Elasticsearch index is rebuilt early in
 the morning via a daily task runner process.
-
-# Migrating from the old site
-
-A migration script does all the work for you:
-
-    inv copy_records
-    inv copy_images
