@@ -69,16 +69,16 @@ Resources:
         EnableEncryption: true
         KmsKey: !GetAtt AppRole.Outputs.KmsKeyArn
         DeletionPolicy: Snapshot
-  # Domain:
-  #   Type: AWS::CloudFormation::Stack
-  #   Properties:
-  #     TemplateURL: https://s3-us-west-2.amazonaws.com/cloudformation-templates.wdt.pdx.edu/1/ec2/private_host/domain.template.yml
-  #     Parameters:
-  #       ZoneExists: false
-  #       HostedZoneName: oregoninvasiveshotline.org
-  #       DnsHostName: oregoninvasiveshotline.org
-  #       ELBCertificate:
-  #       ELBTargetGroup: !GetAtt Networking.Outputs.ELBTargetGroup
-  #       ELBListenerPriority:
-  #       VpcStackName: !GetAtt AppRole.Outputs.VpcStackName
-  #       ListenOn80: true
+  Domain:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://s3-us-west-2.amazonaws.com/cloudformation-templates.wdt.pdx.edu/1/ec2/private_host/domain.template.yml
+      Parameters:
+        ZoneExists: false
+        HostedZoneName: oregoninvasiveshotline.org
+        DnsHostName: oregoninvasiveshotline.org
+        ELBCertificate: arn:aws:acm:us-west-2:921749119607:certificate/b91c58d1-35b5-4d3c-8253-0efaf18948f5
+        ELBTargetGroup: !GetAtt Networking.Outputs.ELBTargetGroup
+        ELBListenerPriority: 5
+        VpcStackName: !GetAtt AppRole.Outputs.VpcStackName
+        ListenOn80: true
