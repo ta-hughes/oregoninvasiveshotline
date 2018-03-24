@@ -6,18 +6,19 @@ Resources:
     Properties:
       TemplateURL: https://s3-us-west-2.amazonaws.com/cloudformation-templates.wdt.pdx.edu/1/iam/application_role.template.yml
       Parameters:
-        HostName: oregoninvasiveshotline
+        Name: invasives
         VpcStackName: vpc-stage
   Host:
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL: https://s3-us-west-2.amazonaws.com/cloudformation-templates.wdt.pdx.edu/1/ec2/private_host/private_host.template.yml
       Parameters:
-        ImageId: ami-903b9de8
-        HostName: !GetAtt AppRole.Outputs.HostName
+        ImageId: ami-8f08bcf7
+        HostName: !GetAtt AppRole.Outputs.Name
         VpcStackName: !GetAtt AppRole.Outputs.VpcStackName
-        IAMAppRoleName: !GetAtt AppRole.Outputs.EC2ApplicationRoleName
-        HostedZoneName: stage.wdt.pdx.edu.
+        IAMAppRoleName: !GetAtt AppRole.Outputs.RoleName
+        ExternalZoneName: stage.wdt.pdx.edu
+        InternalZoneName: stage-internal
         UseEFSFilesystem: true
         EbsVolumeId: !GetAtt Volume.Outputs.EbsVolume
   Networking:
@@ -27,10 +28,10 @@ Resources:
       Parameters:
         EC2Instance: !GetAtt Host.Outputs.InstanceId
         PrivateIp: !GetAtt Host.Outputs.PrivateIP
-        DnsHostName: !GetAtt AppRole.Outputs.HostName
+        DnsHostName: !GetAtt AppRole.Outputs.Name
         VpcStackName: !GetAtt AppRole.Outputs.VpcStackName
-        HostedZoneName: stage.wdt.pdx.edu.
-        InternalDNSZone: stage-internal.
+        ExternalZoneName: !GetAtt Host.Outputs.ExternalZoneName
+        InternalZoneName: !GetAtt Host.Outputs.InternalZoneName
         ELBListenerPriority: 5
         ListenOn80: true
   PostgreSQL:
@@ -50,14 +51,15 @@ Resources:
     Properties:
       TemplateURL: https://s3-us-west-2.amazonaws.com/cloudformation-templates.wdt.pdx.edu/1/es/domain.template.yml
       Parameters:
-        Name: oregoninvasiveshotline-index
-        Version: 1.5
-        IamResourceARN: !GetAtt AppRole.Outputs.EC2ApplicationRoleArn
+        VpcStackName: !GetAtt AppRole.Outputs.VpcStackName
+        Name: oregoninvasiveshotline-stage
+        IamResourceARN: !GetAtt AppRole.Outputs.RoleArn
+        EC2SecurityGroupId: !GetAtt Host.Outputs.EC2SecurityGroup
   Volume:
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL: https://s3-us-west-2.amazonaws.com/cloudformation-templates.wdt.pdx.edu/1/ec2/ebs/volume.template.yml
       Parameters:
-        Name: oregoninvasiveshotline-ebs-volume
+        Name: oregoninvasiveshotline-stage
         AvailabilityZone: us-west-2a
         DeletionPolicy: Delete
