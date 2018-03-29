@@ -10,10 +10,9 @@ from emcee.commands.django import manage, manage_remote
 from emcee.commands.files import copy_file
 
 from emcee.backends.dev.db import provision_database as provision_database_local
-from emcee.backends.aws.provision.base import patch_host
-from emcee.backends.aws.provision.base import provision_volume, patch_host
-from emcee.backends.aws.provision.gis import provision_gis
+from emcee.backends.aws.provision.base import provision_volume, provision_host, patch_host
 from emcee.backends.aws.provision.python import provision_python
+from emcee.backends.aws.provision.gis import provision_gis
 from emcee.backends.aws.provision.services.local import provision_nginx
 from emcee.backends.aws.provision.services.remote import provision_database, import_database
 from emcee.backends.aws.deploy import AWSDjangoDeployer
@@ -44,13 +43,17 @@ def loaddata(config):
 
 @command(env=True)
 def provision_app(config, createdb=False):
-    provision_volume(config, mount_point='/vol/store')
+    # Configure host properties and prepare host platforms
+    provision_host(config, initialize_host=True)
     provision_python(config)
     provision_gis(config)
     provision_nginx(config)
 
+    # Initialize/prepare attached EBS volume
+    provision_volume(config, mount_point='/vol/store')
+
     if createdb:
-        provision_database(config, with_postgis=True)
+        provision_database(config, with_postgis=True, with_devel=True)
 
 
 # Loading data model will cause instantiation of 'ClearableImageInput' which
