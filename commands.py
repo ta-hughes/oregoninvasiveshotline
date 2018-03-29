@@ -15,7 +15,8 @@ from emcee.backends.aws.provision.python import provision_python
 from emcee.backends.aws.provision.gis import provision_gis
 from emcee.backends.aws.provision.services.local import provision_nginx
 from emcee.backends.aws.provision.services.remote import provision_database, import_database
-from emcee.backends.aws.deploy import AWSDjangoDeployer
+from emcee.backends.aws.deploy.django import AWSDjangoDeployer
+from emcee.backends.aws.deploy.base import push_crontab
 from emcee.backends.aws.infrastructure.commands import *
 
 DEFAULT_FIXTURES = 'counties.json'
@@ -100,6 +101,9 @@ class Deployer(AWSDjangoDeployer):
 
         # Rebuild search index
         manage_remote(self.config, 'rebuild_index --noinput')
+
+        # Install crontab
+        push_crontab(self.config)
 
 
 @command(env=True)
