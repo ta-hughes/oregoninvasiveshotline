@@ -13,7 +13,8 @@ Resources:
     Properties:
       TemplateURL: https://s3-us-west-2.amazonaws.com/cloudformation-templates.wdt.pdx.edu/1/ec2/private_host/private_host.template.yml
       Parameters:
-        ImageId: ami-8f08bcf7
+        ImageId: ami-d2f06baa
+        ImageDistribution: amazon2
         HostName: !GetAtt AppRole.Outputs.Name
         VpcStackName: !GetAtt AppRole.Outputs.VpcStackName
         IAMAppRoleName: !GetAtt AppRole.Outputs.RoleName

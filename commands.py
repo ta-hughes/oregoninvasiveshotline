@@ -1,111 +1,121 @@
 import os.path
 
-from runcommands.commands import remote
-from runcommands.util import printer, confirm
-from runcommands import command
+from emcee.runner.util import printer, confirm
+from emcee.runner.config.legacy import Config as LegacyConfig
+from emcee.runner import command, config
+from emcee.runner.commands import remote
 
 from emcee.commands.deploy import deploy
 from emcee.commands.python import virtualenv, install
-from emcee.commands.django import manage, manage_remote
+from emcee.commands.django import manage, manage_remote, test
 from emcee.commands.files import copy_file
 
-from emcee.backends.dev.db import provision_database as provision_database_local
-from emcee.backends.aws.provision.base import provision_volume, provision_host, patch_host
-from emcee.backends.aws.provision.python import provision_python
-from emcee.backends.aws.provision.gis import provision_gis
-from emcee.backends.aws.provision.services.local import provision_nginx
-from emcee.backends.aws.provision.services.remote import provision_database, import_database
-from emcee.backends.aws.deploy.django import AWSDjangoDeployer
-from emcee.backends.aws.deploy.base import push_crontab
+from emcee.provision.base import provision_host, patch_host
+from emcee.provision.python import provision_python
+from emcee.provision.gis import provision_gis
+from emcee.provision.services import provision_nginx
+from emcee.provision.secrets import show_secret
+from emcee.deploy.base import push_nginx_config, push_crontab
+from emcee.deploy.python import push_uwsgi_ini, push_uwsgi_config, restart_uwsgi
+from emcee.deploy.django import Deployer as DjangoDeployer
+
+# from emcee.backends.dev.db import provision_database as provision_database_local
 from emcee.backends.aws.infrastructure.commands import *
+from emcee.backends.aws.provision.db import provision_database, import_database
+from emcee.backends.aws.provision.volumes import provision_volume
+
 
 DEFAULT_FIXTURES = 'counties.json'
 DEVELOPMENT_FIXTURES = 'dummy_user.json category.json severity.json pages.json'
 
+config.load_from_file('commands.cfg', LegacyConfig)
 
-@command(env='dev', timed=True)
-def init(config, overwrite=False):
-    virtualenv(config, config.venv, overwrite=overwrite)
-    install(config)
-    # provision_database_local(config, drop=overwrite, with_postgis=True)
-    manage(config, 'migrate --no-input')
-    manage(config, 'loaddata {}'.format(DEFAULT_FIXTURES))
-    manage(config, 'loaddata {}'.format(DEVELOPMENT_FIXTURES))
-    manage(config, 'generate_icons --no-input --clean --force')
-    manage(config, 'rebuild_index --noinput')
-    # test(config, with_coverage=True, force_env='test')
+
+@command(timed=True)
+def init(overwrite=False):
+    virtualenv(config.python.venv, overwrite=overwrite)
+    install()
+    # provision_database_local(drop=overwrite, with_postgis=True)
+    manage(('migrate', '--noinput'))
+    manage(('loaddata', DEFAULT_FIXTURES))
+    manage(('loaddata', DEVELOPMENT_FIXTURES))
+    manage(('generate_icons', '--no-input', '--clean', '--force'))
+    manage(('rebuild_index', '--noinput'))
+    # test(with_coverage=True, force_env='test')
 
 
 @command
-def loaddata(config):
-    manage(config, 'loaddata {}'.format(DEFAULT_FIXTURES))
-    manage(config, 'loaddata {}'.format(DEVELOPMENT_FIXTURES))
+def loaddata():
+    manage(('loaddata', DEFAULT_FIXTURES))
+    manage(('loaddata', DEVELOPMENT_FIXTURES))
 
 
-@command(env=True)
-def provision_app(config, createdb=False):
+@command
+def provision_app(createdb=False):
     # Configure host properties and prepare host platforms
-    provision_host(config, initialize_host=True)
-    provision_python(config)
-    provision_gis(config)
-    provision_nginx(config)
+    provision_host(initialize_host=True)
+    provision_python()
+    provision_gis()
+    provision_nginx()
 
     # Initialize/prepare attached EBS volume
-    provision_volume(config, mount_point='/vol/store')
+    provision_volume(mount_point='/vol/store')
 
     if createdb:
-        provision_database(config, with_postgis=True, with_devel=True)
+        backend_options={'with_postgis': True,
+                         'with_devel': True}
+        provision_database(backend_options=backend_options)
 
 
 # Loading data model will cause instantiation of 'ClearableImageInput' which
 # will require that the path '{remote.path.root}/media' exist and be readable
 # by {service.user} so it's execution must be delayed until media assets have
 # been imported.
-@command(env=True)
-def provision_media_assets(config):
+@command
+def provision_media_assets():
+    app_media_root = os.path.join(config.remote.path.root, 'media')
+    owner = '{}:{}'.format(config.iam.user, config.remote.nginx.group)
+
     # Create media directory on EBS mount and link to app's media root
-    remote(config, ('mkdir', '-p', '/vol/store/media'), sudo=True)
-    remote(config, ('mkdir', '-p', '{remote.path.root}/media'), sudo=True)
-    remote(config, ('test', '-h', '{remote.path.media}', '||',
-                    'ln', '-sf', '/vol/store/media', '{remote.path.media}'), sudo=True)
+    remote(('mkdir', '-p', '/vol/store/media'), sudo=True)
+    remote(('mkdir', '-p', app_media_root), sudo=True)
+    remote(('test', '-h', config.remote.path.media, '||',
+            'ln', '-sf', '/vol/store/media', config.remote.path.media), sudo=True)
 
     # Set the correct permissions on generated assets
-    remote(config, ('chown', '-R', '{service.user}:{remote.nginx.group}',
-                    '/vol/store/media'), sudo=True)
-    remote(config, ('chown', '-R', '{service.user}:{remote.nginx.group}',
-                    '{remote.path.root}/media'), sudo=True)
+    remote(('chown', '-R', owner, '/vol/store/media'), sudo=True)
+    remote(('chown', '-R', owner, app_media_root), sudo=True)
 
     # Synchronize icons and assorted media assets:
     archive_path = 'media.tar'
     if os.path.exists(archive_path):
-        if not confirm(config, "Synchronize media from '{}'?".format(archive_path)):
+        if not confirm("Synchronize media from '{}'?".format(archive_path)):
             return
 
-        copy_file(config, archive_path, '{remote.path.media}')
-        remote(config,
-               ('tar', 'xvf', archive_path, '&&',
+        copy_file(archive_path, config.remote.path.media)
+        remote(('tar', 'xvf', archive_path, '&&',
                 'rm', archive_path),
                cd=config.remote.path.media
         )
 
 
-class Deployer(AWSDjangoDeployer):
+class InvasivesDeployer(DjangoDeployer):
     def bootstrap_application(self):
-        super(Deployer, self).bootstrap_application()
+        super(InvasivesDeployer, self).bootstrap_application()
 
         # Install static/managed record data
-        manage_remote(self.config, 'loaddata {}'.format(DEFAULT_FIXTURES))
+        manage_remote(('loaddata', DEFAULT_FIXTURES))
 
         # Generate icons
-        manage_remote(self.config, 'generate_icons --no-input')
+        manage_remote(('generate_icons', '--no-input'))
 
         # Rebuild search index
-        manage_remote(self.config, 'rebuild_index --noinput')
+        manage_remote(('rebuild_index', '--noinput'))
 
         # Install crontab
-        push_crontab(self.config)
+        push_crontab()
 
 
-@command(env=True)
-def deploy_app(config):
-    deploy(config, Deployer)
+@command
+def deploy_app(rebuild=True):
+    deploy(InvasivesDeployer, rebuild=rebuild)
