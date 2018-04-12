@@ -2,7 +2,9 @@ from django import forms
 from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
 from django.template.loader import render_to_string
+
 from haystack.forms import SearchForm
+from arcutils.settings import get_setting
 
 from oregoninvasiveshotline.utils import generate_thumbnail
 
@@ -63,15 +65,13 @@ class PublicLoginForm(forms.Form):
         #      Cleaning up the dupes is going to be... fun.
         user = User.objects.get(email__iexact=email)
 
-        subject = 'Oregon Invasives Hotline - Login Link'
+        subject = get_setting('NOTIFICATIONS.login_link__subject')
+        from_email = get_setting('NOTIFICATIONS.from_email')
         body = render_to_string('users/_login.txt', {
             'user': user,
             'url': user.get_authentication_url(request, next=reverse('users-home'))
         })
-        from_email = 'noreply@pdx.edu'
-        recipients = [user.email]
-
-        send_mail(subject, body, from_email, recipients)
+        send_mail(subject, body, from_email, [user.email])
 
 
 class UserForm(forms.ModelForm):

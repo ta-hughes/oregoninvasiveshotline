@@ -64,7 +64,7 @@ class UserNotificationQuery(models.Model):
         """
         from oregoninvasiveshotline.reports.forms import ReportSearchForm  # Avoid circular import
 
-        subject = get_setting('NOTIFICATIONS.subject')
+        subject = get_setting('NOTIFICATIONS.notify_new_submission__subject')
         from_email = get_setting('NOTIFICATIONS.from_email')
         excluded_users = Notification.objects.filter(report=report).values_list('user_id', flat=True)
         q = cls.objects.all().select_related('user')

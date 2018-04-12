@@ -3,6 +3,8 @@ from django.conf import settings
 from django.core.mail import send_mass_mail
 from django.template.loader import render_to_string
 
+from arcutils.settings import get_setting
+
 from ..reports.models import Invite
 from ..reports.perms import can_adjust_visibility
 
@@ -73,7 +75,8 @@ class CommentForm(forms.ModelForm):
         recipients.discard(comment.created_by)
 
         emails = []
-        subject = '{0.PROJECT[title]} - New Comment on Report'.format(settings)
+        subject = get_setting('NOTIFICATIONS.notify_new_comment__subject')
+        from_email = get_setting('NOTIFICATIONS.from_email')
 
         for user in recipients:
             if user.is_active:
@@ -85,6 +88,6 @@ class CommentForm(forms.ModelForm):
                 'body': comment.body,
                 'url': url,
             })
-            emails.append((subject, body, 'noreply@pdx.edu', (user.email,)))
+            emails.append((subject, body, from_email, (user.email,)))
 
         send_mass_mail(emails)

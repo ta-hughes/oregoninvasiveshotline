@@ -9,6 +9,7 @@ from django.template.loader import render_to_string
 
 from haystack.forms import SearchForm
 from haystack.query import AutoQuery, SQ, SearchQuerySet
+from arcutils.settings import get_setting
 
 from oregoninvasiveshotline.comments.models import Comment
 from oregoninvasiveshotline.counties.models import County
@@ -302,7 +303,9 @@ class ReportForm(forms.ModelForm):
             Comment.objects.create(
                 report=report, created_by=user, body=questions, visibility=Comment.PROTECTED)
 
-        subject = '{0.PROJECT[title]} - Thank you for your report'.format(settings)
+        subject = get_setting('NOTIFICATIONS.new_report__subject')
+        from_email = get_setting('NOTIFICATIONS.from_email')
+
         path = reverse('reports-detail', args=[report.pk])
         if user.is_active:
             url = request.build_absolute_uri(path)
@@ -312,9 +315,8 @@ class ReportForm(forms.ModelForm):
             'user': user,
             'url': url,
         })
-        from_email = 'noreply@pdx.edu'
-        recipients = [user.email]
-        send_mail(subject, body, from_email, recipients)
+
+        send_mail(subject, body, from_email, [user.email])
 
         UserNotificationQuery.notify(report, request)
         return report

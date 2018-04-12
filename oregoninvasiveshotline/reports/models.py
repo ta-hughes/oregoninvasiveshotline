@@ -11,6 +11,8 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.template.loader import render_to_string
 
+from arcutils.settings import get_setting
+
 from oregoninvasiveshotline.images.models import Image
 from oregoninvasiveshotline.utils import generate_thumbnail
 from oregoninvasiveshotline.visibility import Visibility
@@ -233,7 +235,9 @@ class Invite(models.Model):
         })
 
         if invited:
-            subject = '{0.PROJECT[title]} - Submission Review Request'.format(settings)
+            subject = get_setting('NOTIFICATIONS.invite_reviewer__subject')
+            from_email = get_setting('NOTIFICATIONS.from_email')
+
             next_url = reverse('reports-detail', args=[report.pk])
             url = user.get_authentication_url(request, next=next_url)
             body = render_to_string('reports/_invite_expert.txt', {
@@ -241,6 +245,6 @@ class Invite(models.Model):
                 'message': message,
                 'url': url,
             })
-            send_mail(subject, body, 'noreply@pdx.edu', [user.email])
+            send_mail(subject, body, from_email, [user.email])
 
         return invited
