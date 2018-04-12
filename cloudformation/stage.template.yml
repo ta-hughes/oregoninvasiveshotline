@@ -42,8 +42,7 @@ Resources:
       Parameters:
         VpcStackName: !GetAtt AppRole.Outputs.VpcStackName
         AvailabilityZone: us-west-2a
-        DBEngineVersion: 9.6
-        DBInstanceName: oregoninvasiveshotline
+        DBInstanceName: oregoninvasiveshotline-stage
         DBUsername: oregoninvasiveshotline_l
         DBPassword: __GENERATED__
         EC2SecurityGroupId: !GetAtt Host.Outputs.EC2SecurityGroup
@@ -63,4 +62,3 @@ Resources:
       Parameters:
         Name: oregoninvasiveshotline-stage
         AvailabilityZone: us-west-2a
-        DeletionPolicy: Delete
