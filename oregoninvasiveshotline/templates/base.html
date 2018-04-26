@@ -132,6 +132,15 @@
             <script src="{% static 'js/cookie.js' %}"></script>
             <script src="{% static 'js/main.js' %}"></script>
         {% endblock %}
+
         {% google_analytics %}
+
+        {% if not debug %}
+            <script src="https://cdn.ravenjs.com/3.24.2/raven.min.js" crossorigin="anonymous"></script>
+            <script type="text/javascript">
+              Raven.config('https://263913aeb1264f1bbc40c1b35dda9933@sentry.io/153798')
+                   .install();
+            </script>
+        {% endif %}
     </body>
 </html>
