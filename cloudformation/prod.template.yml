@@ -33,7 +33,7 @@ Resources:
         VpcStackName: !GetAtt AppRole.Outputs.VpcStackName
         ExternalZoneName: !GetAtt Host.Outputs.ExternalZoneName
         InternalZoneName: !GetAtt Host.Outputs.InternalZoneName
-        ELBListenerPriority: 4
+        ELBListenerPriority: !Ref ELBListenerPriority
         ListenOn80: true
   PostgreSQL:
     Type: AWS::CloudFormation::Stack
@@ -45,7 +45,7 @@ Resources:
         DBInstanceClass: db.t2.small
         DBInstanceName: oregoninvasiveshotline-prod
         DBUsername: oregoninvasiveshotline_l
-        DBPassword: __GENERATED__
+        DBPassword: !Ref DBPassword
         EnableEncryption: true
         KmsKey: !GetAtt AppRole.Outputs.KmsKeyArn
         EC2SecurityGroupId: !GetAtt Host.Outputs.EC2SecurityGroup
@@ -61,6 +61,7 @@ Resources:
         EC2SecurityGroupId: !GetAtt Host.Outputs.EC2SecurityGroup
         InstanceCount: 3
         DeletionPolicy: Retain
+
   Volume:
     Type: AWS::CloudFormation::Stack
     Properties:

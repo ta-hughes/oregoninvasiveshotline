@@ -1,9 +1,12 @@
 import os.path
 
-from emcee.runner.util import printer, confirm
-from emcee.runner.config.legacy import Config as LegacyConfig
-from emcee.runner import command, config
+from emcee.runner.config import YAMLCommandConfiguration
+from emcee.runner import command, configs, config
 from emcee.runner.commands import remote
+from emcee.runner.utils import confirm
+from emcee.app.config import LegacyAppConfiguration
+from emcee.app import app_configs
+from emcee import printer
 
 from emcee.commands.deploy import deploy
 from emcee.commands.python import virtualenv, install
@@ -28,7 +31,8 @@ from emcee.backends.aws.provision.volumes import provision_volume
 DEFAULT_FIXTURES = 'counties.json'
 DEVELOPMENT_FIXTURES = 'dummy_user.json category.json severity.json pages.json'
 
-config.load_from_file('commands.cfg', LegacyConfig)
+configs.load('default', 'commands.yml', YAMLCommandConfiguration)
+app_configs.load('default', LegacyAppConfiguration)
 
 
 @command(timed=True)
