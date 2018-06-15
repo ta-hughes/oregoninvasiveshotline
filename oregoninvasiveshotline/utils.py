@@ -1,5 +1,6 @@
 import hashlib
 import logging
+from urllib import parse
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -14,18 +15,22 @@ from PIL import Image
 log = logging.getLogger(__name__)
 
 
-# The sites framework is dumb. I don't want to hardcode the hostname of the
-# site in the database. To avoid doing that, we monkey patch
-# Site.objects.get_current so it uses our custom function that always returns a
-# Site object with the proper domain
-def get_current(request=None, _get_current=Site.objects.get_current):
-    if request is not None:
-        # fake a Site object, since we are too lazy to keep the database updated
-        return Site(domain=request.get_host(), name=request.get_host(), pk=getattr(settings, "SITE_ID", 1))
-    else:
-        return _get_current(request)
-
-Site.objects.get_current = get_current
+def build_absolute_url(path, query_string=None):
+    domain = Site.objects.get_current().domain
+    return parse.urlunparse((
+        # scheme
+        'https',
+        # netloc
+        domain,
+        # path
+        path,
+        # params
+        '',
+        # query
+        query_string,
+        # fragment
+        ''
+    ))
 
 
 def generate_thumbnail(input_path, output_path, width, height):
