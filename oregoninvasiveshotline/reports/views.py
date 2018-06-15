@@ -156,7 +156,7 @@ def create(request):
         form = ReportForm(request.POST, request.FILES)
         formset = ImageFormSet(request.POST, request.FILES, queryset=Image.objects.none())
         if form.is_valid() and formset.is_valid():
-            report = form.save(request=request)
+            report = form.save()
             formset.save(user=report.created_by, fk=report)
             messages.success(request, "Report submitted successfully")
             request.session.setdefault("report_ids", []).append(report.pk)
@@ -230,7 +230,7 @@ def detail(request, report_id):
             image_formset = ImageFormSet(request.POST, request.FILES, queryset=Image.objects.none())
             comment_form = PartialCommentForm(request.POST, request.FILES)
             if comment_form.is_valid() and image_formset.is_valid():
-                comment = comment_form.save(request=request)
+                comment = comment_form.save()
                 image_formset.save(user=comment.created_by, fk=comment)
                 messages.success(request, "Comment Added!")
                 if can_claim_report(request.user, report):
@@ -260,7 +260,7 @@ def detail(request, report_id):
         if request.POST and submit_flag == InviteForm.SUBMIT_FLAG:
             invite_form = InviteForm(request.POST)
             if invite_form.is_valid():
-                invite_report = invite_form.save(report=report, user=request.user, request=request)
+                invite_report = invite_form.save(request.user, report)
                 message = "%d invited" % (len(invite_report.invited))
                 if invite_report.already_invited:
                     message += " (%d already invited)" % len(invite_report.already_invited)

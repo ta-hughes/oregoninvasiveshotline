@@ -8,6 +8,7 @@ from arcutils.settings import get_setting
 
 from oregoninvasiveshotline.utils import generate_thumbnail
 
+from .tasks import notify_public_user_for_login_link
 from .models import User
 
 
@@ -50,7 +51,7 @@ class PublicLoginForm(forms.Form):
 
         return email
 
-    def save(self, request):
+    def save(self, *args, **kwargs):
         email = self.cleaned_data['email']
 
         # XXX: This can fail because there are several duplicate
@@ -64,14 +65,7 @@ class PublicLoginForm(forms.Form):
         #
         #      Cleaning up the dupes is going to be... fun.
         user = User.objects.get(email__iexact=email)
-
-        subject = get_setting('NOTIFICATIONS.login_link__subject')
-        from_email = get_setting('NOTIFICATIONS.from_email')
-        body = render_to_string('users/_login.txt', {
-            'user': user,
-            'url': user.get_authentication_url(request, next=reverse('users-home'))
-        })
-        send_mail(subject, body, from_email, [user.email])
+        notify_public_user_for_login_link.delay(user.pk)
 
 
 class UserForm(forms.ModelForm):

@@ -79,20 +79,20 @@ class AuthenticateViewTest(TestCase, UserMixin):
     def test_active_or_invited_users_are_logged_in(self):
         # test for an invited user
         invite = make(Invite, report=make(Report, point=ORIGIN))
-        url = invite.user.get_authentication_url(request=Mock(build_absolute_uri=lambda a: a))
+        url = invite.user.get_authentication_url()
         response = self.client.get(url)
         self.assertRedirects(response, self.login_redirect_url)
 
         # test for an active user
         user = self.create_user(username="inactive@example.com", is_active=False)
-        url = user.get_authentication_url(request=Mock(build_absolute_uri=lambda a: a))
+        url = user.get_authentication_url()
         response = self.client.get(url)
         self.assertRedirects(response, self.login_redirect_url)
 
     def test_report_ids_session_variable_is_populated(self):
         user = self.create_user(username="foo@example.com", is_active=True)
         report = make(Report, created_by=user, point=ORIGIN)
-        url = user.get_authentication_url(request=Mock(build_absolute_uri=lambda a: a))
+        url = user.get_authentication_url()
         response = self.client.get(url)
         self.assertRedirects(response, self.login_redirect_url)
         self.assertIn(report.pk, self.client.session['report_ids'])
@@ -289,11 +289,7 @@ class UserTest(TestCase, UserMixin):
         self.assertEqual(other_user.get_proper_name(), "Foo Bar")
 
     def test_get_authentication_url_and_authenticate(self):
-
-        def build_absolute_uri(arg):
-            return "http://example.com" + arg
-
-        url = self.user.get_authentication_url(request=Mock(build_absolute_uri=build_absolute_uri), next="lame")
+        url = self.user.get_authentication_url(next="lame")
         parts = urllib.parse.urlparse(url)
         self.assertEqual(parts.path, reverse("users-authenticate"))
         query = urllib.parse.parse_qs(parts.query)
@@ -316,7 +312,7 @@ class LoginFormTest(TestCase, UserMixin):
         })
         self.assertTrue(form.is_valid())
         with patch("oregoninvasiveshotline.users.forms.User.get_authentication_url", return_value="foobarius"):
-            form.save(request=Mock())
+            form.save()
             self.assertTrue(len(mail.outbox), 1)
             self.assertIn("foobarius", mail.outbox[0].body)
 

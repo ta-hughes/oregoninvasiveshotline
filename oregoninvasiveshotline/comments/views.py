@@ -32,7 +32,7 @@ def edit(request, comment_id):
         form = PartialCommentForm(request.POST)
         formset = ImageFormSet(request.POST, request.FILES, queryset=Image.objects.filter(comment=comment))
         if form.is_valid() and formset.is_valid():
-            form.save(request=request)
+            form.save()
             formset.save(user=comment.created_by, fk=comment)
             messages.success(request, "Comment Edited")
             return redirect("reports-detail", comment.report.pk)

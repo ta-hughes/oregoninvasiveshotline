@@ -1,4 +1,4 @@
-from unittest.mock import Mock, patch
+from unittest.mock import Mock
 
 from django.core import mail
 from django.core.urlresolvers import reverse
@@ -58,39 +58,6 @@ class ListViewTest(TestCase, UserMixin):
         self.client.login(email=user.email, password='foo')
         response = self.client.get(reverse('notifications-list'))
         self.assertEqual(response.status_code, 200)
-
-
-class UserNotificationQueryTest(TestCase, UserMixin):
-
-    @patch('oregoninvasiveshotline.notifications.models.threading.Thread')
-    def test_notify_sends_emails_to_subscribers(self, thread):
-        user = self.create_user(username='foo@example.com')
-
-        # Subscribe to the same thing twice to ensure that only one
-        # email is sent to the user when a report matches.
-        make(UserNotificationQuery, query='q=foobarius', user=user)
-        make(UserNotificationQuery, query='q=foobarius', user=user)
-
-        # This report does *not* have the words "foobarius" in it, so no
-        # email should be sent.
-        report = make(Report, point=ORIGIN)
-        UserNotificationQuery.notify(report, request=Mock())
-        thread.call_args[1]['target']()
-        self.assertEqual(len(mail.outbox), 0)
-
-        # This report *does* have the word "foobarius" in it, so it
-        # should trigger an email to be sent.
-        report = make(Report, reported_category__name='foobarius', point=ORIGIN)
-        request = Mock(build_absolute_uri=Mock(return_value=''))
-        UserNotificationQuery.notify(report, request=request)
-        thread.call_args[1]['target']()
-        self.assertEqual(len(mail.outbox), 1)
-
-        # If we notify about the same report, no new email should be
-        # sent.
-        UserNotificationQuery.notify(report, request=request)
-        thread.call_args[1]['target']()
-        self.assertEqual(len(mail.outbox), 1)
 
 
 class UserNotificationQueryPrettyQuery(TestCase, UserMixin):

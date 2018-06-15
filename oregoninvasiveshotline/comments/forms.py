@@ -1,13 +1,8 @@
 from django import forms
-from django.conf import settings
-from django.core.mail import send_mass_mail
-from django.template.loader import render_to_string
 
-from arcutils.settings import get_setting
+from oregoninvasiveshotline.reports.perms import can_adjust_visibility
 
-from ..reports.models import Invite
-from ..reports.perms import can_adjust_visibility
-
+from .tasks import notify_users_for_comment
 from .models import Comment
 
 
@@ -39,55 +34,9 @@ class CommentForm(forms.ModelForm):
             self.fields.pop('visibility')
             self.instance.visibility = Comment.PROTECTED
 
-    def save(self, *args, request, **kwargs):
+    def save(self, commit=True):
         is_new = self.instance.pk is None  # Must be before save
-        instance = super().save(*args, **kwargs)
+        instance = super().save(commit=commit)
         if is_new:
-            self.notify_users(request)
+            notify_users_for_comment.delay(instance.pk)
         return instance
-
-    def notify_users(self, request):
-        # Send an email notification about the comment to the relevant
-        # users.
-        comment = self.instance
-        report = comment.report
-        recipients = set()
-
-        # Notify staff & managers who commented on the report
-        q = Comment.objects.filter(report=report, created_by__is_active=True)
-        q = q.prefetch_related('created_by')
-        recipients.update(c.created_by for c in q)
-
-        # Notify the user who claimed the report
-        if report.claimed_by:
-            recipients.add(report.claimed_by)
-
-        # Notify invited experts
-        q = Invite.objects.filter(report=report).prefetch_related('user')
-        q = q.prefetch_related('user')
-        recipients.update(invite.user for invite in q)
-
-        # Notify the user that submitted the report
-        if comment.visibility in (Comment.PROTECTED, Comment.PUBLIC):
-            recipients.add(report.created_by)
-
-        # Don't notify the user who made the comment
-        recipients.discard(comment.created_by)
-
-        emails = []
-        subject = get_setting('NOTIFICATIONS.notify_new_comment__subject')
-        from_email = get_setting('NOTIFICATIONS.from_email')
-
-        for user in recipients:
-            if user.is_active:
-                url = request.build_absolute_uri(comment.get_absolute_url())
-            else:
-                url = user.get_authentication_url(request, next=comment.get_absolute_url())
-            body = render_to_string('reports/_new_comment.txt', {
-                'user': comment.created_by,
-                'body': comment.body,
-                'url': url,
-            })
-            emails.append((subject, body, from_email, (user.email,)))
-
-        send_mass_mail(emails)

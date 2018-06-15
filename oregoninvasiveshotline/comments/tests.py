@@ -61,7 +61,7 @@ class CommentFormTest(TestCase, UserMixin):
             'body': "foo",
         }, user=other_user, report=report)
         self.assertTrue(form.is_valid())
-        form.save(request=Mock(build_absolute_uri=Mock(return_value="")))
+        form.save()
 
         self.assertIn(should_be_notified, [email.to[0] for email in mail.outbox])
         self.assertNotIn(should_not_be_notified, [email.to for email in mail.outbox])
@@ -73,7 +73,7 @@ class CommentFormTest(TestCase, UserMixin):
             'body': "foo",
         }, user=self.inactive_user, report=report)
         self.assertTrue(form.is_valid())
-        form.save(request=Mock(build_absolute_uri=Mock(return_value="")))
+        form.save()
 
         self.assertIn(report.claimed_by.email, [email.to[0] for email in mail.outbox])
 
@@ -85,7 +85,7 @@ class CommentFormTest(TestCase, UserMixin):
             'body': "foo",
         }, user=self.inactive_user, report=report)
         self.assertTrue(form.is_valid())
-        form.save(request=Mock(build_absolute_uri=Mock(return_value="")))
+        form.save()
 
         self.assertIn(invite.user.email, [email.to[0] for email in mail.outbox])
 
@@ -98,7 +98,7 @@ class CommentFormTest(TestCase, UserMixin):
             'visibility': Comment.PUBLIC,
         }, user=self.user, report=report)
         self.assertTrue(form.is_valid())
-        form.save(request=Mock(build_absolute_uri=Mock(return_value="")))
+        form.save()
 
         self.assertNotIn(self.user.email, [email.to[0] for email in mail.outbox])
 
@@ -111,7 +111,7 @@ class CommentFormTest(TestCase, UserMixin):
             'visibility': Comment.PUBLIC,
         }, user=invite.user, report=report)
         self.assertTrue(form.is_valid())
-        form.save(request=Mock(build_absolute_uri=Mock(return_value="")))
+        form.save()
 
         self.assertIn(self.inactive_user.email, [email.to[0] for email in mail.outbox])
 
@@ -126,7 +126,7 @@ class CommentFormTest(TestCase, UserMixin):
             'visibility': Comment.PRIVATE,
         }, user=invite.user, report=report)
         self.assertTrue(form.is_valid())
-        form.save(request=Mock(build_absolute_uri=Mock(return_value="")))
+        form.save()
 
         self.assertNotIn(other_user.email, [email.to[0] for email in mail.outbox])
 

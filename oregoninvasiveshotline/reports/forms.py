@@ -1,11 +1,8 @@
 from collections import namedtuple
 
-from django import forms
-from django.conf import settings
-from django.core.mail import send_mail
-from django.core.urlresolvers import reverse
 from django.core.validators import validate_email
-from django.template.loader import render_to_string
+from django.conf import settings
+from django import forms
 
 from haystack.forms import SearchForm
 from haystack.query import AutoQuery, SQ, SearchQuerySet
@@ -13,11 +10,12 @@ from arcutils.settings import get_setting
 
 from oregoninvasiveshotline.comments.models import Comment
 from oregoninvasiveshotline.counties.models import County
-from oregoninvasiveshotline.notifications.models import UserNotificationQuery
 from oregoninvasiveshotline.species.models import Category, Severity, Species
 from oregoninvasiveshotline.users.models import User
 
 from .models import Invite, Report
+from .tasks import (notify_report_submission, notify_report_subscribers,
+                    notify_invited_reviewer)
 
 
 def get_category_choices():
@@ -35,8 +33,8 @@ def get_county_choices():
 
 
 class ReportSearchForm(SearchForm):
-
-    """Search for reports.
+    """
+    Search for reports.
 
     This form handles searching of reports by both managers and
     anonymous users.
@@ -46,9 +44,7 @@ class ReportSearchForm(SearchForm):
     a QueryDict string. So be careful if you start renaming fields,
     since that will break any :class:`UserNotificationQuery` rows that
     rely on that field.
-
     """
-
     public_fields = ['q', 'order_by', 'source', 'categories', 'counties']
 
     q = forms.CharField(
@@ -273,7 +269,7 @@ class ReportForm(forms.ModelForm):
         email = email.lower()
         return email
 
-    def save(self, *args, request, **kwargs):
+    def save(self, *args, **kwargs):
         report = self.instance
 
         # NOTE: If the user doesn't exist, a new inactive account is
@@ -303,22 +299,9 @@ class ReportForm(forms.ModelForm):
             Comment.objects.create(
                 report=report, created_by=user, body=questions, visibility=Comment.PROTECTED)
 
-        subject = get_setting('NOTIFICATIONS.new_report__subject')
-        from_email = get_setting('NOTIFICATIONS.from_email')
+        notify_report_submission.delay(report.pk, user.pk)
+        notify_report_subscribers.delay(report.pk)
 
-        path = reverse('reports-detail', args=[report.pk])
-        if user.is_active:
-            url = request.build_absolute_uri(path)
-        else:
-            url = user.get_authentication_url(request, next=path)
-        body = render_to_string('reports/_submission.txt', {
-            'user': user,
-            'url': url,
-        })
-
-        send_mail(subject, body, from_email, [user.email])
-
-        UserNotificationQuery.notify(report, request)
         return report
 
 
@@ -341,17 +324,41 @@ class InviteForm(forms.Form):
 
         return emails
 
-    def save(self, user, report, request):
+    def save(self, inviter, report):
+        """
+        Send an invitation to the specified ``email`` address.
+
+        If an invite has already been sent to the ``email`` address for
+        the specified ``report``, nothing will be done. Otherwise, an
+        ``Invite`` record is created and an email is sent.
+
+        Returns:
+            bool: True if the invite was sent; False if an invite has
+                already been sent to the email address for the specified
+                report.
+        """
         invited = []
         already_invited = []
+
         for email in self.cleaned_data['emails']:
-            if Invite.create(email=email, report=report, inviter=user, message=self.cleaned_data.get('body'), request=request):
+            user, _ = User.objects.get_or_create(email__iexact=email,
+                                                 defaults={'email': email.lower(),
+                                                           'is_active': False})
+            (invite, created) = Invite.objects.get_or_create(user=user,
+                                                             report=report,
+                                                             defaults={'created_by': inviter})
+            if created:
+                notify_invited_reviewer.delay(invite.pk, self.cleaned_data.get('body'))
                 invited.append(email)
             else:
                 already_invited.append(email)
 
         # make the invite into a comment
-        Comment(body=self.cleaned_data.get("body"), created_by=user, visibility=Comment.PRIVATE, report=report).save()
+        Comment.objects.create(report=report,
+                               visibility=Comment.PRIVATE,
+                               body=self.cleaned_data.get("body"),
+                               created_by=inviter)
+                               
         return namedtuple("InviteReport", "invited already_invited")(invited, already_invited)
 
 

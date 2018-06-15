@@ -1,30 +1,29 @@
+import posixpath
 import logging
 import os
-import posixpath
 
-from django.conf import settings
-from django.contrib.auth import get_user_model
-from django.contrib.gis.db import models
-from django.core.mail import send_mail
-from django.core.urlresolvers import reverse
-from django.db.models.signals import post_save
 from django.dispatch import receiver
-from django.template.loader import render_to_string
+from django.db.models.signals import post_save
+from django.core.urlresolvers import reverse
+from django.contrib.gis.db import models
+from django.conf import settings
 
 from arcutils.settings import get_setting
 
-from oregoninvasiveshotline.images.models import Image
 from oregoninvasiveshotline.utils import generate_thumbnail
 from oregoninvasiveshotline.visibility import Visibility
+from oregoninvasiveshotline.images.models import Image
+from oregoninvasiveshotline.users.models import User
 
 from .utils import generate_icon, icon_file_name
-
 
 log = logging.getLogger(__name__)
 
 
 class Report(models.Model):
-
+    """
+    TBD
+    """
     class Meta:
         db_table = 'report'
         ordering = ['-created_on']
@@ -155,6 +154,7 @@ class Report(models.Model):
 
         file_name = '{image.pk}.png'.format(image=image)
         output_path = os.path.join(output_dir, file_name)
+
         if not os.path.exists(output_path):
             generate_thumbnail(image.image.path, output_path, width=64, height=64)
         return posixpath.join(media_url, file_name)
@@ -185,19 +185,18 @@ class Report(models.Model):
 
 @receiver([post_save], sender=Report)
 def receiver__generate_icon(sender, instance, **kwargs):
-    """Create or update icon for Report on save."""
+    """
+    Create or update icon for Report on save.
+    """
     instance.generate_icon()
 
 
 class Invite(models.Model):
-
     """An invitation to review a report.
 
     Arbitrary people can be invited (via email) to review and leave
     comments on a report.
-
     """
-
     class Meta:
         db_table = 'invite'
 
@@ -208,43 +207,3 @@ class Invite(models.Model):
 
     # The invitee
     user = models.ForeignKey('users.User', related_name='invites')
-
-    @classmethod
-    def create(cls, *, email, report, inviter, message, request):
-        """Send an invitation to the specified ``email`` address.
-
-        If an invite has already been sent to the ``email`` address for
-        the specified ``report``, nothing will be done. Otherwise, an
-        ``Invite`` record is created and an email is sent.
-
-        Returns:
-            bool: True if the invite was sent; False if an invite has
-                already been sent to the email address for the specified
-                report.
-
-        """
-        user_model = get_user_model()
-
-        user, _ = user_model.objects.get_or_create(email__iexact=email, defaults={
-            'email': email.lower(),
-            'is_active': False,
-        })
-
-        invite, invited = cls.objects.get_or_create(user=user, report=report, defaults={
-            'created_by': inviter,
-        })
-
-        if invited:
-            subject = get_setting('NOTIFICATIONS.invite_reviewer__subject')
-            from_email = get_setting('NOTIFICATIONS.from_email')
-
-            next_url = reverse('reports-detail', args=[report.pk])
-            url = user.get_authentication_url(request, next=next_url)
-            body = render_to_string('reports/_invite_expert.txt', {
-                'inviter': inviter,
-                'message': message,
-                'url': url,
-            })
-            send_mail(subject, body, from_email, [user.email])
-
-        return invited
