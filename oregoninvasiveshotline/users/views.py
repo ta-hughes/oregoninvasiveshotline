@@ -66,7 +66,6 @@ def authenticate(request):
         return redirect('login')
 
     if user.is_active or Invite.objects.filter(user=user).exists():
-        user.backend = settings.AUTHENTICATION_BACKENDS[0]
         django_login(request, user)
 
     # Add user's reports to their session
