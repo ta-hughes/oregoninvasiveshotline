@@ -36,6 +36,13 @@ services:
     volumes:
       - ./volumes/elasticsearch:/usr/share/elasticsearch/data
 
+  rabbitmq:
+    image: rabbitmq
+    networks:
+      - default
+    ports:
+      - 5672:5672
+
   oregoninvasiveshotline:
     image: psu.oit.wdt/oregoninvasiveshotline
     build: app
@@ -53,3 +60,4 @@ services:
     depends_on:
       - postgres
       - elasticsearch
+      - rabbitmq
