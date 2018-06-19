@@ -1,5 +1,7 @@
 # Oregon Invasive Species Hotline
 
+[![Build Status](https://travis-ci.org/PSU-OIT-ARC/oregoninvasiveshotline.svg?branch=master)](https://travis-ci.org/PSU-OIT-ARC/oregoninvasiveshotline)
+
 This project allows members of the public to submit reports of invasive species for experts to
 review. Experts can login and review the reports, comment on them, and make a final determination
 about the species that was reported
