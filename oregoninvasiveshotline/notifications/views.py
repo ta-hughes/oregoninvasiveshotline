@@ -8,7 +8,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from arcutils.db import will_be_deleted_with
 
 from oregoninvasiveshotline.perms import permissions
-from oregoninvasiveshotline.utils import get_tab_counts
+from oregoninvasiveshotline.users.utils import get_tab_counts
 
 from .forms import UserNotificationQueryForm, UserSubscriptionAdminForm, UserSubscriptionDeleteForm
 from .models import UserNotificationQuery

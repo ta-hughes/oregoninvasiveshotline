@@ -12,12 +12,12 @@ from django.views.generic import DetailView
 from arcutils.db import will_be_deleted_with
 
 from oregoninvasiveshotline.reports.models import Invite, Report
-from oregoninvasiveshotline.utils import get_tab_counts
 
+from .utils import get_tab_counts
 from .colors import AVATAR_COLORS
+from .perms import can_list_users, permissions
 from .forms import PublicLoginForm, UserForm, UserSearchForm
 from .models import User
-from .perms import can_list_users, permissions
 
 
 def login(request, *args, **kwargs):

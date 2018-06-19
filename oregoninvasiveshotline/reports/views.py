@@ -23,7 +23,7 @@ from oregoninvasiveshotline.comments.perms import can_create_comment
 from oregoninvasiveshotline.images.forms import get_image_formset
 from oregoninvasiveshotline.images.models import Image
 from oregoninvasiveshotline.species.models import Category, Severity, category_id_to_species_id_json
-from oregoninvasiveshotline.utils import get_tab_counts
+from oregoninvasiveshotline.users.utils import get_tab_counts
 
 from .forms import InviteForm, ManagementForm, ReportForm, ReportSearchForm
 from .models import Invite, Report
