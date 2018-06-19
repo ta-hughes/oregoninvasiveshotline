@@ -1,13 +1,15 @@
-import binascii
-import codecs
-import csv
-import json
-import os
 import posixpath
 import tempfile
+import binascii
+import shutil
+import codecs
+import json
+import csv
+import os
+from datetime import timedelta
 from unittest.mock import Mock, patch
 
-from datetime import timedelta
+from django.utils import timezone
 from django.conf import settings
 from django.core import mail
 from django.core.exceptions import NON_FIELD_ERRORS
@@ -16,8 +18,6 @@ from django.core.urlresolvers import reverse
 from django.contrib.gis.geos import Point
 from django.db.models.signals import post_save
 from django.test import TestCase
-from django.test.client import RequestFactory
-from django.utils import timezone
 
 from model_mommy.mommy import make, prepare
 
@@ -35,8 +35,10 @@ from .models import Invite, Report, receiver__generate_icon
 from .search_indexes import ReportIndex
 from .views import _export
 
-
 ORIGIN = Point(0, 0)
+TEST_IMAGE_PATH = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), '..', 'test_assets', 'fsm.png')
+)
 
 
 class SuppressPostSaveMixin:
@@ -108,7 +110,9 @@ class ReportTest(SuppressPostSaveMixin, TestCase):
         self.assertEqual(report.image_url, expected_url)
 
         # A report with a public image should have an image URL
-        image = make(Image, report=report, visibility=Image.PUBLIC)
+        path = os.path.join(settings.MEDIA_ROOT, 'test.png')
+        shutil.copyfile(TEST_IMAGE_PATH, path)
+        image = make(Image, report=report, image=File(open(path, 'rb')), visibility=Image.PUBLIC)
         file_name = '{image.pk}.png'.format(image=image)
         expected_url = posixpath.join(settings.MEDIA_URL, 'generated_thumbnails', file_name)
         self.assertEqual(report.image_url, expected_url)
@@ -123,7 +127,9 @@ class ReportTest(SuppressPostSaveMixin, TestCase):
         expected_url = None
         self.assertEqual(report.image_url, expected_url)
 
-        image = make(Image, comment=make(Comment, report=report), visibility=Image.PUBLIC)
+        path = os.path.join(settings.MEDIA_ROOT, 'test.png')
+        shutil.copyfile(TEST_IMAGE_PATH, path)
+        image = make(Image, report=report, image=File(open(path, 'rb')), visibility=Image.PUBLIC)
         file_name = '{image.pk}.png'.format(image=image)
         expected_url = posixpath.join(settings.MEDIA_URL, 'generated_thumbnails', file_name)
         self.assertEqual(report.image_url, expected_url)
