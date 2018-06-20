@@ -17,10 +17,10 @@ from django.core.files.base import File
 from django.core.urlresolvers import reverse
 from django.contrib.gis.geos import Point
 from django.db.models.signals import post_save
-from django.test import TestCase
+from django.db import transaction
+from django.test import TestCase, TransactionTestCase
 
 from model_mommy.mommy import make, prepare
-
 from arcutils.test.user import UserMixin
 
 from oregoninvasiveshotline.comments.forms import CommentForm
@@ -684,7 +684,7 @@ class DetailViewTest(TestCase, UserMixin):
             self.assertRedirects(response, reverse("reports-detail", args=[report.pk]))
 
 
-class ReportFormTest(TestCase, UserMixin):
+class ReportFormTest(TransactionTestCase, UserMixin):
 
     def setUp(self):
         self.index = ReportIndex()
@@ -768,8 +768,11 @@ class ReportFormTest(TestCase, UserMixin):
         self.assertFalse(form.is_valid())
         report = make(Report, point=ORIGIN)
         with patch("oregoninvasiveshotline.reports.forms.forms.ModelForm.save"):
-            form.instance = report
-            form.save()
+            # notification task is out-of-band and uses 'on_commit' barrier
+            # so the path being tested is wrapped in a transaction
+            with transaction.atomic():
+                form.instance = report
+                form.save()
 
         # mailbox should contain one report submission email
         self.assertEqual(len(mail.outbox), 1)
@@ -778,8 +781,11 @@ class ReportFormTest(TestCase, UserMixin):
         # should trigger an email to be sent.
         report = make(Report, reported_category__name='foobarius', point=ORIGIN)
         with patch("oregoninvasiveshotline.reports.forms.forms.ModelForm.save"):
-            form.instance = report
-            form.save()
+            # notification task is out-of-band and uses 'on_commit' barrier
+            # so the path being tested is wrapped in a transaction
+            with transaction.atomic():
+                form.instance = report
+                form.save()
 
         # mailbox should contain two report submission emails and a
         # subscription notification
@@ -787,8 +793,11 @@ class ReportFormTest(TestCase, UserMixin):
 
         # If we notify about the same report, no new email should be sent.
         with patch("oregoninvasiveshotline.reports.forms.forms.ModelForm.save"):
-            form.instance = report
-            form.save()
+            # notification task is out-of-band and uses 'on_commit' barrier
+            # so the path being tested is wrapped in a transaction
+            with transaction.atomic():
+                form.instance = report
+                form.save()
 
         # mailbox should contain three report submission emails and a
         # subscription notification

@@ -1,3 +1,4 @@
+from django.db import transaction
 from django import forms
 
 from oregoninvasiveshotline.reports.perms import can_adjust_visibility
@@ -38,5 +39,5 @@ class CommentForm(forms.ModelForm):
         is_new = self.instance.pk is None  # Must be before save
         instance = super().save(commit=commit)
         if is_new:
-            notify_users_for_comment.delay(instance.pk)
+            transaction.on_commit(lambda: notify_users_for_comment.delay(instance.pk))
         return instance

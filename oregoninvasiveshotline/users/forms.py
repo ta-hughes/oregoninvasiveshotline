@@ -1,7 +1,8 @@
-from django import forms
+from django.template.loader import render_to_string
 from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
-from django.template.loader import render_to_string
+from django.db import transaction
+from django import forms
 
 from haystack.forms import SearchForm
 from arcutils.settings import get_setting
@@ -65,7 +66,7 @@ class PublicLoginForm(forms.Form):
         #
         #      Cleaning up the dupes is going to be... fun.
         user = User.objects.get(email__iexact=email)
-        notify_public_user_for_login_link.delay(user.pk)
+        transaction.on_commit(lambda: notify_public_user_for_login_link.delay(user.pk))
 
 
 class UserForm(forms.ModelForm):

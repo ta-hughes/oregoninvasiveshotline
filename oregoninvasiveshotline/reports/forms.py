@@ -1,12 +1,11 @@
 from collections import namedtuple
 
 from django.core.validators import validate_email
-from django.conf import settings
+from django.db import transaction
 from django import forms
 
 from haystack.forms import SearchForm
 from haystack.query import AutoQuery, SQ, SearchQuerySet
-from arcutils.settings import get_setting
 
 from oregoninvasiveshotline.comments.models import Comment
 from oregoninvasiveshotline.counties.models import County
@@ -299,8 +298,8 @@ class ReportForm(forms.ModelForm):
             Comment.objects.create(
                 report=report, created_by=user, body=questions, visibility=Comment.PROTECTED)
 
-        notify_report_submission.delay(report.pk, user.pk)
-        notify_report_subscribers.delay(report.pk)
+        transaction.on_commit(lambda: notify_report_submission.delay(report.pk, user.pk))
+        transaction.on_commit(lambda: notify_report_subscribers.delay(report.pk))
 
         return report
 
@@ -348,7 +347,7 @@ class InviteForm(forms.Form):
                                                              report=report,
                                                              defaults={'created_by': inviter})
             if created:
-                notify_invited_reviewer.delay(invite.pk, self.cleaned_data.get('body'))
+                transaction.on_commit(lambda: notify_invited_reviewer.delay(invite.pk, self.cleaned_data.get('body')))
                 invited.append(email)
             else:
                 already_invited.append(email)

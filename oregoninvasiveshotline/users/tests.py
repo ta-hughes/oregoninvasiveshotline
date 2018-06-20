@@ -6,10 +6,10 @@ from django.core import mail
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import AnonymousUser
 from django.contrib.gis.geos import Point
-from django.test import TestCase
+from django.db import transaction
+from django.test import TestCase, TransactionTestCase
 
 from model_mommy.mommy import make, prepare
-
 from arcutils.test.user import UserMixin
 
 from oregoninvasiveshotline.notifications.models import UserNotificationQuery
@@ -360,7 +360,7 @@ class UserTest(TestCase, UserMixin):
         self.assertEqual(self.user, User.from_signature(query['sig'][0]))
 
 
-class LoginFormTest(TestCase, UserMixin):
+class LoginFormTest(TransactionTestCase, UserMixin):
     def test_clean_email_raises_validation_error_for_non_existing_user(self):
         form = PublicLoginForm({
             "email": "foo@pdx.edu"
@@ -375,21 +375,30 @@ class LoginFormTest(TestCase, UserMixin):
         })
         self.assertTrue(form.is_valid())
         with patch("oregoninvasiveshotline.users.forms.User.get_authentication_url", return_value="foobarius"):
-            form.save()
+            # notification task is out-of-band and uses 'on_commit' barrier
+            # so the path being tested is wrapped in a transaction
+            with transaction.atomic():
+                form.save()
+
             self.assertTrue(len(mail.outbox), 1)
             self.assertIn("foobarius", mail.outbox[0].body)
 
 
-class LoginViewTest(TestCase, UserMixin):
+class LoginViewTest(TransactionTestCase, UserMixin):
     def test_get(self):
         response = self.client.get(reverse("login"))
         self.assertEqual(response.status_code, 200)
 
     def test_logging_in_via_email_sends_an_email(self):
         user = self.create_user(username="foo@example.com", is_active=False)
-        response = self.client.post(reverse("login"), {
-            "email": user.email,
-            "form": "OTHER_LOGIN",
-        })
+
+        # notification task is out-of-band and uses 'on_commit' barrier
+        # so the path being tested is wrapped in a transaction
+        with transaction.atomic():
+            response = self.client.post(reverse("login"), {
+                "email": user.email,
+                "form": "OTHER_LOGIN",
+            })
+            self.assertRedirects(response, reverse("login"))
+
         self.assertTrue(len(mail.outbox), 1)
-        self.assertRedirects(response, reverse("login"))

@@ -1,12 +1,9 @@
 from django.template.loader import render_to_string
-from django.core.urlresolvers import reverse
 from django.core.mail import send_mass_mail
-from django.conf import settings
 
 from arcutils.settings import get_setting
 
 from oregoninvasiveshotline.utils import build_absolute_url
-from oregoninvasiveshotline.reports.perms import can_adjust_visibility
 from oregoninvasiveshotline.reports.models import Invite
 from oregoninvasiveshotline.comments.models import Comment
 from oregoninvasiveshotline.celery import app
