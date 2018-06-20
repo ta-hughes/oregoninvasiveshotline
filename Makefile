@@ -3,13 +3,11 @@ distribution = psu.oit.arc.$(package)
 egg_name = $(distribution)
 egg_info = $(egg_name).egg-info
 
-venv ?= .env
+venv ?= venv
 venv_python ?= python3
 bin = $(venv)/bin
-env ?= stage
 
 
-venv: $(venv)
 $(venv):
 	$(venv_python) -m venv $(venv)
 
@@ -22,15 +20,13 @@ install: $(venv) $(egg_info)
 reinstall: clean-install install
 
 init: install
-	@$(bin)/runcommand init
+	@$(bin)/mc init
 reinit: clean-egg-info clean-venv init
 
 test: install
-	@$(bin)/runcommand test
-coverage: install
-	$(bin)/runcommand coverage
+	LOCAL_SETTINGS_FILE="local.base.cfg#test" $(bin)/python manage.py test
 run:
-	@$(bin)/runcommand runserver
+	@$(bin)/python manage.py runserver
 
 clean: clean-pyc
 clean-all: clean-build clean-coverage clean-dist clean-egg-info clean-pyc clean-venv
