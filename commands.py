@@ -10,7 +10,7 @@ from emcee import printer
 
 from emcee.commands.deploy import deploy
 from emcee.commands.python import virtualenv, install
-from emcee.commands.django import manage, manage_remote, test
+from emcee.commands.django import manage, manage_remote
 from emcee.commands.files import copy_file
 
 from emcee.provision.base import provision_host, patch_host
@@ -24,14 +24,14 @@ from emcee.deploy.base import push_nginx_config, push_crontab, push_supervisor_c
 from emcee.deploy.python import push_uwsgi_ini, push_uwsgi_config, restart_uwsgi
 from emcee.deploy.django import Deployer as DjangoDeployer
 
-# from emcee.backends.dev.db import provision_database as provision_database_local
+# from emcee.backends.dev.provision.db import provision_database as provision_database_local
 from emcee.backends.aws.infrastructure.commands import *
 from emcee.backends.aws.provision.db import provision_database, import_database
 from emcee.backends.aws.provision.volumes import provision_volume
 
 
-DEFAULT_FIXTURES = 'counties.json'
-DEVELOPMENT_FIXTURES = 'dummy_user.json category.json severity.json pages.json'
+DEFAULT_FIXTURES = ('counties.json',)
+DEVELOPMENT_FIXTURES = ('dummy_user.json', 'category.json', 'severity.json', 'pages.json')
 
 configs.load('default', 'commands.yml', YAMLCommandConfiguration)
 app_configs.load('default', LegacyAppConfiguration)
@@ -43,17 +43,10 @@ def init(overwrite=False):
     install()
     # provision_database_local(drop=overwrite, with_postgis=True)
     manage(('migrate', '--noinput'))
-    manage(('loaddata', DEFAULT_FIXTURES))
-    manage(('loaddata', DEVELOPMENT_FIXTURES))
+    manage(('loaddata',) + DEFAULT_FIXTURES)
+    manage(('loaddata',) + DEVELOPMENT_FIXTURES)
     manage(('generate_icons', '--no-input', '--clean', '--force'))
     manage(('rebuild_index', '--noinput'))
-    # test(with_coverage=True, force_env='test')
-
-
-@command
-def loaddata():
-    manage(('loaddata', DEFAULT_FIXTURES))
-    manage(('loaddata', DEVELOPMENT_FIXTURES))
 
 
 @command
@@ -112,7 +105,7 @@ class InvasivesDeployer(DjangoDeployer):
         super(InvasivesDeployer, self).bootstrap_application()
 
         # Install static/managed record data
-        manage_remote(('loaddata', DEFAULT_FIXTURES))
+        manage_remote(('loaddata',) + DEFAULT_FIXTURES)
 
         # Generate icons
         manage_remote(('generate_icons', '--no-input'))
