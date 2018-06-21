@@ -1,12 +1,15 @@
 import base64
 import binascii
 from datetime import datetime, timedelta
-from urllib.parse import urlencode
+from urllib import parse
 
 from django.contrib.auth.models import AbstractBaseUser, UserManager
-from django.core.signing import Signer
+from django.contrib.sites.models import Site
 from django.core.urlresolvers import reverse
+from django.core.signing import Signer
 from django.db import models
+
+from oregoninvasiveshotline.utils import build_absolute_url
 
 
 class User(AbstractBaseUser):
@@ -53,19 +56,18 @@ class User(AbstractBaseUser):
             return None
         return cls.objects.get(email=email)
 
-    def get_authentication_url(self, request, next=None):
+    def get_authentication_url(self, next=None):
         signer = Signer()
         value = ':'.join((self.email, str(datetime.utcnow().timestamp())))
         value = base64.urlsafe_b64encode(value.encode('utf-8'))
         signature = signer.sign(value)
-        query_string = urlencode({
-            'sig': signature,
-            'next': next or '',
-        })
-        path = reverse('users-authenticate')
-        url = request.build_absolute_uri(path)
-        url = '?'.join((url, query_string))
-        return url
+
+        return build_absolute_url(
+            reverse('users-authenticate'),
+            parse.urlencode({
+                'sig': signature,
+                'next': next or '',
+            }))
 
     @property
     def full_name(self):

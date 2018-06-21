@@ -1,23 +1,26 @@
 language: python
 
 python:
-    - "3.3"
-    - "3.4"
     - "3.5"
+    - "3.6"
 
 sudo: false
 
 addons:
-    postgresql: "9.4"
+    postgresql: "9.6"
+    apt:
+      packages:
+        - postgresql-9.6-postgis-2.3
 
 services:
-    - elasticsearch
     - postgresql
+    - elasticsearch
 
 install:
     - pip install -r requirements.txt
 
 before_script:
+    - curl -O https://download.elastic.co/elasticsearch/release/org/elasticsearch/distribution/deb/elasticsearch/2.3.0/elasticsearch-2.3.0.deb && sudo dpkg -i --force-confnew elasticsearch-2.3.0.deb && sudo service elasticsearch restart
     - sleep 10
     - psql -U postgres -c 'create user oregoninvasiveshotline;'
     - psql -U postgres -c 'create database oregoninvasiveshotline owner oregoninvasiveshotline;'
@@ -27,4 +30,4 @@ before_script:
     - curl -XPUT 'http://localhost:9200/oregoninvasiveshotline-test/'
 
 script:
-    - LOCAL_SETTINGS_FILE="local.base.cfg#test" python manage.py test --keepdb
+    - LOCAL_SETTINGS_FILE="local.base.cfg#travis" python manage.py test --keepdb

@@ -1,11 +1,15 @@
-from django import forms
+from django.template.loader import render_to_string
 from django.core.mail import send_mail
 from django.core.urlresolvers import reverse
-from django.template.loader import render_to_string
+from django.db import transaction
+from django import forms
+
 from haystack.forms import SearchForm
+from arcutils.settings import get_setting
 
 from oregoninvasiveshotline.utils import generate_thumbnail
 
+from .tasks import notify_public_user_for_login_link
 from .models import User
 
 
@@ -48,7 +52,7 @@ class PublicLoginForm(forms.Form):
 
         return email
 
-    def save(self, request):
+    def save(self, *args, **kwargs):
         email = self.cleaned_data['email']
 
         # XXX: This can fail because there are several duplicate
@@ -62,16 +66,7 @@ class PublicLoginForm(forms.Form):
         #
         #      Cleaning up the dupes is going to be... fun.
         user = User.objects.get(email__iexact=email)
-
-        subject = 'Oregon Invasives Hotline - Login Link'
-        body = render_to_string('users/_login.txt', {
-            'user': user,
-            'url': user.get_authentication_url(request, next=reverse('users-home'))
-        })
-        from_email = 'noreply@pdx.edu'
-        recipients = [user.email]
-
-        send_mail(subject, body, from_email, recipients)
+        transaction.on_commit(lambda: notify_public_user_for_login_link.delay(user.pk))
 
 
 class UserForm(forms.ModelForm):

@@ -1,31 +1,33 @@
-import binascii
-import codecs
-import csv
-import json
-import os
 import posixpath
 import tempfile
+import binascii
+import shutil
+import codecs
+import json
+import csv
+import os
+from datetime import timedelta
 from unittest.mock import Mock, patch
 
-from datetime import timedelta
+from django.utils import timezone
 from django.conf import settings
+from django.core import mail
 from django.core.exceptions import NON_FIELD_ERRORS
 from django.core.files.base import File
 from django.core.urlresolvers import reverse
 from django.contrib.gis.geos import Point
 from django.db.models.signals import post_save
-from django.test import TestCase
-from django.test.client import RequestFactory
-from django.utils import timezone
+from django.db import transaction
+from django.test import TestCase, TransactionTestCase
 
 from model_mommy.mommy import make, prepare
-
 from arcutils.test.user import UserMixin
 
 from oregoninvasiveshotline.comments.forms import CommentForm
 from oregoninvasiveshotline.comments.models import Comment
 from oregoninvasiveshotline.images.models import Image
 from oregoninvasiveshotline.species.models import Category, Severity, Species
+from oregoninvasiveshotline.notifications.models import UserNotificationQuery
 from oregoninvasiveshotline.users.models import User
 
 from .forms import InviteForm, ManagementForm, ReportForm, ReportSearchForm
@@ -33,8 +35,10 @@ from .models import Invite, Report, receiver__generate_icon
 from .search_indexes import ReportIndex
 from .views import _export
 
-
 ORIGIN = Point(0, 0)
+TEST_IMAGE_PATH = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), '..', 'test_assets', 'fsm.png')
+)
 
 
 class SuppressPostSaveMixin:
@@ -106,7 +110,9 @@ class ReportTest(SuppressPostSaveMixin, TestCase):
         self.assertEqual(report.image_url, expected_url)
 
         # A report with a public image should have an image URL
-        image = make(Image, report=report, visibility=Image.PUBLIC)
+        path = os.path.join(settings.MEDIA_ROOT, 'test.png')
+        shutil.copyfile(TEST_IMAGE_PATH, path)
+        image = make(Image, report=report, image=File(open(path, 'rb')), visibility=Image.PUBLIC)
         file_name = '{image.pk}.png'.format(image=image)
         expected_url = posixpath.join(settings.MEDIA_URL, 'generated_thumbnails', file_name)
         self.assertEqual(report.image_url, expected_url)
@@ -121,7 +127,9 @@ class ReportTest(SuppressPostSaveMixin, TestCase):
         expected_url = None
         self.assertEqual(report.image_url, expected_url)
 
-        image = make(Image, comment=make(Comment, report=report), visibility=Image.PUBLIC)
+        path = os.path.join(settings.MEDIA_ROOT, 'test.png')
+        shutil.copyfile(TEST_IMAGE_PATH, path)
+        image = make(Image, report=report, image=File(open(path, 'rb')), visibility=Image.PUBLIC)
         file_name = '{image.pk}.png'.format(image=image)
         expected_url = posixpath.join(settings.MEDIA_URL, 'generated_thumbnails', file_name)
         self.assertEqual(report.image_url, expected_url)
@@ -672,11 +680,11 @@ class DetailViewTest(TestCase, UserMixin):
             }
             response = self.client.post(reverse("reports-detail", args=[report.pk]), data)
             self.assertEqual(1, m.call_count)
-            m().save.assert_called_once_with(user=self.admin, report=report, request=response.wsgi_request)
+            m().save.assert_called_once_with(self.admin, report)
             self.assertRedirects(response, reverse("reports-detail", args=[report.pk]))
 
 
-class ReportFormTest(TestCase):
+class ReportFormTest(TransactionTestCase, UserMixin):
 
     def setUp(self):
         self.index = ReportIndex()
@@ -702,19 +710,16 @@ class ReportFormTest(TestCase):
         self.assertFalse(form.is_valid())
         report = prepare(Report, pk=1, point=ORIGIN)
         pre_count = User.objects.count()
-        request = Mock(build_absolute_uri=Mock(return_value=""))
 
         with patch("oregoninvasiveshotline.reports.forms.forms.ModelForm.save") as save:
             form.instance = report
-            form.save(request=request)
+            form.save()
             self.assertTrue(save.called)
 
         self.assertEqual(User.objects.count(), pre_count+1)
-        user = User.objects.order_by("-pk").first()
-        self.assertEqual(user.email, "foo@example.com")
-        self.assertEqual(user.is_active, False)
-        self.assertEqual(user.last_name, "Bar")
-        self.assertEqual(user.pk, form.instance.created_by.pk)
+        self.assertEqual(report.created_by.email, "foo@example.com")
+        self.assertEqual(report.created_by.is_active, False)
+        self.assertEqual(report.created_by.last_name, "Bar")
 
         # the user already exists, so no record should be created
         pre_count = User.objects.count()
@@ -725,11 +730,10 @@ class ReportFormTest(TestCase):
         pre_count = User.objects.count()
         with patch("oregoninvasiveshotline.reports.forms.forms.ModelForm.save") as save:
             form.instance = report
-            form.save(request=request)
+            form.save()
             self.assertTrue(save.called)
 
         self.assertEqual(User.objects.count(), pre_count)
-        self.assertEqual(user.pk, form.instance.created_by.pk)
 
     def test_comment_is_added(self):
         form = ReportForm({
@@ -740,11 +744,64 @@ class ReportFormTest(TestCase):
         })
         self.assertFalse(form.is_valid())
         report = make(Report, point=ORIGIN)
-        form.instance = report
         with patch("oregoninvasiveshotline.reports.forms.forms.ModelForm.save"):
-            form.save(request=Mock(build_absolute_uri=Mock(return_value="")))
+            form.instance = report
+            form.save()
 
         self.assertEqual(Comment.objects.get(report=report).body, "hello world")
+
+    def test_notify_sends_emails_to_subscribers(self):
+        user = self.create_user(username='foo@example.com')
+
+        # Subscribe to the same thing twice to ensure that only one
+        # email is sent to the user when a report matches.
+        make(UserNotificationQuery, query='q=foobarius', user=user)
+        make(UserNotificationQuery, query='q=foobarius', user=user)
+
+        # This report does *not* have the words "foobarius" in it, so no
+        # email should be sent.
+        form = ReportForm({
+            "email": "foo@example.com",
+            "first_name": "Foo",
+            "last_name": "Bar",
+        })
+        self.assertFalse(form.is_valid())
+        report = make(Report, point=ORIGIN)
+        with patch("oregoninvasiveshotline.reports.forms.forms.ModelForm.save"):
+            # notification task is out-of-band and uses 'on_commit' barrier
+            # so the path being tested is wrapped in a transaction
+            with transaction.atomic():
+                form.instance = report
+                form.save()
+
+        # mailbox should contain one report submission email
+        self.assertEqual(len(mail.outbox), 1)
+
+        # This report *does* have the word "foobarius" in it, so it
+        # should trigger an email to be sent.
+        report = make(Report, reported_category__name='foobarius', point=ORIGIN)
+        with patch("oregoninvasiveshotline.reports.forms.forms.ModelForm.save"):
+            # notification task is out-of-band and uses 'on_commit' barrier
+            # so the path being tested is wrapped in a transaction
+            with transaction.atomic():
+                form.instance = report
+                form.save()
+
+        # mailbox should contain two report submission emails and a
+        # subscription notification
+        self.assertEqual(len(mail.outbox), 3)
+
+        # If we notify about the same report, no new email should be sent.
+        with patch("oregoninvasiveshotline.reports.forms.forms.ModelForm.save"):
+            # notification task is out-of-band and uses 'on_commit' barrier
+            # so the path being tested is wrapped in a transaction
+            with transaction.atomic():
+                form.instance = report
+                form.save()
+
+        # mailbox should contain three report submission emails and a
+        # subscription notification
+        self.assertEqual(len(mail.outbox), 4)
 
 
 class ManagementFormTest(SuppressPostSaveMixin, TestCase):
@@ -883,14 +940,13 @@ class InviteFormTest(TestCase, UserMixin):
     def test_save(self):
         inviter = self.create_user()
         report = make(Report, point=ORIGIN)
-        request = RequestFactory().get(reverse('reports-detail', args=(report.pk,)))
 
         form = InviteForm({
             'emails': 'foo@pdx.edu',
             'body': 'body',
         })
         self.assertTrue(form.is_valid())
-        invite_report = form.save(user=inviter, report=report, request=request)
+        invite_report = form.save(inviter, report)
         self.assertEqual(invite_report.invited, ['foo@pdx.edu'])
         self.assertEqual(invite_report.already_invited, [])
 
@@ -899,7 +955,7 @@ class InviteFormTest(TestCase, UserMixin):
             'body': 'body',
         })
         self.assertTrue(form.is_valid())
-        invite_report = form.save(user=inviter, report=report, request=request)
+        invite_report = form.save(inviter, report)
         self.assertEqual(invite_report.invited, ['bar@pdx.edu'])
         self.assertEqual(invite_report.already_invited, ['foo@pdx.edu'])
 

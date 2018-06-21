@@ -4,21 +4,84 @@ from unittest.mock import Mock, patch
 from django.conf import settings
 from django.core import mail
 from django.core.urlresolvers import reverse
+from django.contrib.auth.models import AnonymousUser
 from django.contrib.gis.geos import Point
-from django.test import TestCase
+from django.db import transaction
+from django.test import TestCase, TransactionTestCase
 
 from model_mommy.mommy import make, prepare
-
 from arcutils.test.user import UserMixin
 
+from oregoninvasiveshotline.notifications.models import UserNotificationQuery
 from oregoninvasiveshotline.reports.models import Invite, Report
 
 from .forms import PublicLoginForm, UserForm, UserSearchForm
-from .models import User
 from .search_indexes import UserIndex
-
+from .utils import get_tab_counts
+from .models import User
 
 ORIGIN = Point(0, 0)
+
+
+class GetTabCountsTest(TestCase, UserMixin):
+
+    def setUp(self):
+        self.user = self.create_user(
+            username="foo@example.com",
+            password="foo",
+            is_active=True,
+            is_staff=False
+        )
+
+    def test_subscribed(self):
+        make(UserNotificationQuery, user=self.user)
+        make(UserNotificationQuery)
+        context = get_tab_counts(self.user, [])
+        self.assertEqual(context['subscribed'], 1)
+
+    def test_invited_to(self):
+        make(Invite, user=self.user, report=make(Report, point=ORIGIN))
+        make(Invite, report=make(Report, point=ORIGIN))
+        context = get_tab_counts(self.user, [])
+        self.assertEqual(context['invited_to'], 1)
+
+    def test_reported(self):
+        make(Report, created_by=self.user, point=ORIGIN)
+        make(Report, point=ORIGIN)
+        report_id = make(Report, point=ORIGIN).pk
+        context = get_tab_counts(self.user, [report_id])
+        self.assertEqual(context['reported'], 2)
+
+    def test_open_and_claimed(self):
+        make(Report, point=ORIGIN)
+        user = AnonymousUser()
+        context = get_tab_counts(user, [])
+        self.assertEqual(context['open_and_claimed'], 0)
+
+        make(Report, claimed_by=self.user, point=ORIGIN)
+        context = get_tab_counts(self.user, [])
+        self.assertEqual(context['open_and_claimed'], 1)
+
+    def test_unclaimed_reports(self):
+        make(Report, claimed_by=self.user, point=ORIGIN)
+        make(Report, point=ORIGIN)
+        user = AnonymousUser()
+        context = get_tab_counts(user, [])
+        self.assertEqual(context['unclaimed_reports'], 0)
+
+        user = self.create_user(
+            username="inactive_user@example.com",
+            is_active=False
+        )
+        context = get_tab_counts(user, [])
+        self.assertEqual(context['unclaimed_reports'], 0)
+
+        other_user = self.create_user(
+            username="active_other@example.com",
+            is_active=True
+        )
+        context = get_tab_counts(other_user, [])
+        self.assertEqual(context['unclaimed_reports'], 1)
 
 
 class DetailViewTest(TestCase, UserMixin):
@@ -79,20 +142,20 @@ class AuthenticateViewTest(TestCase, UserMixin):
     def test_active_or_invited_users_are_logged_in(self):
         # test for an invited user
         invite = make(Invite, report=make(Report, point=ORIGIN))
-        url = invite.user.get_authentication_url(request=Mock(build_absolute_uri=lambda a: a))
+        url = invite.user.get_authentication_url()
         response = self.client.get(url)
         self.assertRedirects(response, self.login_redirect_url)
 
         # test for an active user
         user = self.create_user(username="inactive@example.com", is_active=False)
-        url = user.get_authentication_url(request=Mock(build_absolute_uri=lambda a: a))
+        url = user.get_authentication_url()
         response = self.client.get(url)
         self.assertRedirects(response, self.login_redirect_url)
 
     def test_report_ids_session_variable_is_populated(self):
         user = self.create_user(username="foo@example.com", is_active=True)
         report = make(Report, created_by=user, point=ORIGIN)
-        url = user.get_authentication_url(request=Mock(build_absolute_uri=lambda a: a))
+        url = user.get_authentication_url()
         response = self.client.get(url)
         self.assertRedirects(response, self.login_redirect_url)
         self.assertIn(report.pk, self.client.session['report_ids'])
@@ -289,11 +352,7 @@ class UserTest(TestCase, UserMixin):
         self.assertEqual(other_user.get_proper_name(), "Foo Bar")
 
     def test_get_authentication_url_and_authenticate(self):
-
-        def build_absolute_uri(arg):
-            return "http://example.com" + arg
-
-        url = self.user.get_authentication_url(request=Mock(build_absolute_uri=build_absolute_uri), next="lame")
+        url = self.user.get_authentication_url(next="lame")
         parts = urllib.parse.urlparse(url)
         self.assertEqual(parts.path, reverse("users-authenticate"))
         query = urllib.parse.parse_qs(parts.query)
@@ -301,7 +360,7 @@ class UserTest(TestCase, UserMixin):
         self.assertEqual(self.user, User.from_signature(query['sig'][0]))
 
 
-class LoginFormTest(TestCase, UserMixin):
+class LoginFormTest(TransactionTestCase, UserMixin):
     def test_clean_email_raises_validation_error_for_non_existing_user(self):
         form = PublicLoginForm({
             "email": "foo@pdx.edu"
@@ -316,21 +375,30 @@ class LoginFormTest(TestCase, UserMixin):
         })
         self.assertTrue(form.is_valid())
         with patch("oregoninvasiveshotline.users.forms.User.get_authentication_url", return_value="foobarius"):
-            form.save(request=Mock())
+            # notification task is out-of-band and uses 'on_commit' barrier
+            # so the path being tested is wrapped in a transaction
+            with transaction.atomic():
+                form.save()
+
             self.assertTrue(len(mail.outbox), 1)
             self.assertIn("foobarius", mail.outbox[0].body)
 
 
-class LoginViewTest(TestCase, UserMixin):
+class LoginViewTest(TransactionTestCase, UserMixin):
     def test_get(self):
         response = self.client.get(reverse("login"))
         self.assertEqual(response.status_code, 200)
 
     def test_logging_in_via_email_sends_an_email(self):
         user = self.create_user(username="foo@example.com", is_active=False)
-        response = self.client.post(reverse("login"), {
-            "email": user.email,
-            "form": "OTHER_LOGIN",
-        })
+
+        # notification task is out-of-band and uses 'on_commit' barrier
+        # so the path being tested is wrapped in a transaction
+        with transaction.atomic():
+            response = self.client.post(reverse("login"), {
+                "email": user.email,
+                "form": "OTHER_LOGIN",
+            })
+            self.assertRedirects(response, reverse("login"))
+
         self.assertTrue(len(mail.outbox), 1)
-        self.assertRedirects(response, reverse("login"))

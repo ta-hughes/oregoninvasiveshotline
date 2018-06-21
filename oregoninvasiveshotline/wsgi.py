@@ -92,23 +92,7 @@ def create_wsgi_application(settings_module=None, root=None, venv=None, local_se
     from django.core.management import call_command
     from django.core.wsgi import get_wsgi_application
 
-    app = get_wsgi_application()
-
-    if not settings.DEBUG:
-        from arcutils.tasks import DailyTasksProcess
-        daily_tasks = DailyTasksProcess(home=root)
-        daily_tasks.add_task(call_command, 3, 1, ('clearsessions',), name='clearsessions')
-        daily_tasks.add_task(call_command, 3, 16, ('generate_icons',), {
-            'clean': True,
-            'interactive': False,
-            'quiet': True,
-        }, name='generate_icons')
-        daily_tasks.add_task(call_command, 3, 17, ('rebuild_index',), {
-            'interactive': False
-        }, name='rebuild_index')
-        daily_tasks.start()
-
-    return app
+    return get_wsgi_application()
 
 
 # IMPORTANT: Pass the settings module for the project or ensure the

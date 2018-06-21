@@ -3,22 +3,84 @@ version: "3"
 networks:
   default:
     driver: bridge
+    ipam:
+      config:
+        # this value is a soft-reservation of the subnet in
+        # order to reduce friction w.r.t. a given local docker
+        # environment and project configuration.
+        # 
+        # if you encounter network definition conflicts, change
+        # the value below and revise its use in 'local.*.cfg'.
+        - subnet: 172.23.0.0/16
 
 services:
-    elasticsearch:
-        image: elasticsearch:1.7
-        networks:
-            - default
-        ports:
-            - 9200:9200
-        volumes:
-            - ./volumes/elasticsearch:/usr/share/elasticsearch/data
+  postgres:
+    image: kartoza/postgis:9.6-2.4
+    networks:
+      - default
+    ports:
+      - 5432:5432
+    environment:
+      # In some cases, the logic present in the kartoza/postgis
+      # entrypoint may fail to recognize that this database already
+      # exists when the container volume has already such a database
+      # present; in this case, comment the 'POSTGRES_DBNAME' entry
+      # in order to succesfully boot the container.
+      - POSTGRES_USER=invasives
+      - POSTGRES_PASS=invasives
+      - POSTGRES_DBNAME=invasives
+      - ALLOW_IP_RANGE=172.23.0.0/16
+    volumes:
+      - ./volumes/postgres:/var/lib/postgresql
 
-    postgres:
-        image: mdillon/postgis:9.4
-        networks:
-            - default
-        ports:
-            - 5432:5432
-        volumes:
-            - ./volumes/postgres:/var/lib/postgresql
+  elasticsearch:
+    image: elasticsearch:2
+    networks:
+      - default
+    ports:
+      - 9200:9200
+    volumes:
+      - ./volumes/elasticsearch:/usr/share/elasticsearch/data
+
+  rabbitmq:
+    image: rabbitmq
+    networks:
+      - default
+    ports:
+      - 5672:5672
+
+  oregoninvasiveshotline:
+    image: psu.oit.wdt/oregoninvasiveshotline
+    build: app
+    user: oregoninvasiveshotline
+    environment:
+      - LOCAL_SETTINGS_FILE=local.docker.cfg
+      - APP_ROOT=/webapps/oregoninvasiveshotline
+      - APP_VENV=/webapps/oregoninvasiveshotline/venv-docker
+      - APP_SERVICE=wsgi
+    networks:
+      - default
+    ports:
+      - 8000:8000
+    volumes:
+      - ./:/webapps/oregoninvasiveshotline
+    depends_on:
+      - postgres
+      - elasticsearch
+      - rabbitmq
+
+  celery:
+    build: app
+    user: oregoninvasiveshotline
+    user: oregoninvasiveshotline
+    environment:
+      - LOCAL_SETTINGS_FILE=local.docker.cfg
+      - APP_ROOT=/webapps/oregoninvasiveshotline
+      - APP_VENV=/webapps/oregoninvasiveshotline/venv-docker
+      - APP_SERVICE=celery
+    networks:
+      - default
+    volumes:
+      - ./:/webapps/oregoninvasiveshotline
+    depends_on:
+      - oregoninvasiveshotline

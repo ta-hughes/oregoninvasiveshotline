@@ -1,0 +1,71 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Resource stack for Oregon Invasives Hotline
+Parameters:
+  DBPassword:
+    Description: Mechanism for declaring DBPassword
+    Type: String
+  ELBListenerPriority:
+    Description: Mechanism for declaring ELBListenerPriority
+    Type: String
+Resources:
+  AppRole:
+    Properties:
+      Parameters:
+        Name: invasives
+        VpcStackName: vpc-stage
+      TemplateURL: https://s3-us-west-2.amazonaws.com/cloudformation-templates.wdt.pdx.edu/1/iam/application_role.template.yml
+    Type: AWS::CloudFormation::Stack
+  Host:
+    Properties:
+      Parameters:
+        EbsVolumeId: !GetAtt 'Volume.Outputs.EbsVolume'
+        ExternalZoneName: stage.wdt.pdx.edu
+        HostName: !GetAtt 'AppRole.Outputs.Name'
+        IAMAppRoleName: !GetAtt 'AppRole.Outputs.RoleName'
+        ImageDistribution: amazon2
+        ImageId: ami-d2f06baa
+        InternalZoneName: stage-internal
+        UseEFSFilesystem: true
+        VpcStackName: !GetAtt 'AppRole.Outputs.VpcStackName'
+      TemplateURL: https://s3-us-west-2.amazonaws.com/cloudformation-templates.wdt.pdx.edu/1/ec2/private_host/private_host.template.yml
+    Type: AWS::CloudFormation::Stack
+  Networking:
+    Properties:
+      Parameters:
+        DnsHostName: !GetAtt 'AppRole.Outputs.Name'
+        EC2Instance: !GetAtt 'Host.Outputs.InstanceId'
+        ELBListenerPriority: !Ref 'ELBListenerPriority'
+        ExternalZoneName: !GetAtt 'Host.Outputs.ExternalZoneName'
+        InternalZoneName: !GetAtt 'Host.Outputs.InternalZoneName'
+        ListenOn80: true
+        PrivateIp: !GetAtt 'Host.Outputs.PrivateIP'
+        VpcStackName: !GetAtt 'AppRole.Outputs.VpcStackName'
+      TemplateURL: https://s3-us-west-2.amazonaws.com/cloudformation-templates.wdt.pdx.edu/1/ec2/private_host/networking.template.yml
+    Type: AWS::CloudFormation::Stack
+  PostgreSQL:
+    Properties:
+      Parameters:
+        AvailabilityZone: us-west-2a
+        DBInstanceName: oregoninvasiveshotline-stage
+        DBPassword: !Ref 'DBPassword'
+        DBUsername: oregoninvasiveshotline_l
+        EC2SecurityGroupId: !GetAtt 'Host.Outputs.EC2SecurityGroup'
+        VpcStackName: !GetAtt 'AppRole.Outputs.VpcStackName'
+      TemplateURL: https://s3-us-west-2.amazonaws.com/cloudformation-templates.wdt.pdx.edu/1/rds/postgres.template.yml
+    Type: AWS::CloudFormation::Stack
+  SearchIndex:
+    Properties:
+      Parameters:
+        EC2SecurityGroupId: !GetAtt 'Host.Outputs.EC2SecurityGroup'
+        IamResourceARN: !GetAtt 'AppRole.Outputs.RoleArn'
+        Name: oregoninvasiveshotline-stage
+        VpcStackName: !GetAtt 'AppRole.Outputs.VpcStackName'
+      TemplateURL: https://s3-us-west-2.amazonaws.com/cloudformation-templates.wdt.pdx.edu/1/es/domain.template.yml
+    Type: AWS::CloudFormation::Stack
+  Volume:
+    Properties:
+      Parameters:
+        AvailabilityZone: us-west-2a
+        Name: oregoninvasiveshotline-stage
+      TemplateURL: https://s3-us-west-2.amazonaws.com/cloudformation-templates.wdt.pdx.edu/1/ec2/ebs/volume.template.yml
+    Type: AWS::CloudFormation::Stack

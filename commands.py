@@ -1,139 +1,127 @@
-from collections import defaultdict
+import os.path
 
-from runcommands import DEFAULT_ENV, command, configure
-from runcommands.util import confirm, printer
+from emcee.runner.config import YAMLCommandConfiguration
+from emcee.runner import command, configs, config
+from emcee.runner.commands import remote
+from emcee.runner.utils import confirm
+from emcee.app.config import LegacyAppConfiguration
+from emcee.app import app_configs
+from emcee import printer
 
-from arctasks.commands import *
-from arctasks.django import call_command, manage, setup
+from emcee.commands.deploy import deploy
+from emcee.commands.python import virtualenv, install
+from emcee.commands.django import manage, manage_remote
+from emcee.commands.files import copy_file
 
+from emcee.provision.base import provision_host, patch_host
+from emcee.provision.python import provision_python
+from emcee.provision.gis import provision_gis
+from emcee.provision.services import (provision_nginx,
+                                      provision_supervisor,
+                                      provision_rabbitmq)
+from emcee.provision.secrets import show_secret
+from emcee.deploy.base import push_nginx_config, push_crontab, push_supervisor_config
+from emcee.deploy.python import push_uwsgi_ini, push_uwsgi_config, restart_uwsgi
+from emcee.deploy.django import Deployer as DjangoDeployer
 
-configure(default_env='dev')
-
-
-@command(env='dev', timed=True)
-def init(config, overwrite=False):
-    virtualenv(config, overwrite=overwrite)
-    install(config)
-    createdb(config, drop=overwrite)
-    migrate(config)
-    loaddata(config)
-    rebuild_index(config, input=False)
-    generate_icons(config, clean=overwrite, input=False)
-    test(config, with_coverage=True, force_env='test')
-
-
-@command(env='dev')
-def loaddata(config):
-    manage(config, (
-        'loaddata',
-        'dummy_user.json category.json severity.json counties.json pages.json',
-    ))
-
-
-@command(default_env=DEFAULT_ENV)
-def post_deploy(config):
-    """A set of tasks that commonly needs to be run after deploying."""
-    generate_icons(config, clean=True, input=False)
-    rebuild_index(config, input=False)
+# from emcee.backends.dev.provision.db import provision_database as provision_database_local
+from emcee.backends.aws.infrastructure.commands import *
+from emcee.backends.aws.provision.db import provision_database, import_database
+from emcee.backends.aws.provision.volumes import provision_volume
 
 
-@command(default_env=DEFAULT_ENV)
-def rebuild_index(config, input=True):
-    call_command(config, 'rebuild_index', interactive=input)
+DEFAULT_FIXTURES = ('counties.json',)
+DEVELOPMENT_FIXTURES = ('dummy_user.json', 'category.json', 'severity.json', 'pages.json')
+
+configs.load('default', 'commands.yml', YAMLCommandConfiguration)
+app_configs.load('default', LegacyAppConfiguration)
 
 
-@command(default_env=DEFAULT_ENV)
-def generate_icons(config, clean=False, force=False, input=True):
-    call_command(config, 'generate_icons', clean=clean, force=force, interactive=input)
+@command(timed=True)
+def init(overwrite=False):
+    virtualenv(config.python.venv, overwrite=overwrite)
+    install()
+    # provision_database_local(drop=overwrite, with_postgis=True)
+    manage(('migrate', '--noinput'))
+    manage(('loaddata',) + DEFAULT_FIXTURES)
+    manage(('loaddata',) + DEVELOPMENT_FIXTURES)
+    manage(('generate_icons', '--no-input', '--clean', '--force'))
+    manage(('rebuild_index', '--noinput'))
 
 
-@command(default_env=DEFAULT_ENV)
-def remove_duplicate_users(config):
-    setup(config)
-    from django.apps import apps
-    from django.contrib.auth import get_user_model
-    from arcutils.db import will_be_deleted_with
+@command
+def provision_app(createdb=False):
+    # Configure host properties and prepare host platforms
+    provision_host(initialize_host=True)
+    provision_python()
+    provision_gis()
+    provision_nginx()
+    provision_supervisor()
+    provision_rabbitmq()
 
-    Comment = apps.get_model('comments', 'Comment')
-    Image = apps.get_model('images', 'Image')
-    Notification = apps.get_model('notifications', 'Notification')
-    UserNotificationQuery = apps.get_model('notifications', 'UserNotificationQuery')
-    Invite = apps.get_model('reports', 'Invite')
-    Report = apps.get_model('reports', 'Report')
+    # Initialize/prepare attached EBS volume
+    provision_volume(mount_point='/vol/store')
 
-    user_model = get_user_model()
-    dupes = user_model.objects.raw(
-        'SELECT * from "user" u1 '
-        'WHERE ('
-        '    SELECT count(*) FROM "user" u2 WHERE lower(u2.email) = lower(u1.email )'
-        ') > 1 '
-        'ORDER BY lower(email)'
-    )
-    dupes = [d for d in dupes]
+    if createdb:
+        backend_options={'with_postgis': True,
+                         'with_devel': True}
+        provision_database(backend_options=backend_options)
 
-    printer.info('Found {n} duplicates'.format(n=len(dupes)))
 
-    # Delete any dupes we can.
-    # Active and staff users are never deleted.
-    # Public users with no associated records will be deleted.
-    for user in dupes:
-        email = user.email
-        objects = list(will_be_deleted_with(user))
-        num_objects = len(objects)
-        f = locals()
-        if user.is_active:
-            print('Skipping active user: {email}.'.format_map(f))
-        elif user.is_staff:
-            print('Skipping inactive staff user: {email}.'.format_map(f))
-        elif num_objects == 0:
-            printer.warning('Deleting {email} will *not* cascade.'.format_map(f))
-            if confirm(config, 'Delete {email}?'.format_map(f), yes_values=('yes',)):
-                print('Okay, deleting {email}...'.format_map(f), end='')
-                user.delete()
-                dupes.remove(user)
-                print('Deleted')
-        else:
-            print(
-                'Deleting {email} would cascade to {num_objects} objects. Skipping.'.format_map(f))
+# Loading data model will cause instantiation of 'ClearableImageInput' which
+# will require that the path '{remote.path.root}/media' exist and be readable
+# by {service.user} so it's execution must be delayed until media assets have
+# been imported.
+@command
+def provision_media_assets():
+    app_media_root = os.path.join(config.remote.path.root, 'media')
+    owner = '{}:{}'.format(config.iam.user, config.remote.nginx.group)
 
-    # Group the remaining duplicates by email address
-    grouped_dupes = defaultdict(list)
-    for user in dupes:
-        email = user.email.lower()
-        grouped_dupes[email].append(user)
-    grouped_dupes = {email: users for (email, users) in grouped_dupes.items() if len(users) > 1}
+    # Create media directory on EBS mount and link to app's media root
+    remote(('mkdir', '-p', '/vol/store/media'), sudo=True)
+    remote(('mkdir', '-p', app_media_root), sudo=True)
+    remote(('test', '-h', config.remote.path.media, '||',
+            'ln', '-sf', '/vol/store/media', config.remote.path.media), sudo=True)
 
-    # For each group, find the "best" user (staff > active > inactive).
-    # The other users' associated records will be associated with this
-    # "winner".
-    for email, users in grouped_dupes.items():
-        winner = None
-        for user in users:
-            if user.is_staff:
-                winner = user
-                break
-        if winner is None:
-            for user in users:
-                if user.is_active:
-                    winner = user
-                    break
-        if winner is None:
-            for user in users:
-                if user.full_name:
-                    winner = user
-        if winner is None:
-            winner = users[0]
-        losers = [user for user in users if user != winner]
-        print('Winner:', winner.full_name, '<{0.email}>'.format(winner))
-        for loser in losers:
-            print('Loser:', loser.full_name, '<{0.email}>'.format(loser))
-            print('Re-associating loser objects...', end='')
-            Comment.objects.filter(created_by=loser).update(created_by=winner)
-            Image.objects.filter(created_by=loser).update(created_by=winner)
-            Invite.objects.filter(user=loser).update(user=winner)
-            Invite.objects.filter(created_by=loser).update(created_by=winner)
-            Notification.objects.filter(user=loser).update(user=winner)
-            Report.objects.filter(claimed_by=loser).update(claimed_by=winner)
-            Report.objects.filter(created_by=loser).update(created_by=winner)
-            UserNotificationQuery.objects.filter(user=loser).update(user=winner)
-            print('Done')
+    # Set the correct permissions on generated assets
+    remote(('chown', '-R', owner, '/vol/store/media'), sudo=True)
+    remote(('chown', '-R', owner, app_media_root), sudo=True)
+
+    # Synchronize icons and assorted media assets:
+    archive_path = 'media.tar'
+    if os.path.exists(archive_path):
+        if not confirm("Synchronize media from '{}'?".format(archive_path)):
+            return
+
+        copy_file(archive_path, config.remote.path.media)
+        remote(('tar', 'xvf', archive_path, '&&',
+                'rm', archive_path),
+               cd=config.remote.path.media
+        )
+
+
+class InvasivesDeployer(DjangoDeployer):
+    def bootstrap_application(self):
+        super(InvasivesDeployer, self).bootstrap_application()
+
+        # Install static/managed record data
+        manage_remote(('loaddata',) + DEFAULT_FIXTURES)
+
+        # Generate icons
+        manage_remote(('generate_icons', '--no-input'))
+
+        # Rebuild search index
+        manage_remote(('rebuild_index', '--noinput'))
+
+        # Install crontab
+        push_crontab()
+
+    def make_active(self):
+        super(InvasivesDeployer, self).make_active()
+
+        push_supervisor_config()
+
+
+@command
+def deploy_app(rebuild=True):
+    deploy(InvasivesDeployer, rebuild=rebuild)

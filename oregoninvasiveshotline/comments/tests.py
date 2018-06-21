@@ -3,10 +3,10 @@ from unittest.mock import Mock
 from django.core import mail
 from django.core.urlresolvers import reverse
 from django.contrib.gis.geos import Point
-from django.test import TestCase
+from django.db import transaction
+from django.test import TestCase, TransactionTestCase
 
 from model_mommy.mommy import make
-
 from arcutils.test.user import UserMixin
 
 from oregoninvasiveshotline.images.models import Image
@@ -19,7 +19,7 @@ from .models import Comment
 ORIGIN = Point(0, 0)
 
 
-class CommentFormTest(TestCase, UserMixin):
+class CommentFormTest(TransactionTestCase, UserMixin):
 
     def setUp(self):
         self.user = self.create_user(
@@ -57,11 +57,13 @@ class CommentFormTest(TestCase, UserMixin):
 
         should_be_notified = make(Comment, report=report, created_by=self.admin).created_by.email
         should_not_be_notified = make(Comment, report=report, created_by=self.inactive_user).created_by.email
-        form = CommentForm({
-            'body': "foo",
-        }, user=other_user, report=report)
+        form = CommentForm({'body': "foo"}, user=other_user, report=report)
         self.assertTrue(form.is_valid())
-        form.save(request=Mock(build_absolute_uri=Mock(return_value="")))
+
+        # notification task is out-of-band and uses 'on_commit' barrier
+        # so the path being tested is wrapped in a transaction
+        with transaction.atomic():
+            form.save()
 
         self.assertIn(should_be_notified, [email.to[0] for email in mail.outbox])
         self.assertNotIn(should_not_be_notified, [email.to for email in mail.outbox])
@@ -69,11 +71,13 @@ class CommentFormTest(TestCase, UserMixin):
     def test_email_sent_out_for_new_comment_to_user_who_claimed_report(self):
         report = make(Report, claimed_by=self.user, point=ORIGIN)
 
-        form = CommentForm({
-            'body': "foo",
-        }, user=self.inactive_user, report=report)
+        form = CommentForm({'body': "foo"}, user=self.inactive_user, report=report)
         self.assertTrue(form.is_valid())
-        form.save(request=Mock(build_absolute_uri=Mock(return_value="")))
+
+        # notification task is out-of-band and uses 'on_commit' barrier
+        # so the path being tested is wrapped in a transaction
+        with transaction.atomic():
+            form.save()
 
         self.assertIn(report.claimed_by.email, [email.to[0] for email in mail.outbox])
 
@@ -81,11 +85,13 @@ class CommentFormTest(TestCase, UserMixin):
         report = make(Report, point=ORIGIN)
         invite = make(Invite, report=report, user=self.user)
 
-        form = CommentForm({
-            'body': "foo",
-        }, user=self.inactive_user, report=report)
+        form = CommentForm({'body': "foo"}, user=self.inactive_user, report=report)
         self.assertTrue(form.is_valid())
-        form.save(request=Mock(build_absolute_uri=Mock(return_value="")))
+
+        # notification task is out-of-band and uses 'on_commit' barrier
+        # so the path being tested is wrapped in a transaction
+        with transaction.atomic():
+            form.save()
 
         self.assertIn(invite.user.email, [email.to[0] for email in mail.outbox])
 
@@ -93,12 +99,14 @@ class CommentFormTest(TestCase, UserMixin):
         report = make(Report, point=ORIGIN)
         make(Invite, report=report, user=self.user)
 
-        form = CommentForm({
-            'body': "foo",
-            'visibility': Comment.PUBLIC,
-        }, user=self.user, report=report)
+        form = CommentForm({'body': "foo", 'visibility': Comment.PUBLIC},
+                           user=self.user, report=report)
         self.assertTrue(form.is_valid())
-        form.save(request=Mock(build_absolute_uri=Mock(return_value="")))
+
+        # notification task is out-of-band and uses 'on_commit' barrier
+        # so the path being tested is wrapped in a transaction
+        with transaction.atomic():
+            form.save()
 
         self.assertNotIn(self.user.email, [email.to[0] for email in mail.outbox])
 
@@ -106,12 +114,14 @@ class CommentFormTest(TestCase, UserMixin):
         report = make(Report, created_by=self.inactive_user, point=ORIGIN)
         invite = make(Invite, report=report)
 
-        form = CommentForm({
-            'body': "foo",
-            'visibility': Comment.PUBLIC,
-        }, user=invite.user, report=report)
+        form = CommentForm({'body': "foo", 'visibility': Comment.PUBLIC},
+                           user=invite.user, report=report)
         self.assertTrue(form.is_valid())
-        form.save(request=Mock(build_absolute_uri=Mock(return_value="")))
+
+        # notification task is out-of-band and uses 'on_commit' barrier
+        # so the path being tested is wrapped in a transaction
+        with transaction.atomic():
+            form.save()
 
         self.assertIn(self.inactive_user.email, [email.to[0] for email in mail.outbox])
 
@@ -126,7 +136,11 @@ class CommentFormTest(TestCase, UserMixin):
             'visibility': Comment.PRIVATE,
         }, user=invite.user, report=report)
         self.assertTrue(form.is_valid())
-        form.save(request=Mock(build_absolute_uri=Mock(return_value="")))
+
+        # notification task is out-of-band and uses 'on_commit' barrier
+        # so the path being tested is wrapped in a transaction
+        with transaction.atomic():
+            form.save()
 
         self.assertNotIn(other_user.email, [email.to[0] for email in mail.outbox])
 

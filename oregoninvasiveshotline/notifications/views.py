@@ -1,17 +1,19 @@
-from django.conf import settings
-from django.contrib import messages
+from django.shortcuts import get_object_or_404, redirect, render
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.urlresolvers import reverse
+from django.contrib import messages
 from django.http import HttpResponseRedirect
-from django.shortcuts import get_object_or_404, redirect, render
+from django.db import transaction
+from django.conf import settings
 
 from arcutils.db import will_be_deleted_with
 
 from oregoninvasiveshotline.perms import permissions
-from oregoninvasiveshotline.utils import get_tab_counts
+from oregoninvasiveshotline.users.utils import get_tab_counts
 
 from .forms import UserNotificationQueryForm, UserSubscriptionAdminForm, UserSubscriptionDeleteForm
 from .models import UserNotificationQuery
+from .tasks import notify_new_subscription_owner
 
 
 @permissions.is_active
@@ -46,7 +48,7 @@ def edit(request, subscription_id):
             if new_owner != old_owner:
                 # If the owner has changed, send the new owner an email updating
                 # them of their newly assigned subscription
-                instance.notify_new_owner(subscription, request)
+                transaction.on_commit(lambda: notify_new_subscription_owner.delay(instance.pk, request.user.pk))
                 messages.success(request, 'Subscription updated. {0.full_name} has been notified'.format(new_owner))
             else:
                 messages.success(request, 'Subscription updated')
