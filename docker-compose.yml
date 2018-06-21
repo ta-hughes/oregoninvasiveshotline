@@ -21,9 +21,15 @@ services:
     ports:
       - 5432:5432
     environment:
+      # In some cases, the logic present in the kartoza/postgis
+      # entrypoint may fail to recognize that this database already
+      # exists when the container volume has already such a database
+      # present; in this case, comment the 'POSTGRES_DBNAME' entry
+      # in order to succesfully boot the container.
       - POSTGRES_USER=invasives
       - POSTGRES_PASS=invasives
       - POSTGRES_DBNAME=invasives
+      - ALLOW_IP_RANGE=172.23.0.0/16
     volumes:
       - ./volumes/postgres:/var/lib/postgresql
 
