@@ -37,11 +37,32 @@ This project using the Emcee tooling to define and orchestrate resource provisio
 See the AWS cloudformation templates in `cloudformation` and the command definitions in `commands.py`
 for more information.
 
-## Notable Hackiness
+## General notes
 
-The Sites framework is used here only so we can use flatpages. To avoid having to update the stupid
-domain column all the time, the Site.objects attribute has been monkey-patched in the `utils`
-module so it returns whatever domain is currently being used.
+### Regular maintenance tasks
+
+This project ships with a crontab which handles scheduling of several regular tasks:
+
+- Clearing expired HTTP sessions
+- Generates icons for uploaded images
+- Rebuilds the Elasticsearch index
+
+### Email notifications
+
+Several workflows trigger email notifications based on specific criteria. All such notifications
+are implemented and orchestrated using Celery-based tasks in order that they are performed out-
+of-band with respect to the request/response cycle.
+
+### Application behavior
+
+This project uses an unconventional approach to its use of the built-in Django user and
+authentication mechanisms. Traditionally, the `User.is_active` attribute supports soft-delete
+behavior, whereby individual users may be disabled without removing the record and those with
+relations to it. In this case, the attribute signifies whether or not the user record in question
+is considered to be staff or an individual (unaffiliated) contributor. In order to support the
+pre-existing workflows which require these users to be able to login (i.e., successfully
+authenticate), the `django.contrib.auth.backends.AllowAllUsersModelBacked` added in Django 1.10
+is used.
 
 There is a "subscribe to search" feature that allows an active user of the system to perform
 a search on the reports list page and then subscribe to it. Meaning: whenever a new report is
@@ -52,6 +73,3 @@ as a string like "querystring=foobar&category-4=142". When a report is submitted
 `UserNotificationQuery` model. The `search()` method on the form is called, and if the results
 contains that newly submitted report, the user gets an email. This is an expensive process, so it
 runs in a separate thread.
-
-Because cron jobs tend to get abandoned around here, the Elasticsearch index is rebuilt early in
-the morning via a daily task runner process.

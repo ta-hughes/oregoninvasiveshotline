@@ -1,27 +1,47 @@
 # Changelog for Oregon Invasives Hotline
 
-## 1.13.0 - unreleased
+## 1.13.0 - 2018-06-21
 
 ### Added
 
-- Configures the project to use 'emcee'.
+- Configures the project to use Emcee to support AWS deployment.
+- Replaces frail code paths responsible for triggering email
+  notifications with Celery-based out-of-band tasks.
+
+### Fixed
+
+- Addresses authentication issues related to public login attempts
+  and the behavior in Django >= 1.10.
+- Uses appropriate Haystack backend for Elasticsearch>2.0,<3.0
+
+### Maintenance
+
+- Adds client-side Raven integration.
+- Replaces hard-coded use of email 'From' headers.
+- Revises implementation of URI builder to preclude the requirement
+  for passing around 'HttpRequest' objects.
+- Adds crontab to facilitate scheduled operations.
 
 ## 1.12.1 - 2018-03-12
 
 ### Fixed
+
 - Fixed Haystack indexing error on report.claimed_by_id
 
 ### Maintenance
+
 - Bump Haystack to newest release 2.8
 
 ## 1.12.0 - 2018-02-21
 
 ### Maintenance
+
 - Update to Django 1.11.x
 - Update python dependencies
 - Update JS dependencies
 
 ### Feature
+
 - Added address Geocoder (Google maps API) to report form
 
 ## 1.11.0 - 2017-10-12
