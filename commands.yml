@@ -20,7 +20,7 @@ environment:
       venv: venv
   docker:
     python:
-      venv: venv-docker
+      venv: /venv/venv-docker
   stage:
     db:
       host: oregoninvasiveshotline-stage.c6xuiyamhpsi.us-west-2.rds.amazonaws.com

@@ -23,7 +23,6 @@ To build the application dependencies in your host's environment:
 
 To use the provided Docker container definitions:
 
-    venv/bin/pip install -r requirements.txt
     venv/bin/docker-compose up -d
 
 To authenticate with the provided default user:
