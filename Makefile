@@ -24,7 +24,7 @@ init: install
 reinit: clean-egg-info clean-venv init
 
 test: install
-	LOCAL_SETTINGS_FILE="local.base.cfg#test" $(bin)/python manage.py test
+	LOCAL_SETTINGS_FILE="local.test.cfg" $(bin)/python manage.py test -k
 run:
 	@$(bin)/python manage.py runserver
 
