@@ -15,9 +15,9 @@ setup(
     zip_safe=False,
     install_requires=[
         'psu.oit.wdt.emcee>=1.0.0.rc7,<1.1',
-        'django>=1.11.16,<2.0',
+        'django~=1.11.20',
         'django-arcutils~=2.24.0',
-        'django-bootstrap-form~=3.4',
+        'django-bootstrap-form==3.4',
         'django-haystack~=2.8.1',
         'django-perms~=2.0.0',
         'django-pgcli~=0.0.3',
@@ -25,10 +25,10 @@ setup(
 
         'djangorestframework~=3.8.2',
         'elasticsearch>=2.4.0,<3.0.0',
-        'Markdown~=3.0',
-        'Pillow~=5.1.0',
-        'psycopg2~=2.7.5',
-        'pytz~=2018.5',
+        'Markdown==3.1',
+        'Pillow~=6.0.0',
+        'psycopg2~=2.8.2',
+        'pytz~=2019.1',
     ],
     extras_require={
         'dev': [
