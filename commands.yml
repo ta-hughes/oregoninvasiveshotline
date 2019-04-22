@@ -13,7 +13,6 @@ remote:
       cdn.research.pdx.edu cdn.ravenjs.com cdnjs.cloudflare.com http://*.tiles.osgeo.org
       khms0.googleapis.com khms1.googleapis.com maps.googleapis.com *.google-analytics.com
       *.gstatic.com fonts.googleapis.com fonts.gstatic.com; connect-src sentry.io;"
-  user: tlinton
 environment:
   dev:
     python:
