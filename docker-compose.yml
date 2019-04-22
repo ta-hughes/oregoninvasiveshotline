@@ -8,7 +8,7 @@ networks:
         # this value is a soft-reservation of the subnet in
         # order to reduce friction w.r.t. a given local docker
         # environment and project configuration.
-        # 
+        #
         # if you encounter network definition conflicts, change
         # the value below and revise its use in 'local.*.cfg'.
         - subnet: 172.23.0.0/16
@@ -58,6 +58,7 @@ services:
       - APP_ROOT=/webapps/oregoninvasiveshotline
       - APP_VENV=/venv/venv-docker
       - APP_SERVICE=wsgi
+      - GOOGLE_API_KEY
     networks:
       - default
     ports:
