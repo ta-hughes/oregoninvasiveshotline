@@ -29,6 +29,8 @@ setup(
         'Pillow~=6.0.0',
         'psycopg2~=2.8.2',
         'pytz~=2019.1',
+
+        'PyYAML~=5.1',
     ],
     extras_require={
         'dev': [
