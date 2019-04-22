@@ -20,6 +20,9 @@ services:
 install:
     - pip install -r requirements.txt
 
+env:
+    - GOOGLE_API_KEY=NOT_A_VALID_KEY
+
 before_script:
     - curl -O https://download.elastic.co/elasticsearch/release/org/elasticsearch/distribution/deb/elasticsearch/2.3.0/elasticsearch-2.3.0.deb && sudo dpkg -i --force-confnew elasticsearch-2.3.0.deb && sudo service elasticsearch restart
     - sleep 10
