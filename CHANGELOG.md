@@ -1,5 +1,16 @@
 # Changelog for Oregon Invasives Hotline
 
+## 1.13.3 - 2019-04-22
+
+### Maintenance
+
+- Adds formal support for Python 3.7.
+- Uses PostgreSQL 10 / PostGIS 2.4 in docker and travis environments.
+- Adds separate local.test.cfg for test env configuration.
+- Updates Python dependencies.
+- Adds additional requirement to avoid vulnerable releases
+  of the PyYAML package.
+
 ## 1.13.2 - 2018-10-19
 
 ### Added
