@@ -30,11 +30,19 @@ To authenticate with the provided default user:
     username: foobar@example.com
     password: foobar
 
+A Google API Key is needed for the mapping features in this project. In
+development environments (native or docker) you should export an environment variable, eg:
+
+    export GOOGLE_API_KEY='{ key }'
+
 ## Deploying
 
 This project using the Emcee tooling to define and orchestrate resource provisioning and deployment.
 See the AWS cloudformation templates in `cloudformation` and the command definitions in `commands.py`
 for more information.
+
+API keys for stage and production environments are stored and fetched from AWS key store; you will be
+prompted to supply these keys the first time you provision infrastructure for a given environment.
 
 ## General notes
 

@@ -19,7 +19,7 @@ from emcee.provision.gis import provision_gis
 from emcee.provision.services import (provision_nginx,
                                       provision_supervisor,
                                       provision_rabbitmq)
-from emcee.provision.secrets import show_secret
+from emcee.provision.secrets import show_secret, provision_secret
 from emcee.deploy.base import push_nginx_config, push_crontab, push_supervisor_config
 from emcee.deploy.python import push_uwsgi_ini, push_uwsgi_config, restart_uwsgi
 from emcee.deploy.django import Deployer as DjangoDeployer
@@ -58,6 +58,8 @@ def provision_app(createdb=False):
     provision_nginx()
     provision_supervisor()
     provision_rabbitmq()
+    api_key = input('Enter the Google API key for this project/environment: ')
+    provision_secret('GOOGLE_API_KEY', api_key)
 
     # Initialize/prepare attached EBS volume
     provision_volume(mount_point='/vol/store')
