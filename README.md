@@ -8,10 +8,10 @@ about the species that was reported
 
 ## Technology stack
 
-- PostgreSQL 9.6
+- PostgreSQL 10
 - PostGIS 2.x
 - Elasticsearch 2.x
-- Python 3.6
+- Python 3.7
 - Django 1.11.x
 - Google Maps
 
