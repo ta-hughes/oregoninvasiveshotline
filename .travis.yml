@@ -1,16 +1,17 @@
+dist: xenial
 language: python
-
 python:
     - "3.5"
     - "3.6"
+    - "3.7"
 
 sudo: false
 
 addons:
-    postgresql: "9.6"
+    postgresql: "10"
     apt:
       packages:
-        - postgresql-9.6-postgis-2.3
+        - postgresql-10-postgis-2.4
 
 services:
     - postgresql
@@ -18,6 +19,9 @@ services:
 
 install:
     - pip install -r requirements.txt
+
+env:
+    - GOOGLE_API_KEY=NOT_A_VALID_KEY
 
 before_script:
     - curl -O https://download.elastic.co/elasticsearch/release/org/elasticsearch/distribution/deb/elasticsearch/2.3.0/elasticsearch-2.3.0.deb && sudo dpkg -i --force-confnew elasticsearch-2.3.0.deb && sudo service elasticsearch restart
