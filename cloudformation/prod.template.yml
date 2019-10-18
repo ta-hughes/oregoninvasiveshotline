@@ -4,14 +4,14 @@ Resources:
   AppRole:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: https://s3-us-west-2.amazonaws.com/cloudformation-templates.wdt.pdx.edu/1/iam/application_role.template.yml
+      TemplateURL: https://s3-us-west-2.amazonaws.com/cloudformation-templates.wdt.pdx.edu/20190607/iam/application_role.template.yml
       Parameters:
         Name: invasives
         VpcStackName: vpc-prod
   Host:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: https://s3-us-west-2.amazonaws.com/cloudformation-templates.wdt.pdx.edu/1/ec2/private_host/private_host.template.yml
+      TemplateURL: https://s3-us-west-2.amazonaws.com/cloudformation-templates.wdt.pdx.edu/20190607/ec2/private_host/private_host.template.yml
       Parameters:
         ImageId: ami-d2f06baa
         ImageDistribution: amazon2
@@ -25,7 +25,7 @@ Resources:
   Networking:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: https://s3-us-west-2.amazonaws.com/cloudformation-templates.wdt.pdx.edu/1/ec2/private_host/networking.template.yml
+      TemplateURL: https://s3-us-west-2.amazonaws.com/cloudformation-templates.wdt.pdx.edu/20190607/ec2/private_host/networking.template.yml
       Parameters:
         EC2Instance: !GetAtt Host.Outputs.InstanceId
         PrivateIp: !GetAtt Host.Outputs.PrivateIP
@@ -38,7 +38,7 @@ Resources:
   PostgreSQL:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: https://s3-us-west-2.amazonaws.com/cloudformation-templates.wdt.pdx.edu/1/rds/postgres.template.yml
+      TemplateURL: https://s3-us-west-2.amazonaws.com/cloudformation-templates.wdt.pdx.edu/20190607/rds/postgres.template.yml
       Parameters:
         VpcStackName: !GetAtt AppRole.Outputs.VpcStackName
         MultiAZ: true
@@ -53,7 +53,7 @@ Resources:
   SearchIndex:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: https://s3-us-west-2.amazonaws.com/cloudformation-templates.wdt.pdx.edu/1/es/domain.template.yml
+      TemplateURL: https://s3-us-west-2.amazonaws.com/cloudformation-templates.wdt.pdx.edu/20190607/es/domain.template.yml
       Parameters:
         VpcStackName: !GetAtt AppRole.Outputs.VpcStackName
         Name: oregoninvasiveshotline-prod
@@ -65,7 +65,7 @@ Resources:
   Volume:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: https://s3-us-west-2.amazonaws.com/cloudformation-templates.wdt.pdx.edu/1/ec2/ebs/volume.template.yml
+      TemplateURL: https://s3-us-west-2.amazonaws.com/cloudformation-templates.wdt.pdx.edu/20190607/ec2/ebs/volume.template.yml
       Parameters:
         Name: oregoninvasiveshotline-prod
         AvailabilityZone: us-west-2a
@@ -75,13 +75,24 @@ Resources:
   Domain:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: https://s3-us-west-2.amazonaws.com/cloudformation-templates.wdt.pdx.edu/1/ec2/private_host/domain.template.yml
+      TemplateURL: https://s3-us-west-2.amazonaws.com/cloudformation-templates.wdt.pdx.edu/20190607/ec2/private_host/domain.template.yml
       Parameters:
         ZoneExists: false
         HostedZoneName: oregoninvasiveshotline.org
         DnsHostName: oregoninvasiveshotline.org
         ELBCertificate: arn:aws:acm:us-west-2:921749119607:certificate/b91c58d1-35b5-4d3c-8253-0efaf18948f5
         ELBTargetGroup: !GetAtt Networking.Outputs.ELBTargetGroup
-        ELBListenerPriority: 5
+        ELBListenerPriority: !Ref CustomELBListenerPriority
         VpcStackName: !GetAtt AppRole.Outputs.VpcStackName
         ListenOn80: true
+
+Parameters:
+  ELBListenerPriority:
+    Type: String
+    Description: Mechanism for declaring ELBListenerPriority
+  CustomELBListenerPriority:
+    Type: String
+    Description: Mechanism for declaring ELBListenerPriority
+  DBPassword:
+    Type: String
+    Description: Mechanism for declaring DBPassword
