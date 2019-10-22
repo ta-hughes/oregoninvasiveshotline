@@ -21,6 +21,8 @@ To build the application dependencies in your host's environment:
 
     make init
 
+To prepare the database you may use, e.g., the `import_database` command to install a copy of production data.
+
 To use the provided Docker container definitions:
 
     venv/bin/docker-compose up -d
