@@ -14,23 +14,23 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=[
-        'psu.oit.wdt.emcee>=1.0.0.rc9,<1.1',
-        'django~=1.11.20',
+        'psu.oit.wdt.emcee>=1.0.0,<1.1',
+        'django~=1.11.25',
         'django-arcutils~=2.24.0',
         'django-bootstrap-form==3.4',
         'django-haystack~=2.8.1',
         'django-perms~=2.0.0',
         'django-pgcli~=0.0.3',
-        'celery~=4.2.0',
+        'celery~=4.3.0',
 
-        'djangorestframework~=3.8.2',
+        'djangorestframework~=3.10.3',
         'elasticsearch>=2.4.0,<3.0.0',
-        'Markdown==3.1',
-        'Pillow~=6.0.0',
-        'psycopg2~=2.8.2',
-        'pytz~=2019.1',
+        'Markdown~=3.1.1',
+        'Pillow~=6.2.0',
+        'psycopg2~=2.8.4',
+        'pytz~=2019.3',
 
-        'PyYAML~=5.1',
+        'PyYAML~=5.1.2',
     ],
     extras_require={
         'dev': [
