@@ -25,7 +25,7 @@ from emcee.deploy.django import Deployer
 
 # from emcee.backends.dev.provision.db import provision_database as provision_database_local
 from emcee.backends.aws.infrastructure.commands import *
-from emcee.backends.aws.provision.db import provision_database, import_database
+from emcee.backends.aws.provision.db import provision_database, import_database, update_database_ca
 from emcee.backends.aws.provision.volumes import provision_volume
 from emcee.backends.aws.deploy import EC2RemoteProcessor
 
@@ -57,8 +57,6 @@ def provision_app(createdb=False):
     provision_nginx()
     provision_supervisor()
     provision_rabbitmq()
-    api_key = input('Enter the Google API key for this project/environment: ')
-    provision_secret('GOOGLE_API_KEY', api_key)
 
     # Initialize/prepare attached EBS volume
     provision_volume(mount_point='/vol/store')
@@ -67,6 +65,10 @@ def provision_app(createdb=False):
         backend_options={'with_postgis': True,
                          'with_devel': True}
         provision_database(backend_options=backend_options)
+
+    # Provision application secrets
+    api_key = input('Enter the Google API key for this project/environment: ')
+    provision_secret('GOOGLE_API_KEY', api_key)
 
 
 # Loading data model will cause instantiation of 'ClearableImageInput' which
@@ -122,6 +124,7 @@ class InvasivesDeployer(Deployer):
     def make_active(self):
         super(InvasivesDeployer, self).make_active()
 
+        # Install supervisor worker configuration
         push_supervisor_config(template='assets/supervisor.conf')
 
 
