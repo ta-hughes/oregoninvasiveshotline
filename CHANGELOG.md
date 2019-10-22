@@ -1,5 +1,12 @@
 # Changelog for Oregon Invasives Hotline
 
+## 1.13.5 - 2019-10-22
+
+### Maintenance
+
+- Uses Emcee 1.0.0.
+- Updates Python dependencies.
+
 ## 1.13.4 - 2019-08-19
 
 ### Maintenance
@@ -21,16 +28,16 @@
 
 ### Added
 
-- Manage Google API keys with emcee and AWS ssm
+- Manage Google API keys with emcee and AWS ssm.
 
 ### Fixed
 
-- Adds local.docker.cfg for docker env configuration
-- Revise wsgi file to be closer to Django standard
+- Adds local.docker.cfg for docker env configuration.
+- Revise wsgi file to be closer to Django standard.
 
 ### Maintenance
 
-- Update Python dependencies
+- Update Python dependencies.
 
 ## 1.13.1 - 2018-06-27
 
