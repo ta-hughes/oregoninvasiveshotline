@@ -1,4 +1,5 @@
 from django.db import models, migrations
+import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
@@ -14,8 +15,8 @@ class Migration(migrations.Migration):
             fields=[
                 ('notification_id', models.AutoField(serialize=False, primary_key=True)),
                 ('created_on', models.DateTimeField(auto_now_add=True)),
-                ('report', models.ForeignKey(to='reports.Report')),
-                ('user', models.ForeignKey(to='users.User')),
+                ('report', models.ForeignKey(to='reports.Report', on_delete=django.db.models.deletion.CASCADE)),
+                ('user', models.ForeignKey(to='users.User', on_delete=django.db.models.deletion.CASCADE)),
             ],
             options={
                 'db_table': 'notification',
@@ -26,7 +27,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('user_notification_query_id', models.AutoField(serialize=False, primary_key=True)),
                 ('query', models.TextField(help_text='This is a string for a QueryDict of the GET parameters to pass to the ReportSearchForm that match reports the user should be notified about.')),
-                ('user', models.ForeignKey(to='users.User')),
+                ('user', models.ForeignKey(to='users.User', on_delete=django.db.models.deletion.CASCADE)),
                 ('name', models.CharField(verbose_name='To make it easier to review your subscriptions, give the search you just performed a name. For example: "Aquatic plants in Multnomah county".', max_length=255)),
                 ('created_on', models.DateTimeField(auto_now_add=True)),
             ],

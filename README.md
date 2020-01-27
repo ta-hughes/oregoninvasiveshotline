@@ -12,7 +12,7 @@ about the species that was reported
 - PostGIS 2.x
 - Elasticsearch 2.x
 - Python 3.7
-- Django 1.11.x
+- Django 2.2 LTS
 - Google Maps
 
 ## Getting started

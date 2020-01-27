@@ -113,13 +113,13 @@ class ClearableImageInput(ClearableFileInput):
 
         return self._cached_value
 
-    def render(self, name, value, attrs=None):
+    def render(self, name, value, attrs=None, renderer=None):
         if attrs is None:
             attrs = {}
 
         attrs['accept'] = "image/*"
 
-        output = super().render(name, value, attrs)
+        output = super().render(name, value, attrs, renderer=renderer)
         if self.signed_path:
             output += forms.HiddenInput().render(self.signed_path_field_name(name), self.signed_path, {})
 

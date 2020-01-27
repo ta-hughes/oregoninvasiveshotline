@@ -1,10 +1,9 @@
 from django.template.loader import render_to_string
-from django.core.urlresolvers import reverse
 from django.core.mail import send_mail
+from django.urls import reverse
 
-from arcutils.settings import get_setting
-
-from oregoninvasiveshotline.utils import build_absolute_url
+from oregoninvasiveshotline.utils.settings import get_setting
+from oregoninvasiveshotline.utils.urls import build_absolute_url
 from oregoninvasiveshotline.notifications.models import UserNotificationQuery
 from oregoninvasiveshotline.users.models import User
 from oregoninvasiveshotline.celery import app

@@ -3,15 +3,15 @@ from unittest.mock import Mock, patch
 
 from django.conf import settings
 from django.core import mail
-from django.core.urlresolvers import reverse
 from django.contrib.auth.models import AnonymousUser
 from django.contrib.gis.geos import Point
 from django.db import transaction
+from django.urls import reverse
 from django.test import TestCase, TransactionTestCase
 
 from model_mommy.mommy import make, prepare
-from arcutils.test.user import UserMixin
 
+from oregoninvasiveshotline.utils.test.user import UserMixin
 from oregoninvasiveshotline.notifications.models import UserNotificationQuery
 from oregoninvasiveshotline.reports.models import Invite, Report
 
@@ -360,45 +360,36 @@ class UserTest(TestCase, UserMixin):
         self.assertEqual(self.user, User.from_signature(query['sig'][0]))
 
 
-class LoginFormTest(TransactionTestCase, UserMixin):
-    def test_clean_email_raises_validation_error_for_non_existing_user(self):
-        form = PublicLoginForm({
-            "email": "foo@pdx.edu"
-        })
-        self.assertFalse(form.is_valid())
-        self.assertTrue(form.has_error("email"))
-
-    def test_save_sends_email_to_user_with_login_link(self):
-        user = self.create_user(username="foo@example.com", is_active=False)
-        form = PublicLoginForm({
-            "email": user.email
-        })
-        self.assertTrue(form.is_valid())
-        with patch("oregoninvasiveshotline.users.forms.User.get_authentication_url", return_value="foobarius"):
-            # notification task is out-of-band and uses 'on_commit' barrier
-            # so the path being tested is wrapped in a transaction
-            with transaction.atomic():
-                form.save()
-
-            self.assertTrue(len(mail.outbox), 1)
-            self.assertIn("foobarius", mail.outbox[0].body)
-
-
 class LoginViewTest(TransactionTestCase, UserMixin):
     def test_get(self):
         response = self.client.get(reverse("login"))
         self.assertEqual(response.status_code, 200)
 
+    def test_logging_in_email_prints_error_message_for_nonexistent_user(self):
+        # notification task is out-of-band and uses 'on_commit' barrier
+        # so the path being tested is wrapped in a transaction
+        payload = {
+            "email": "i.do.not.exist@example.com",
+            "form": "OTHER_LOGIN",
+        }
+        response = self.client.post(reverse("login"), data=payload, follow=True)
+        self.assertIn(b"Could not find the account i.do.not.exist@example.com for public login",
+                      response.content)
+
     def test_logging_in_via_email_sends_an_email(self):
         user = self.create_user(username="foo@example.com", is_active=False)
 
-        # notification task is out-of-band and uses 'on_commit' barrier
-        # so the path being tested is wrapped in a transaction
-        with transaction.atomic():
-            response = self.client.post(reverse("login"), {
-                "email": user.email,
-                "form": "OTHER_LOGIN",
-            })
-            self.assertRedirects(response, reverse("login"))
+        with patch("oregoninvasiveshotline.users.views.User.get_authentication_url",
+                   return_value="foobarius"):
+            # notification task is out-of-band and uses 'on_commit' barrier
+            # so the path being tested is wrapped in a transaction
+            with transaction.atomic():
+                payload = {
+                    "email": user.email,
+                    "form": "OTHER_LOGIN",
+                }
+                response = self.client.post(reverse("login"), data=payload)
+                self.assertRedirects(response, reverse("login"))
 
-        self.assertTrue(len(mail.outbox), 1)
+            self.assertTrue(len(mail.outbox), 1)
+            self.assertIn("foobarius", mail.outbox[0].body)

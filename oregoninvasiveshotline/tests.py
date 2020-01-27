@@ -1,6 +1,6 @@
 from django.test import TestCase
 
-from arcutils.test.user import UserMixin
+from oregoninvasiveshotline.utils.test.user import UserMixin
 
 
 class RubyPasswordHasherTest(TestCase, UserMixin):

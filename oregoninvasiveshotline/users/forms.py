@@ -1,15 +1,13 @@
 from django.template.loader import render_to_string
 from django.core.mail import send_mail
-from django.core.urlresolvers import reverse
-from django.db import transaction
+from django.urls import reverse
 from django import forms
 
 from haystack.forms import SearchForm
-from arcutils.settings import get_setting
 
-from oregoninvasiveshotline.utils import generate_thumbnail
+from oregoninvasiveshotline.utils.settings import get_setting
+from oregoninvasiveshotline.utils.images import generate_thumbnail
 
-from .tasks import notify_public_user_for_login_link
 from .models import User
 
 
@@ -34,39 +32,13 @@ class UserSearchForm(SearchForm):
 
 
 class PublicLoginForm(forms.Form):
-
-    """Allows users to log in via a link sent via email."""
-
+    """
+    Allows users to log in via a link sent via email.
+    """
     email = forms.EmailField()
 
-    def clean_email(self):
-        email = self.cleaned_data['email']
-
-        try:
-            user = User.objects.get(email__iexact=email)
-        except User.DoesNotExist:
-            raise forms.ValidationError('Could not find an account with that email address')
-
-        if user.is_active:
-            raise forms.ValidationError('You must log in with your username and password')
-
-        return email
-
-    def save(self, *args, **kwargs):
-        email = self.cleaned_data['email']
-
-        # XXX: This can fail because there are several duplicate
-        #      accounts that have the same email address with a
-        #      different case. This SQL query will reveal the dupes:
-        #
-        #      SELECT user_id, email, first_name, last_name, is_active, is_staff
-        #      FROM "user" u1
-        #      WHERE (SELECT count(*) FROM "user" u2 WHERE lower(u2.email) = lower(u1.email )) > 1
-        #      ORDER BY lower(email);
-        #
-        #      Cleaning up the dupes is going to be... fun.
-        user = User.objects.get(email__iexact=email)
-        transaction.on_commit(lambda: notify_public_user_for_login_link.delay(user.pk))
+    def __init__(self, request=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
 
 class UserForm(forms.ModelForm):
@@ -84,10 +56,12 @@ class UserForm(forms.ModelForm):
             'is_staff',
         )
 
-    def __init__(self, *args, user, **kwargs):
+    def __init__(self, *args, **kwargs):
         """
         `user` is the person using the form, not the person the form is actually going edit
         """
+        user = kwargs.pop('user')
+
         super().__init__(*args, **kwargs)
 
         # add a password field to the form if the user is being created. This

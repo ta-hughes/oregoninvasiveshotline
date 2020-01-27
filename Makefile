@@ -16,6 +16,7 @@ $(egg_info):
 	$(bin)/python setup.py egg_info
 
 install: $(venv) $(egg_info)
+	$(venv)/bin/pip install --upgrade pip
 	$(venv)/bin/pip install -r requirements.txt
 reinstall: clean-install install
 

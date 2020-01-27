@@ -13,7 +13,7 @@ class UserNotificationQuery(models.Model):
         db_table = 'user_notification_query'
 
     user_notification_query_id = models.AutoField(primary_key=True)
-    user = models.ForeignKey('users.User')
+    user = models.ForeignKey('users.User', on_delete=models.CASCADE)
     name = models.CharField(
         max_length=255,
         verbose_name=(
@@ -63,8 +63,8 @@ class Notification(models.Model):
         db_table = 'notification'
 
     notification_id = models.AutoField(primary_key=True)
-    user = models.ForeignKey('users.User')
-    report = models.ForeignKey('reports.Report')
+    user = models.ForeignKey('users.User', on_delete=models.CASCADE)
+    report = models.ForeignKey('reports.Report', on_delete=models.CASCADE)
     created_on = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

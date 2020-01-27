@@ -1,9 +1,9 @@
-import os
-import shutil
 import tempfile
+import shutil
+import os
 
-from django.conf import settings
 from django.test.runner import DiscoverRunner
+from django.conf import settings
 
 
 class TestRunner(DiscoverRunner):
@@ -20,4 +20,5 @@ class TestRunner(DiscoverRunner):
 
     def teardown_test_environment(self, **kwargs):
         shutil.rmtree(settings.MEDIA_ROOT)
+
         super().teardown_test_environment(**kwargs)

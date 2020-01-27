@@ -135,7 +135,7 @@ class ReportSearchForm(SearchForm):
                 if name not in self.public_fields:
                     self.fields.pop(name)
 
-        if user.is_anonymous():
+        if user.is_anonymous:
             if report_ids:
                 source_field = self.fields['source']
                 source_choices = source_field.choices

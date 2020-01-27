@@ -5,11 +5,11 @@ from urllib import parse
 
 from django.contrib.auth.models import AbstractBaseUser, UserManager
 from django.contrib.sites.models import Site
-from django.core.urlresolvers import reverse
-from django.core.signing import Signer
+from django.core.signing import TimestampSigner, SignatureExpired
+from django.urls import reverse
 from django.db import models
 
-from oregoninvasiveshotline.utils import build_absolute_url
+from oregoninvasiveshotline.utils.urls import build_absolute_url
 
 
 class User(AbstractBaseUser):
@@ -42,30 +42,22 @@ class User(AbstractBaseUser):
 
     @classmethod
     def from_signature(cls, signature):
-        signer = Signer()
-        value = signer.unsign(signature)
         try:
-            value = base64.urlsafe_b64decode(value).decode('utf-8')
+            signer = TimestampSigner()
+            value = signer.unsign(signature, max_age=60 * 60 * 24)
+            return cls.objects.get(email=value)
+        except SignatureExpired:
+            return None
         except binascii.Error:
             # Typically, this would indicate a non-base64-encoded value
             return None
-        email, timestamp = value.rsplit(':', 1)
-        timestamp = float(timestamp)
-        elapsed = datetime.utcnow() - datetime.utcfromtimestamp(timestamp)
-        if elapsed > timedelta(days=1):
-            return None
-        return cls.objects.get(email=email)
 
     def get_authentication_url(self, next=None):
-        signer = Signer()
-        value = ':'.join((self.email, str(datetime.utcnow().timestamp())))
-        value = base64.urlsafe_b64encode(value.encode('utf-8'))
-        signature = signer.sign(value)
-
+        signer = TimestampSigner()
         return build_absolute_url(
             reverse('users-authenticate'),
             parse.urlencode({
-                'sig': signature,
+                'sig': signer.sign(self.email),
                 'next': next or '',
             }))
 

@@ -3,14 +3,13 @@ import logging
 import os
 
 from django.dispatch import receiver
-from django.db.models.signals import post_save
-from django.core.urlresolvers import reverse
 from django.contrib.gis.db import models
+from django.db.models.signals import post_save
+from django.urls import reverse
 from django.conf import settings
 
-from arcutils.settings import get_setting
-
-from oregoninvasiveshotline.utils import generate_thumbnail
+from oregoninvasiveshotline.utils.settings import get_setting
+from oregoninvasiveshotline.utils.images import generate_thumbnail
 from oregoninvasiveshotline.visibility import Visibility
 from oregoninvasiveshotline.images.models import Image
 from oregoninvasiveshotline.users.models import User
@@ -28,14 +27,12 @@ class Report(models.Model):
         db_table = 'report'
         ordering = ['-created_on']
 
-    objects = models.GeoManager()
-
     report_id = models.AutoField(primary_key=True)
     # It may seem odd to have FKs to the species AND category, but in the case
     # where the user doesn't know what species it is, we fall back to just a
     # category (with the reported_species field NULL'd out)
-    reported_category = models.ForeignKey("species.Category")
-    reported_species = models.ForeignKey("species.Species", null=True, default=None, related_name="+")
+    reported_category = models.ForeignKey("species.Category", on_delete=models.CASCADE)
+    reported_species = models.ForeignKey("species.Species", null=True, default=None, related_name="+", on_delete=models.SET_NULL)
 
     description = models.TextField(verbose_name="Please provide a description of your find")
     location = models.TextField(
@@ -50,12 +47,12 @@ class Report(models.Model):
     has_specimen = models.BooleanField(default=False, verbose_name="Do you have a physical specimen?")
 
     point = models.PointField(srid=4326)
-    county = models.ForeignKey('counties.County', null=True)
+    county = models.ForeignKey('counties.County', null=True, on_delete=models.SET_NULL)
 
-    created_by = models.ForeignKey("users.User", related_name="reports")
+    created_by = models.ForeignKey("users.User", related_name="reports", on_delete=models.CASCADE)
     created_on = models.DateTimeField(auto_now_add=True)
 
-    claimed_by = models.ForeignKey("users.User", null=True, default=None, related_name="claimed_reports")
+    claimed_by = models.ForeignKey("users.User", null=True, default=None, related_name="claimed_reports", on_delete=models.SET_NULL)
 
     # these are copied over from the original site
     edrr_status = models.IntegerField(verbose_name="EDRR Status", choices=[
@@ -69,7 +66,7 @@ class Report(models.Model):
     ], default=None, null=True, blank=True)
 
     # the actual species confirmed by an expert
-    actual_species = models.ForeignKey("species.Species", null=True, default=None, related_name="reports")
+    actual_species = models.ForeignKey("species.Species", null=True, default=None, related_name="reports", on_delete=models.SET_NULL)
 
     is_archived = models.BooleanField(default=False)
     is_public = models.BooleanField(default=False, help_text="This report can be viewed by the public")
@@ -201,9 +198,9 @@ class Invite(models.Model):
         db_table = 'invite'
 
     invite_id = models.AutoField(primary_key=True)
-    created_by = models.ForeignKey('users.User', related_name='+')
+    created_by = models.ForeignKey('users.User', related_name='+', on_delete=models.CASCADE)
     created_on = models.DateTimeField(auto_now_add=True)
-    report = models.ForeignKey(Report)
+    report = models.ForeignKey(Report, on_delete=models.CASCADE)
 
     # The invitee
-    user = models.ForeignKey('users.User', related_name='invites')
+    user = models.ForeignKey('users.User', related_name='invites', on_delete=models.CASCADE)

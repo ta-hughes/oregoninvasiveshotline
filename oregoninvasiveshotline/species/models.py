@@ -69,7 +69,7 @@ class Species(models.Model):
         ordering = ['name']
 
     species_id = models.AutoField(primary_key=True)
-    category = models.ForeignKey(Category)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
     is_confidential = models.BooleanField(
         default=False,
         help_text=(
@@ -81,7 +81,7 @@ class Species(models.Model):
     remedy = models.TextField(blank=True)
     resources = models.TextField(blank=True)
     scientific_name = models.CharField(max_length=255, blank=True)
-    severity = models.ForeignKey(Severity)
+    severity = models.ForeignKey(Severity, on_delete=models.CASCADE)
 
     @property
     def title(self):

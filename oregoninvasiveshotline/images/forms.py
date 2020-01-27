@@ -2,8 +2,7 @@ from django import forms
 from django.forms.models import modelformset_factory
 from django.utils.functional import curry
 
-from arcutils.forms import BaseModelFormSet
-
+from oregoninvasiveshotline.utils.forms import BaseModelFormSet
 from oregoninvasiveshotline.reports.perms import can_adjust_visibility
 
 from .fields import ClearableImageInput

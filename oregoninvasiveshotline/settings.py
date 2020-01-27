@@ -1,9 +1,8 @@
 import os
 
 from django.conf import global_settings
-
-from arcutils.settings import init_settings
 from emcee.backends.aws import processors
+from oregoninvasiveshotline.utils.settings import init_settings
 
 
 def set_google_map_url(settings):

@@ -21,7 +21,7 @@ urlpatterns = [
 
     url(r'^$', HomeView.as_view(), name='home'),
 
-    url(r'^admin/', include(admin.site.urls)),
+    url(r'^admin/', admin.site.urls),
     url(r'^adminpanel/?$', AdminPanelView.as_view(), name='admin-panel'),
 
     url(r'^categories/create/?$', permissions.is_staff(species.CategoryCreateView.as_view()), name='categories-create'),
@@ -65,7 +65,8 @@ urlpatterns = [
     url(r'^users/home/?$', users.home, name='users-home'),
     url(r'^users/list/?$', users.list_, name='users-list'),
 
-    url(r'^login/?$', users.login, name='login'),
+    # url(r'^login/?$', users.login, name='login'),
+    url(r'^login/?$', users.LoginView.as_view(), name='login'),
     url(r'', include('django.contrib.auth.urls')),
 
     url(r'pages/', include('oregoninvasiveshotline.pages.urls')),

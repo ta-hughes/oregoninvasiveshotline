@@ -14,7 +14,7 @@ def can_edit_report(user, report):
 
 @permissions.register(model=Report)
 def can_view_private_report(user, report):
-    if user.is_anonymous():
+    if user.is_anonymous:
         return False
 
     if report.created_by == user:
@@ -44,4 +44,4 @@ def can_unclaim_report(user, report):
 
 @permissions.register(model=Report)
 def can_manage_report(user, report):
-    return user.is_authenticated() and (user.is_staff or report.claimed_by_id == user.pk)
+    return user.is_authenticated and (user.is_staff or report.claimed_by_id == user.pk)

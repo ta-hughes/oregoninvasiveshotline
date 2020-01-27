@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 from django.db import models, migrations
+import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
@@ -41,8 +42,8 @@ class Migration(migrations.Migration):
                 ('remedy', models.TextField()),
                 ('resources', models.TextField()),
                 ('confidential', models.BooleanField(default=False, help_text='\n        A species can be marked as confidential if making a report about it public would cause harm\n    ')),
-                ('category', models.ForeignKey(to='species.Category')),
-                ('severity', models.ForeignKey(to='species.Severity')),
+                ('category', models.ForeignKey(to='species.Category', on_delete=django.db.models.deletion.CASCADE)),
+                ('severity', models.ForeignKey(to='species.Severity', on_delete=django.db.models.deletion.CASCADE)),
             ],
             options={
                 'ordering': ['name'],

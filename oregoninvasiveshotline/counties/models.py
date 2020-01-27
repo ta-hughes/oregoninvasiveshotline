@@ -7,8 +7,6 @@ class County(models.Model):
         db_table = 'county'
         ordering = ['state', 'name']
 
-    objects = models.GeoManager()
-
     county_id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=255)
     state = models.CharField(max_length=255)
