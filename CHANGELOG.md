@@ -1,5 +1,14 @@
 # Changelog for Oregon Invasives Hotline
 
+## 1.13.7 - 2020-02-12
+
+### Maintenance
+
+- Uses Emcee 1.0.4.
+- Replaces use of AWS Elasticsearch service in favor of a locally-
+  administered, container-based ES cluster.
+- Updates Python dependencies.
+
 ## 1.13.6 - 2020-01-21
 
 ### Maintenance
