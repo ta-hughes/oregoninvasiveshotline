@@ -1,4 +1,5 @@
-version: "3"
+version: "2.4"
+
 
 networks:
   default:
@@ -43,14 +44,19 @@ services:
       - ./volumes/elasticsearch:/usr/share/elasticsearch/data
 
   rabbitmq:
-    image: rabbitmq
+    image: rabbitmq:3-alpine
     networks:
       - default
     ports:
       - 5672:5672
+    volumes:
+      - ./volumes/rabbitmq:/var/lib/rabbitmq
+    # override hostname to prevent reinitialization of data
+    # on container delete/init cycle.
+    #   Refs: https://github.com/docker-library/rabbitmq/issues/106#issuecomment-241882358
+    hostname: 'rabbitmq-dev'
 
   oregoninvasiveshotline:
-    image: psu.oit.wdt/oregoninvasiveshotline
     build: docker
     user: oregoninvasiveshotline
     environment:
@@ -58,7 +64,7 @@ services:
       - APP_ROOT=/webapps/oregoninvasiveshotline
       - APP_VENV=/venv/venv-docker
       - APP_SERVICE=wsgi
-      - GOOGLE_API_KEY
+      - GOOGLE_API_KEY=
     networks:
       - default
     ports:
@@ -73,12 +79,12 @@ services:
   celery:
     build: docker
     user: oregoninvasiveshotline
-    user: oregoninvasiveshotline
     environment:
       - LOCAL_SETTINGS_FILE=local.docker.cfg
       - APP_ROOT=/webapps/oregoninvasiveshotline
       - APP_VENV=/venv/venv-docker
       - APP_SERVICE=celery
+      - GOOGLE_API_KEY=
     networks:
       - default
     volumes:

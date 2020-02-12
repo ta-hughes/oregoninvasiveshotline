@@ -17,6 +17,7 @@ Resources:
         ExternalZoneName: stage.wdt.pdx.edu
         HostName: !GetAtt 'AppRole.Outputs.Name'
         IAMAppRoleName: !GetAtt 'AppRole.Outputs.RoleName'
+        InstanceType: t3.small
         ImageDistribution: amazon2
         ImageId: ami-d2f06baa
         InternalZoneName: stage-internal
@@ -48,15 +49,7 @@ Resources:
         DBUsername: oregoninvasiveshotline_l
         EC2SecurityGroupId: !GetAtt 'Host.Outputs.EC2SecurityGroup'
         VpcStackName: !GetAtt 'AppRole.Outputs.VpcStackName'
-  SearchIndex:
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      TemplateURL: https://s3-us-west-2.amazonaws.com/cloudformation-templates.wdt.pdx.edu/20190607/es/domain.template.yml
-      Parameters:
-        EC2SecurityGroupId: !GetAtt 'Host.Outputs.EC2SecurityGroup'
-        IamResourceARN: !GetAtt 'AppRole.Outputs.RoleArn'
-        Name: oregoninvasiveshotline-stage
-        VpcStackName: !GetAtt 'AppRole.Outputs.VpcStackName'
+
   Volume:
     Type: AWS::CloudFormation::Stack
     Properties:

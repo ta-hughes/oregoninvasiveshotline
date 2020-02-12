@@ -14,6 +14,7 @@ from emcee.commands.django import manage, manage_remote
 from emcee.commands.files import copy_file
 
 from emcee.provision.base import provision_host, patch_host
+from emcee.provision.docker import provision_docker, provision_containers
 from emcee.provision.python import provision_python
 from emcee.provision.gis import provision_gis
 from emcee.provision.services import (provision_nginx,
@@ -25,7 +26,10 @@ from emcee.deploy.django import Deployer
 
 # from emcee.backends.dev.provision.db import provision_database as provision_database_local
 from emcee.backends.aws.infrastructure.commands import *
-from emcee.backends.aws.provision.db import provision_database, import_database, update_database_ca
+from emcee.backends.aws.provision.db import (provision_database,
+                                             import_database,
+                                             update_database_ca,
+                                             update_database_client)
 from emcee.backends.aws.provision.volumes import provision_volume
 from emcee.backends.aws.deploy import EC2RemoteProcessor
 
@@ -54,9 +58,19 @@ def provision_app(createdb=False):
     provision_host(initialize_host=True)
     provision_python()
     provision_gis()
+
+    # Provision application services
     provision_nginx()
     provision_supervisor()
-    provision_rabbitmq()
+
+    # Provision containers
+    printer.header("Initializing container volumes...")
+    for service in ['elasticsearch/master', 'elasticsearch/node-1', 'elasticsearch/node-2', 'rabbitmq']:
+        services_path = os.path.join(config.remote.path.root, 'services', service)
+        remote(('mkdir', '-p', services_path), run_as=config.iam.user)
+
+    provision_docker()
+    provision_containers('docker-compose.prod.yml')
 
     # Initialize/prepare attached EBS volume
     provision_volume(mount_point='/vol/store')
@@ -121,8 +135,8 @@ class InvasivesDeployer(Deployer):
         # Install crontab
         push_crontab(template='assets/crontab')
 
-    def make_active(self):
-        super(InvasivesDeployer, self).make_active()
+    def setup_application_hosting(self):
+        super().setup_application_hosting()
 
         # Install supervisor worker configuration
         push_supervisor_config(template='assets/supervisor.conf')

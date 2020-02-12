@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 
-VERSION = '1.13.6'
+VERSION = '1.13.7'
 
 
 setup(
@@ -14,23 +14,23 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=[
-        'psu.oit.wdt.emcee>=1.0.0,<1.1',
-        'django~=1.11.25',
+        'psu.oit.wdt.emcee>=1.0.4,<1.1',
+        'django~=1.11.28',
         'django-arcutils~=2.24.0',
         'django-bootstrap-form==3.4',
         'django-haystack~=2.8.1',
         'django-perms~=2.0.0',
         'django-pgcli~=0.0.3',
-        'celery~=4.3.0',
+        'celery~=4.4.0',
 
         'djangorestframework~=3.10.3',
         'elasticsearch>=2.4.0,<3.0.0',
-        'Markdown~=3.1.1',
-        'Pillow~=6.2.0',
+        'Markdown~=3.2',
+        'Pillow~=7.0.0',
         'psycopg2~=2.8.4',
         'pytz~=2019.3',
 
-        'PyYAML~=5.1.2',
+        'PyYAML~=5.2.0',
     ],
     extras_require={
         'dev': [
