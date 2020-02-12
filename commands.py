@@ -135,8 +135,8 @@ class InvasivesDeployer(Deployer):
         # Install crontab
         push_crontab(template='assets/crontab')
 
-    def make_active(self):
-        super(InvasivesDeployer, self).make_active()
+    def setup_application_hosting(self):
+        super().setup_application_hosting()
 
         # Install supervisor worker configuration
         push_supervisor_config(template='assets/supervisor.conf')
