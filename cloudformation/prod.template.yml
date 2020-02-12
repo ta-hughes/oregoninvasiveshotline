@@ -13,6 +13,7 @@ Resources:
     Properties:
       TemplateURL: https://s3-us-west-2.amazonaws.com/cloudformation-templates.wdt.pdx.edu/20190607/ec2/private_host/private_host.template.yml
       Parameters:
+        InstanceType: t3.small
         ImageId: ami-d2f06baa
         ImageDistribution: amazon2
         HostName: !GetAtt AppRole.Outputs.Name
@@ -50,17 +51,6 @@ Resources:
         KmsKey: !GetAtt AppRole.Outputs.KmsKeyArn
         EC2SecurityGroupId: !GetAtt Host.Outputs.EC2SecurityGroup
         DeletionPolicy: Snapshot
-  SearchIndex:
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      TemplateURL: https://s3-us-west-2.amazonaws.com/cloudformation-templates.wdt.pdx.edu/20190607/es/domain.template.yml
-      Parameters:
-        VpcStackName: !GetAtt AppRole.Outputs.VpcStackName
-        Name: oregoninvasiveshotline-prod
-        IamResourceARN: !GetAtt AppRole.Outputs.RoleArn
-        EC2SecurityGroupId: !GetAtt Host.Outputs.EC2SecurityGroup
-        InstanceCount: 3
-        DeletionPolicy: Retain
 
   Volume:
     Type: AWS::CloudFormation::Stack

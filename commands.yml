@@ -23,10 +23,6 @@ environment:
   stage:
     db:
       host: oregoninvasiveshotline-stage.c6xuiyamhpsi.us-west-2.rds.amazonaws.com
-    index:
-      url: vpc-oregoninvasiveshotline-stage-ct6llktkgbha76i7ysyn3rgh2u.us-west-2.es.amazonaws.com
   prod:
     db:
       host: oregoninvasiveshotline-prod.c6xuiyamhpsi.us-west-2.rds.amazonaws.com
-    index:
-      url: search-oregoninvasiveshotline-prod-4salw4wz4dav3nmwz35pmae6gq.us-west-2.es.amazonaws.com
