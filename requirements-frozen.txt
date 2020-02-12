@@ -1,4 +1,4 @@
--f https://pypi.research.pdx.edu/dist
+-f https://packages.wdt.pdx.edu/dist
 psu.oit.arc.oregoninvasiveshotline==1.13.6
 amqp==2.5.1
 asn1crypto==0.24.0
