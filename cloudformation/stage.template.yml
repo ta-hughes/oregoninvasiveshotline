@@ -4,14 +4,14 @@ Resources:
   AppRole:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: https://s3-us-west-2.amazonaws.com/cloudformation-templates.wdt.pdx.edu/20190607/iam/application_role.template.yml
+      TemplateURL: https://s3-us-west-2.amazonaws.com/cloudformation-templates.wdt.pdx.edu/20200206/iam/application_role.template.yml
       Parameters:
         Name: invasives
         VpcStackName: vpc-stage
   Host:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: https://s3-us-west-2.amazonaws.com/cloudformation-templates.wdt.pdx.edu/20190607/ec2/private_host/private_host.template.yml
+      TemplateURL: https://s3-us-west-2.amazonaws.com/cloudformation-templates.wdt.pdx.edu/20200206/ec2/private_host/private_host.template.yml
       Parameters:
         EbsVolumeId: !GetAtt 'Volume.Outputs.EbsVolume'
         ExternalZoneName: stage.wdt.pdx.edu
@@ -19,7 +19,7 @@ Resources:
         IAMAppRoleName: !GetAtt 'AppRole.Outputs.RoleName'
         InstanceType: t3.small
         ImageDistribution: amazon2
-        ImageId: ami-d2f06baa
+        ImageId: ami-082b5a644766e0e6f
         InternalZoneName: stage-internal
         UseEFSFilesystem: true
         VpcStackName: !GetAtt 'AppRole.Outputs.VpcStackName'
@@ -27,7 +27,7 @@ Resources:
   Networking:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: https://s3-us-west-2.amazonaws.com/cloudformation-templates.wdt.pdx.edu/20190607/ec2/private_host/networking.template.yml
+      TemplateURL: https://s3-us-west-2.amazonaws.com/cloudformation-templates.wdt.pdx.edu/20200206/ec2/private_host/networking.template.yml
       Parameters:
         DnsHostName: !GetAtt 'AppRole.Outputs.Name'
         EC2Instance: !GetAtt 'Host.Outputs.InstanceId'
@@ -41,7 +41,7 @@ Resources:
   PostgreSQL:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: https://s3-us-west-2.amazonaws.com/cloudformation-templates.wdt.pdx.edu/20190607/rds/postgres.template.yml
+      TemplateURL: https://s3-us-west-2.amazonaws.com/cloudformation-templates.wdt.pdx.edu/20200206/rds/postgres.template.yml
       Parameters:
         AvailabilityZone: us-west-2a
         DBInstanceName: oregoninvasiveshotline-stage
@@ -53,7 +53,7 @@ Resources:
   Volume:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: https://s3-us-west-2.amazonaws.com/cloudformation-templates.wdt.pdx.edu/20190607/ec2/ebs/volume.template.yml
+      TemplateURL: https://s3-us-west-2.amazonaws.com/cloudformation-templates.wdt.pdx.edu/20200206/ec2/ebs/volume.template.yml
       Parameters:
         AvailabilityZone: us-west-2a
         Name: oregoninvasiveshotline-stage
