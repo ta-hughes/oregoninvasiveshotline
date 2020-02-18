@@ -5,7 +5,7 @@ package: oregoninvasiveshotline
 iam:
   user: invasives
 remote:
-  host_name: invasives
+  host_name: invasives-v2
   nginx:
     alt_fqdns: oregoninvasiveshotline.org
     client_max_body_size: 8m

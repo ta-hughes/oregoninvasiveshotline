@@ -6,7 +6,7 @@ Resources:
     Properties:
       TemplateURL: https://s3-us-west-2.amazonaws.com/cloudformation-templates.wdt.pdx.edu/20200206/iam/application_role.template.yml
       Parameters:
-        Name: invasives
+        Name: invasives-v2
         VpcStackName: vpc-stage
   Host:
     Type: AWS::CloudFormation::Stack
@@ -44,7 +44,7 @@ Resources:
       TemplateURL: https://s3-us-west-2.amazonaws.com/cloudformation-templates.wdt.pdx.edu/20200206/rds/postgres.template.yml
       Parameters:
         AvailabilityZone: us-west-2a
-        DBInstanceName: oregoninvasiveshotline-stage
+        DBInstanceName: oregoninvasiveshotline-v2-stage
         DBPassword: !Ref 'DBPassword'
         DBUsername: oregoninvasiveshotline_l
         EC2SecurityGroupId: !GetAtt 'Host.Outputs.EC2SecurityGroup'
@@ -56,7 +56,7 @@ Resources:
       TemplateURL: https://s3-us-west-2.amazonaws.com/cloudformation-templates.wdt.pdx.edu/20200206/ec2/ebs/volume.template.yml
       Parameters:
         AvailabilityZone: us-west-2a
-        Name: oregoninvasiveshotline-stage
+        Name: oregoninvasiveshotline-v2-stage
 
 Parameters:
   ELBListenerPriority:
