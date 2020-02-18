@@ -4,6 +4,7 @@ distribution: psu.oit.arc.oregoninvasiveshotline
 package: oregoninvasiveshotline
 iam:
   user: invasives
+  uid: 1101
 remote:
   host_name: invasives-v2
   nginx:

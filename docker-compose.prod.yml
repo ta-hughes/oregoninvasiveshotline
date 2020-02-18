@@ -18,7 +18,7 @@ services:
     volumes:
       - /vol/www/oregoninvasiveshotline/services/elasticsearch/master:/usr/share/elasticsearch/data
     hostname: 'elasticsearch'
-    user: "1008"
+    user: "1101"
     mem_limit: 256M
     mem_swappiness: 1
     restart: always
@@ -33,7 +33,7 @@ services:
     volumes:
       - /vol/www/oregoninvasiveshotline/services/elasticsearch/node-1:/usr/share/elasticsearch/data
     hostname: 'elasticsearch-node-1'
-    user: "1008"
+    user: "1101"
     restart: always
     cpus: 1
     mem_limit: 512M
@@ -53,7 +53,7 @@ services:
     volumes:
       - /vol/www/oregoninvasiveshotline/services/elasticsearch/node-2:/usr/share/elasticsearch/data
     hostname: 'elasticsearch-node-2'
-    user: "1008"
+    user: "1101"
     restart: always
     cpus: 1
     mem_limit: 512M
@@ -75,7 +75,7 @@ services:
     # on container delete/init cycle.
     #   Refs: https://github.com/docker-library/rabbitmq/issues/106#issuecomment-241882358
     hostname: 'rabbitmq'
-    user: "1008"
+    user: "1101"
     mem_limit: 256M
     mem_swappiness: 1
     restart: always
