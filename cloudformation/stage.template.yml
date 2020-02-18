@@ -23,7 +23,6 @@ Resources:
         InternalZoneName: stage-internal
         UseEFSFilesystem: true
         VpcStackName: !GetAtt 'AppRole.Outputs.VpcStackName'
-
   Networking:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -37,19 +36,17 @@ Resources:
         ListenOn80: true
         PrivateIp: !GetAtt 'Host.Outputs.PrivateIP'
         VpcStackName: !GetAtt 'AppRole.Outputs.VpcStackName'
-
   PostgreSQL:
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL: https://s3-us-west-2.amazonaws.com/cloudformation-templates.wdt.pdx.edu/20200206/rds/postgres.template.yml
       Parameters:
         AvailabilityZone: us-west-2a
-        DBInstanceName: oregoninvasiveshotline-v2-stage
+        DBInstanceName: oregoninvasiveshotline-v3-stage
         DBPassword: !Ref 'DBPassword'
         DBUsername: oregoninvasiveshotline_l
         EC2SecurityGroupId: !GetAtt 'Host.Outputs.EC2SecurityGroup'
         VpcStackName: !GetAtt 'AppRole.Outputs.VpcStackName'
-
   Volume:
     Type: AWS::CloudFormation::Stack
     Properties:

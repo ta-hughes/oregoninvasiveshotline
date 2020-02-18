@@ -44,13 +44,13 @@ Resources:
         VpcStackName: !GetAtt 'AppRole.Outputs.VpcStackName'
         MultiAZ: true
         DBInstanceClass: db.t3.small
-        DBInstanceName: oregoninvasiveshotline-v2-prod
+        DBInstanceName: oregoninvasiveshotline-v3-prod
         DBUsername: oregoninvasiveshotline_l
         DBPassword: !Ref 'DBPassword'
         EnableEncryption: true
         KmsKey: !GetAtt 'AppRole.Outputs.KmsKeyArn'
         EC2SecurityGroupId: !GetAtt 'Host.Outputs.EC2SecurityGroup'
-        SnapshotId: arn:aws:rds:us-west-2:921749119607:snapshot:invasives-prod-stackfailure-20200217-snapshot
+        SnapshotId: arn:aws:rds:us-west-2:921749119607:snapshot:oregoninvasiveshotline-v2-prod-with-new-kms-key-20200217
         DeletionPolicy: Snapshot
   Volume:
     Type: AWS::CloudFormation::Stack

@@ -23,7 +23,7 @@ environment:
       venv: /venv/venv-docker
   stage:
     db:
-      host: oregoninvasiveshotline-stage.c6xuiyamhpsi.us-west-2.rds.amazonaws.com
+      host: oregoninvasiveshotline-v3-stage.c6xuiyamhpsi.us-west-2.rds.amazonaws.com
   prod:
     db:
-      host: oregoninvasiveshotline-prod.c6xuiyamhpsi.us-west-2.rds.amazonaws.com
+      host: oregoninvasiveshotline-v3-prod.c6xuiyamhpsi.us-west-2.rds.amazonaws.com
