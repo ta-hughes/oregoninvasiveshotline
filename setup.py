@@ -31,6 +31,7 @@ setup(
         'pytz~=2019.3',
 
         'PyYAML~=5.2.0',
+        'raven~=6.10.0',
     ],
     extras_require={
         'dev': [
