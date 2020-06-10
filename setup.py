@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 
-VERSION = '1.13.7'
+VERSION = '1.13.8'
 
 
 setup(
@@ -15,7 +15,7 @@ setup(
     zip_safe=False,
     install_requires=[
         'psu.oit.wdt.emcee>=1.0.4,<1.1',
-        'django~=1.11.28',
+        'django~=1.11.29',
         'django-arcutils~=2.24.0',
         'django-bootstrap-form==3.4',
         'django-haystack~=2.8.1',
