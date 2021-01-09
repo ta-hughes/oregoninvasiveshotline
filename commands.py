@@ -40,16 +40,6 @@ configs.load('default', 'commands.yml', YAMLCommandConfiguration)
 app_configs.load('default', LegacyAppConfiguration)
 
 
-@command(timed=True)
-def init(overwrite=False):
-    virtualenv(config.python.venv, overwrite=overwrite)
-    install()
-    # provision_database_local(drop=overwrite, with_postgis=True)
-    manage(('migrate', '--noinput'))
-    manage(('loaddata',) + DEFAULT_FIXTURES)
-    manage(('loaddata',) + DEVELOPMENT_FIXTURES)
-    manage(('generate_icons', '--no-input', '--clean', '--force'))
-    manage(('rebuild_index', '--noinput'))
 
 
 @command

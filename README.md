@@ -17,15 +17,11 @@ about the species that was reported
 
 ## Getting started
 
-To build the application dependencies in your host's environment:
-
-    make init
-
-To prepare the database you may use, e.g., the `import_database` command to install a copy of production data.
+Ensure that you have Docker and Docker Compose installed in your host's environment.
 
 To use the provided Docker container definitions:
 
-    venv/bin/docker-compose up -d
+    docker-compose -f docker-compose.dev.yml up -d
 
 To authenticate with the provided default user:
 
@@ -36,6 +32,16 @@ A Google API Key is needed for the mapping features in this project. In
 development environments (native or docker) you should export an environment variable, eg:
 
     export GOOGLE_API_KEY='{ key }'
+
+To prepare the database you may use, e.g., the `import_database` command to install a copy of production data.
+
+To update the frontend dependencies of the project, use the included make rule:
+
+    make client_dependencies
+
+To run the test library:
+
+    docker-compose -f docker-compose.dev.yml run test
 
 ## Deploying
 
