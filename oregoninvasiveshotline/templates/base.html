@@ -127,6 +127,26 @@
         {% endblock %}
 
         {% block js %}
+          <script src="{% static 'js/sentry.browser.js' %}"></script>
+          {# Initializes sentry client #}
+          <script type="text/javascript">
+            Sentry.init({
+              dsn: "https://263913aeb1264f1bbc40c1b35dda9933@o50547.ingest.sentry.io/153798",
+              release: "{{ RELEASE }}",
+              environment: "{{ ENVIRONMENT }}",
+              tracesSampleRate: 0.05,
+              attachStacktrace: true
+            });
+            {# Links current user to the frontend context #}
+            {% if request.user.is_authenticated %}
+              Sentry.setUser({ email: "{{ request.user.email }}" });
+            {% endif %}
+          </script>
+          {# Links backend trace_id to frontend context #}
+          {% if trace_id %}
+            <meta name="sentry-trace" content="{{ TRACE_ID }}" />
+          {% endif %}
+
           <script src="{% static 'js/jquery.min.js' %}"></script>
           <script src="{% static 'js/bootstrap.min.js' %}"></script>
           <script src="{% static 'js/js.cookie.js' %}"></script>
@@ -134,13 +154,5 @@
         {% endblock %}
 
         {% google_analytics %}
-
-        {% if not debug %}
-            <script src="https://cdn.ravenjs.com/3.26.4/raven.min.js" crossorigin="anonymous"></script>
-            <script type="text/javascript">
-              Raven.config('https://263913aeb1264f1bbc40c1b35dda9933@sentry.io/153798')
-                   .install();
-            </script>
-        {% endif %}
     </body>
 </html>
