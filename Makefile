@@ -8,63 +8,18 @@ venv_python ?= python3
 bin = $(venv)/bin
 
 
-$(venv):
-	$(venv_python) -m venv $(venv)
+client_dependencies:  ## Builds npm dependencies and copies built ('dist') artifacts into static collection directory.
+	@yarn install
+	@echo "Installing js-cookie..."
+	@cp node_modules/js-cookie/src/js.cookie.js oregoninvasiveshotline/static/js/
+	@echo "Installing jQuery..."
+	@cp node_modules/jquery/dist/*.min.* oregoninvasiveshotline/static/js/
+	@echo "Installing bootstrap..."
+	@cp node_modules/bootstrap/dist/js/*.min.js* oregoninvasiveshotline/static/js/
+	@cp node_modules/bootstrap/dist/css/*.min.css* oregoninvasiveshotline/static/css/
+	@cp node_modules/bootstrap/dist/fonts/* oregoninvasiveshotline/static/fonts/
+	@echo "Installing sentry/browser + sentry/tracing..."
+	@cp node_modules/@sentry/tracing/build/bundle.tracing.min.js oregoninvasiveshotline/static/js/sentry.browser.min.js
 
-egg-info: $(egg_info)
-$(egg_info):
-	$(bin)/python setup.py egg_info
 
-install: $(venv) $(egg_info)
-	$(venv)/bin/pip install --upgrade pip
-	$(venv)/bin/pip install -r requirements.txt
-reinstall: clean-install install
-
-init: install
-	@$(bin)/mc init
-reinit: clean-egg-info clean-venv init
-
-test: install
-	LOCAL_SETTINGS_FILE="local.test.cfg" $(bin)/python manage.py test -k
-run:
-	@$(bin)/python manage.py runserver
-
-clean: clean-pyc
-clean-all: clean-build clean-coverage clean-dist clean-egg-info clean-pyc clean-venv
-clean-build:
-	rm -rf build
-clean-coverage:
-	rm -f .coverage
-clean-dist:
-	rm -rf dist
-clean-egg-info:
-	rm -rf $(egg_info)
-clean-install:
-	$(bin)/pip uninstall $(distribution)
-clean-pyc:
-	find . -name __pycache__ -type d -print0 | xargs -0 rm -r
-	find . -name '*.py[co]' -type f -print0 | xargs -0 rm
-clean-venv:
-	rm -rf $(venv)
-
-.PHONY = \
-    init \
-    reinit \
-    venv \
-    install \
-    reinstall \
-    egg-info \
-    test \
-    coverage \
-    run-services \
-    run \
-    deploy \
-    clean \
-    clean-all \
-    clean-build \
-    clean-coverage \
-    clean-dist \
-    clean-egg-info \
-    clean-install \
-    clean-pyc \
-    clean-venv
+.PHONY = client_dependencies
