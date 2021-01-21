@@ -70,7 +70,7 @@ Resources:
         ZoneExists: true
         HostedZoneName: oregoninvasiveshotline.org
         DnsHostName: oregoninvasiveshotline.org
-        ELBCertificate: arn:aws:acm:us-west-2:921749119607:certificate/b91c58d1-35b5-4d3c-8253-0efaf18948f5
+        ELBCertificate: arn:aws:acm:us-west-2:921749119607:certificate/5c148b9a-bbdc-4739-9cd2-174be1545c9a
         ELBTargetGroup: !GetAtt 'Networking.Outputs.ELBTargetGroup'
         ELBListenerPriority: !Ref 'CustomELBListenerPriority'
         VpcStackName: !GetAtt 'AppRole.Outputs.VpcStackName'
