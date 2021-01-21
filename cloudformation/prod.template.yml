@@ -4,14 +4,14 @@ Resources:
   AppRole:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: https://s3-us-west-2.amazonaws.com/cloudformation-templates.wdt.pdx.edu/20200206/iam/application_role.template.yml
+      TemplateURL: https://s3-us-west-2.amazonaws.com/cloudformation-templates.wdt.pdx.edu/20210115/iam/application_role.template.yml
       Parameters:
-        Name: invasives-v2
+        Name: invasives
         VpcStackName: vpc-prod
   Host:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: https://s3-us-west-2.amazonaws.com/cloudformation-templates.wdt.pdx.edu/20200206/ec2/private_host/private_host.template.yml
+      TemplateURL: https://s3-us-west-2.amazonaws.com/cloudformation-templates.wdt.pdx.edu/20210115/ec2/private_host/private_host.template.yml
       Parameters:
         InstanceType: t3.small
         ImageId: ami-082b5a644766e0e6f
@@ -26,7 +26,7 @@ Resources:
   Networking:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: https://s3-us-west-2.amazonaws.com/cloudformation-templates.wdt.pdx.edu/20200206/ec2/private_host/networking.template.yml
+      TemplateURL: https://s3-us-west-2.amazonaws.com/cloudformation-templates.wdt.pdx.edu/20210115/ec2/private_host/networking.template.yml
       Parameters:
         EC2Instance: !GetAtt 'Host.Outputs.InstanceId'
         PrivateIp: !GetAtt 'Host.Outputs.PrivateIP'
@@ -39,34 +39,33 @@ Resources:
   PostgreSQL:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: https://s3-us-west-2.amazonaws.com/cloudformation-templates.wdt.pdx.edu/20200206/rds/postgres.template.yml
+      TemplateURL: https://s3-us-west-2.amazonaws.com/cloudformation-templates.wdt.pdx.edu/20210115/rds/postgres.template.yml
       Parameters:
         VpcStackName: !GetAtt 'AppRole.Outputs.VpcStackName'
         MultiAZ: true
         DBInstanceClass: db.t3.small
-        DBInstanceName: oregoninvasiveshotline-v3-prod
+        DBInstanceName: oregoninvasiveshotline-prod
         DBUsername: oregoninvasiveshotline_l
         DBPassword: !Ref 'DBPassword'
         EnableEncryption: true
         KmsKey: !GetAtt 'AppRole.Outputs.KmsKeyArn'
         EC2SecurityGroupId: !GetAtt 'Host.Outputs.EC2SecurityGroup'
-        SnapshotId: arn:aws:rds:us-west-2:921749119607:snapshot:oregoninvasiveshotline-v2-prod-with-new-kms-key-20200217
         DeletionPolicy: Snapshot
   Volume:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: https://s3-us-west-2.amazonaws.com/cloudformation-templates.wdt.pdx.edu/20200206/ec2/ebs/volume.template.yml
+      TemplateURL: https://s3-us-west-2.amazonaws.com/cloudformation-templates.wdt.pdx.edu/20210115/ec2/ebs/volume.template.yml
       Parameters:
-        Name: oregoninvasiveshotline-v2-prod
+        Name: oregoninvasiveshotline-prod
         AvailabilityZone: us-west-2a
         EnableEncryption: true
         KmsKey: !GetAtt 'AppRole.Outputs.KmsKeyArn'
-        SnapshotId: snap-0882326257887df5e
+        SnapshotId: snap-00cd6b7489b2dd518
         DeletionPolicy: Snapshot
   Domain:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: https://s3-us-west-2.amazonaws.com/cloudformation-templates.wdt.pdx.edu/20200206/ec2/private_host/domain.template.yml
+      TemplateURL: https://s3-us-west-2.amazonaws.com/cloudformation-templates.wdt.pdx.edu/20210115/ec2/private_host/domain.template.yml
       Parameters:
         ZoneExists: true
         HostedZoneName: oregoninvasiveshotline.org
