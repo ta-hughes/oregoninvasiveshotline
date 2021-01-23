@@ -1,53 +1,57 @@
 import random
 
-from django.conf import settings
-from django.contrib import messages
-from django.contrib.auth import login as django_login
-from django.contrib.auth.views import login as django_login_view
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.core.signing import BadSignature
 from django.shortcuts import get_object_or_404, redirect, render
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.core.exceptions import ValidationError
+from django.core.signing import BadSignature
 from django.views.generic import DetailView
+from django.contrib.auth import login as django_login
+from django.contrib.auth.views import LoginView as DjangoLoginView
+from django.contrib import messages
+from django.db import transaction
+from django.conf import settings
 
-from arcutils.db import will_be_deleted_with
-
+from oregoninvasiveshotline.utils.db import will_be_deleted_with
 from oregoninvasiveshotline.reports.models import Invite, Report
 
 from .utils import get_tab_counts
 from .colors import AVATAR_COLORS
 from .perms import can_list_users, permissions
 from .forms import PublicLoginForm, UserForm, UserSearchForm
+from .tasks import notify_public_user_for_login_link
 from .models import User
 
 
-def login(request, *args, **kwargs):
-    """
-    This delegates most of the work to `django.contrib.auth.views.login`, but
-    we need to display an extra form, that allows users to login with just an
-    email address. To do that without rewriting all the django login code, we
-    tap into the TemplateResponse.context_data and add the extra form
-    """
-    response = django_login_view(request, *args, **kwargs)
-    # if our special "OTHER_LOGIN" flag is present, we process our login form
-    if request.method == "POST" and request.POST.get("form") == "OTHER_LOGIN":
-        # make it look like the django login form wasn't filled out
-        response.context_data['form'] = response.context_data['form'].__class__(request)
-        # now do the regular form processing stuff...
-        other_form = PublicLoginForm(request.POST)
-        if other_form.is_valid():
-            other_form.save(request=request)
-            messages.success(request, "Check your email! You have been sent the login link.")
-            return redirect(request.get_full_path())
-    else:
-        other_form = PublicLoginForm()
+class LoginView(DjangoLoginView):
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['other_form'] = PublicLoginForm()
+        return context
 
-    # patch in the other_form variable, so the template can render it.
-    # Sometimes the django_login_view returns an HttpResponseRedirect, which
-    # doesn't have context_data, hence the check
-    if hasattr(response, "context_data"):
-        response.context_data['other_form'] = other_form
+    def get_form_class(self):
+        if self.request.POST.get('form') == 'OTHER_LOGIN':
+            return PublicLoginForm
+        return super().get_form_class()
 
-    return response
+    def form_valid(self, form):
+        if isinstance(form, PublicLoginForm):
+            try:
+                user = User.objects.get(email__iexact=form.cleaned_data.get('email'))
+            except User.DoesNotExist:
+                msg = "Could not find the account {} for public login"
+                messages.warning(self.request, msg.format(form.cleaned_data.get('email')))
+            else:
+                if user.is_active:
+                    msg = "You must log in with your username and password"
+                    messages.info(self.request, msg)
+                else:
+                    msg = "Check your email! You have been sent the login link."
+                    messages.success(self.request, msg)
+                    transaction.on_commit(lambda: notify_public_user_for_login_link.delay(user.pk))
+
+            return redirect(self.request.get_full_path())
+
+        return super().form_valid(form)
 
 
 def authenticate(request):
@@ -98,7 +102,7 @@ def home(request):
     (i.e. we can't use variables in the URL)
     """
     user = request.user
-    if user.is_anonymous() and not request.session.get('report_ids'):
+    if user.is_anonymous and not request.session.get('report_ids'):
         messages.error(request, "You are not allowed to be here")
         return redirect("home")
 

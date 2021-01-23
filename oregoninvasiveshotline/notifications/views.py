@@ -1,13 +1,12 @@
 from django.shortcuts import get_object_or_404, redirect, render
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.core.urlresolvers import reverse
 from django.contrib import messages
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import HttpResponseRedirect
 from django.db import transaction
 from django.conf import settings
+from django.urls import reverse
 
-from arcutils.db import will_be_deleted_with
-
+from oregoninvasiveshotline.utils.db import will_be_deleted_with
 from oregoninvasiveshotline.perms import permissions
 from oregoninvasiveshotline.users.utils import get_tab_counts
 

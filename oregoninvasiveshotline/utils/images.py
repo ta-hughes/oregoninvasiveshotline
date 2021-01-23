@@ -1,28 +1,7 @@
 import logging
-from urllib import parse
 from PIL import Image
 
-from django.contrib.sites.models import Site
-
 log = logging.getLogger(__name__)
-
-
-def build_absolute_url(path, query_string=None):
-    domain = Site.objects.get_current().domain
-    return parse.urlunparse((
-        # scheme
-        'https',
-        # netloc
-        domain,
-        # path
-        path,
-        # params
-        '',
-        # query
-        query_string,
-        # fragment
-        ''
-    ))
 
 
 def generate_thumbnail(input_path, output_path, width, height):

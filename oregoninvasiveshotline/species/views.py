@@ -1,12 +1,11 @@
 from django.conf import settings
 from django.contrib.messages.views import SuccessMessageMixin
-from django.core.urlresolvers import reverse, reverse_lazy
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.shortcuts import render
 from django.views.generic import CreateView, DeleteView, ListView, UpdateView
+from django.urls import reverse, reverse_lazy
+from django.shortcuts import render
 
-from arcutils.db import will_be_deleted_with
-
+from oregoninvasiveshotline.utils.db import will_be_deleted_with
 from oregoninvasiveshotline.perms import permissions
 from oregoninvasiveshotline.species.forms import SpeciesSearchForm
 from oregoninvasiveshotline.species.models import Category, Severity, Species

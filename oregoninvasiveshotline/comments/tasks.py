@@ -1,9 +1,8 @@
 from django.template.loader import render_to_string
 from django.core.mail import send_mass_mail
 
-from arcutils.settings import get_setting
-
-from oregoninvasiveshotline.utils import build_absolute_url
+from oregoninvasiveshotline.utils.settings import get_setting
+from oregoninvasiveshotline.utils.urls import build_absolute_url
 from oregoninvasiveshotline.reports.models import Invite
 from oregoninvasiveshotline.comments.models import Comment
 from oregoninvasiveshotline.celery import app

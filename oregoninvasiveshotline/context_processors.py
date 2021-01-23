@@ -1,8 +1,26 @@
+from sentry_sdk import Hub
+
 from django.conf import settings
+
+from oregoninvasiveshotline import __version__
 
 
 def defaults(request):
+    # If the current Sentry span is defined, supply the attached
+    # attached trace_id to the template context.
+    # 
+    # This value allows a sentinel header to be set which allows
+    # traces to span the frontend/backend boundary.
+    trace_id = None
+    if Hub.current.scope.span is not None:
+        trace_id = Hub.current.scope.span.trace_id
+
     return {
+        'PROJECT': settings.PROJECT,
         'CONTACT_EMAIL': settings.CONTACT_EMAIL,
         'GOOGLE': settings.GOOGLE,
+
+        'ENVIRONMENT': settings.ENV,
+        'RELEASE': __version__,
+        'TRACE_ID': trace_id
     }

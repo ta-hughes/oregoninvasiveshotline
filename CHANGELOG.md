@@ -1,5 +1,22 @@
 # Changelog for Oregon Invasives Hotline
 
+## 1.14.0 - 2021-01-22
+
+- Uses cloud-config 20210115 release.
+- Uses Emcee 1.0.7.
+- Uses Django 2.2 LTS.
+- Drops support for Python<3.6.
+- Drops dependencies on unmaintained, historical organizational
+  packages 'django-arcutils', 'django-perms'.
+- Adds modern configuration of Sentry clients.
+- Adds tooling for frontend client dependency management.
+- Updates, refactors docker container construction.
+- Updates project dependencies to support current releases:
+  - Pillow 8.0
+  - celery 5.0
+  - djangorestframework 3.12
+  - django-haystack 3.0
+
 ## 1.13.7 - 2020-02-12
 
 ### Maintenance

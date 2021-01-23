@@ -18,7 +18,7 @@ def edit(request, comment_id):
     if report.pk in request.session.get("report_ids", []) and not report.created_by.is_active:
         request.user = report.created_by
 
-    if request.user.is_anonymous():
+    if request.user.is_anonymous:
         return login_required(lambda request: None)(request)
 
     if not can_edit_comment(request.user, comment):

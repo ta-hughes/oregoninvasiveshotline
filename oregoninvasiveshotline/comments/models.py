@@ -1,4 +1,4 @@
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.db import models
 
 from oregoninvasiveshotline.visibility import Visibility
@@ -15,8 +15,8 @@ class Comment(Visibility, models.Model):
 
     visibility = models.IntegerField(choices=Visibility.choices, default=Visibility.PROTECTED, help_text="Controls who can see this comment")
 
-    created_by = models.ForeignKey("users.User")
-    report = models.ForeignKey("reports.Report")
+    created_by = models.ForeignKey("users.User", on_delete=models.CASCADE)
+    report = models.ForeignKey("reports.Report", on_delete=models.CASCADE)
 
     class Meta:
         db_table = "comment"

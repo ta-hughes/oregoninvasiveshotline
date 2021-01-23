@@ -8,15 +8,14 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
 from django.utils.functional import curry
 
-from arcutils.db import will_be_deleted_with
-
+from oregoninvasiveshotline.utils.db import will_be_deleted_with
 from oregoninvasiveshotline.comments.forms import CommentForm
 from oregoninvasiveshotline.comments.models import Comment
 from oregoninvasiveshotline.comments.perms import can_create_comment
@@ -206,7 +205,7 @@ def detail(request, report_id):
         request.user = report.created_by
 
     if not report.is_public:
-        if request.user.is_anonymous():
+        if request.user.is_anonymous:
             messages.info(request, "If this is your report, please use the login system below to authenticate yourself.")
             return login_required(lambda request: None)(request)
         elif not can_view_private_report(request.user, report):
@@ -272,7 +271,7 @@ def detail(request, report_id):
     # filter down the comments based on the user's permissions
     comments = Comment.objects.filter(report=report)
     images = Image.objects.filter(Q(report=report) | Q(comment__report=report))
-    if request.user.is_anonymous():
+    if request.user.is_anonymous:
         comments = comments.filter(visibility=Comment.PUBLIC)
         images = images.filter(visibility=Image.PUBLIC)
     elif request.user.is_active or Invite.objects.filter(user=request.user, report=report).exists():

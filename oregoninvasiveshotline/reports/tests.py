@@ -14,15 +14,15 @@ from django.conf import settings
 from django.core import mail
 from django.core.exceptions import NON_FIELD_ERRORS
 from django.core.files.base import File
-from django.core.urlresolvers import reverse
 from django.contrib.gis.geos import Point
 from django.db.models.signals import post_save
 from django.db import transaction
+from django.urls import reverse
 from django.test import TestCase, TransactionTestCase
 
 from model_mommy.mommy import make, prepare
-from arcutils.test.user import UserMixin
 
+from oregoninvasiveshotline.utils.test.user import UserMixin
 from oregoninvasiveshotline.comments.forms import CommentForm
 from oregoninvasiveshotline.comments.models import Comment
 from oregoninvasiveshotline.images.models import Image

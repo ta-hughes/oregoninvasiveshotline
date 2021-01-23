@@ -1,4 +1,4 @@
-from permissions import PermissionsRegistry
+from .permissions import PermissionsRegistry
 
 # just create a permissions object we can tack permissions onto in app/perms.py
 permissions = PermissionsRegistry()

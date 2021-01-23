@@ -1,0 +1,12 @@
+{
+  "name": "oregoninvasiveshotline",
+  "private": true,
+  "scripts": {},
+    "dependencies": {
+      "bootstrap": "^3.4.1",
+      "js-cookie": "2.2.1",
+      "jquery": "^1.12.4",
+      "@sentry/browser": "^5.29.0",
+      "@sentry/tracing": "5.29.0"
+  }
+}

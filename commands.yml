@@ -6,17 +6,14 @@ iam:
   user: invasives
   uid: 1101
 remote:
-  host_name: invasives-v2
+  host_name: invasives
   nginx:
     alt_fqdns: oregoninvasiveshotline.org
     client_max_body_size: 8m
-    csp_policy: 'default-src ''unsafe-inline''
-                 data: oregoninvasiveshotline.org *.wdt.pdx.edu
-                 cdn.ravenjs.com cdnjs.cloudflare.com
-                 http://*.tiles.osgeo.org khms0.googleapis.com khms1.googleapis.com
-                 maps.googleapis.com *.google-analytics.com *.gstatic.com
-                 fonts.googleapis.com fonts.gstatic.com;
-                 connect-src sentry.io;'
+    csp_policy: 'default-src ''unsafe-inline'' data: oregoninvasiveshotline.org *.wdt.pdx.edu
+      http://*.tiles.osgeo.org khms0.googleapis.com khms1.googleapis.com maps.googleapis.com
+      *.google-analytics.com *.gstatic.com fonts.googleapis.com fonts.gstatic.com;
+      connect-src *.sentry.io;'
 environment:
   dev:
     python:
@@ -26,7 +23,7 @@ environment:
       venv: /venv/venv-docker
   stage:
     db:
-      host: oregoninvasiveshotline-v3-stage.c6xuiyamhpsi.us-west-2.rds.amazonaws.com
+      host: oregoninvasiveshotline-stage.c6xuiyamhpsi.us-west-2.rds.amazonaws.com
   prod:
     db:
-      host: oregoninvasiveshotline-v3-prod.c6xuiyamhpsi.us-west-2.rds.amazonaws.com
+      host: oregoninvasiveshotline-prod.c6xuiyamhpsi.us-west-2.rds.amazonaws.com

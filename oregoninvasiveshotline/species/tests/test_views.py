@@ -1,5 +1,5 @@
-from django.core.urlresolvers import reverse
 from django.test import RequestFactory, TestCase
+from django.urls import reverse
 from model_mommy.mommy import make
 
 from ..models import Category, Severity, Species

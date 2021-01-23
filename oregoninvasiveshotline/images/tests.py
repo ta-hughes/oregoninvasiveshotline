@@ -9,8 +9,7 @@ from django.test import TestCase
 
 from model_mommy.mommy import make
 
-from arcutils.test.user import UserMixin
-
+from oregoninvasiveshotline.utils.test.user import UserMixin
 from oregoninvasiveshotline.reports.models import Report
 
 from .fields import ClearableImageInput

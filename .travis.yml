@@ -24,13 +24,13 @@ env:
     - GOOGLE_API_KEY=NOT_A_VALID_KEY
 
 before_script:
-    - curl -O https://download.elastic.co/elasticsearch/release/org/elasticsearch/distribution/deb/elasticsearch/2.3.0/elasticsearch-2.3.0.deb && sudo dpkg -i --force-confnew elasticsearch-2.3.0.deb && sudo service elasticsearch restart
+    - curl -O https://download.elastic.co/elasticsearch/release/org/elasticsearch/distribution/deb/elasticsearch/2.4.6/elasticsearch-2.4.6.deb && sudo dpkg -i --force-confnew elasticsearch-2.4.6.deb && sudo service elasticsearch restart
     - sleep 10
-    - psql -U postgres -c 'create user oregoninvasiveshotline;'
-    - psql -U postgres -c 'create database oregoninvasiveshotline owner oregoninvasiveshotline;'
-    - psql -U postgres -d oregoninvasiveshotline -c 'create extension postgis;'
-    - psql -U postgres -c 'create database test_oregoninvasiveshotline owner oregoninvasiveshotline;'
-    - psql -U postgres -d test_oregoninvasiveshotline -c 'create extension postgis;'
+    - psql -U postgres -c 'create user invasives;'
+    - psql -U postgres -c 'create database invasives owner invasives;'
+    - psql -U postgres -d invasives -c 'create extension postgis;'
+    - psql -U postgres -c 'create database test_invasives owner invasives;'
+    - psql -U postgres -d test_invasives -c 'create extension postgis;'
     - curl -XPUT 'http://localhost:9200/oregoninvasiveshotline-test/'
 
 script:

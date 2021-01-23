@@ -1,9 +1,8 @@
 from django.template.loader import render_to_string
-from django.core.urlresolvers import reverse
 from django.core.mail import send_mail
+from django.urls import reverse
 
-from arcutils.settings import get_setting
-
+from oregoninvasiveshotline.utils.settings import get_setting
 from oregoninvasiveshotline.users.models import User
 from oregoninvasiveshotline.celery import app
 

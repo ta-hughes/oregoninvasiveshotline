@@ -1,14 +1,14 @@
 from unittest.mock import Mock
 
 from django.core import mail
-from django.core.urlresolvers import reverse
 from django.contrib.gis.geos import Point
-from django.db import transaction
 from django.test import TestCase, TransactionTestCase
+from django.db import transaction
+from django.urls import reverse
 
 from model_mommy.mommy import make
-from arcutils.test.user import UserMixin
 
+from oregoninvasiveshotline.utils.test.user import UserMixin
 from oregoninvasiveshotline.images.models import Image
 from oregoninvasiveshotline.reports.models import Invite, Report
 
