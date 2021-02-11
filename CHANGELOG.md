@@ -1,5 +1,12 @@
 # Changelog for Oregon Invasives Hotline
 
+## 1.14.1 - 2021-02-10
+
+- Drops support for Python<3.7.
+- Updates client Javascript dependencies and replaces hard-
+  coded/bundled packages with specifiers in 'package.json'
+  and utility scripts.
+
 ## 1.14.0 - 2021-01-22
 
 - Uses cloud-config 20210115 release.
