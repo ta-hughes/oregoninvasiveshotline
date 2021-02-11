@@ -148,6 +148,9 @@
           {% endif %}
 
           <script src="{% static 'js/jquery.min.js' %}"></script>
+          {% if debug %}
+            <script src="{% static 'js/jquery-migrate.min.js' %}"></script>
+          {% endif %}
           <script src="{% static 'js/bootstrap.min.js' %}"></script>
           <script src="{% static 'js/js.cookie.js' %}"></script>
           <script src="{% static 'js/main.js' %}"></script>

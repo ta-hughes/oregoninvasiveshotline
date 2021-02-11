@@ -14,8 +14,10 @@ client_dependencies:  ## Builds npm dependencies and copies built ('dist') artif
 	@cp node_modules/@sentry/tracing/build/bundle.tracing.min.js oregoninvasiveshotline/static/js/sentry.browser.min.js
 	@echo "Installing js-cookie..."
 	@cp node_modules/js-cookie/src/js.cookie.js oregoninvasiveshotline/static/js/
-	@echo "Installing jQuery..."
+	@echo "Installing jquery..."
 	@cp node_modules/jquery/dist/*.min.* oregoninvasiveshotline/static/js/
+	@echo "Installing jquery-migrate..."
+	@cp node_modules/jquery-migrate/dist/*.min.* oregoninvasiveshotline/static/js/
 	@echo "Installing bootstrap..."
 	@cp node_modules/bootstrap/dist/js/*.min.js* oregoninvasiveshotline/static/js/
 	@cp node_modules/bootstrap/dist/css/*.min.css* oregoninvasiveshotline/static/css/
