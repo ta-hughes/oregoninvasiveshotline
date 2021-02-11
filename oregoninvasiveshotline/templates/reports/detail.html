@@ -242,11 +242,11 @@ Report #{{ report.pk }} - {{ report }}
     </script>
 
     <script src="{% static 'js/species_selector.js' %}"></script>
-    <script src="{% static 'galleria/galleria-1.5.7.min.js' %}"></script>
+    <script src="{% static 'js/galleria.min.js' %}"></script>
 
     <script>
         if($('.galleria').length){
-            Galleria.loadTheme('{% static "galleria/themes/classic/galleria.classic.min.js" %}');
+            Galleria.loadTheme('{% static "js/galleria.classic.min.js" %}');
             Galleria.run('.galleria', {
                 "lightbox": true
             });
