@@ -1,8 +1,8 @@
 """Oregon Invasives Hotline"""
 import sys
 
-if sys.version_info < (3, 6):
-    raise Exception('ORO requires Python version 3.6 or later.')
+if sys.version_info < (3, 7):
+    raise Exception('ORO requires Python version 3.7 or later.')
 
 
 __version__ = '1.14.0'
