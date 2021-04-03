@@ -50,7 +50,7 @@ Report #{{ report.pk }} - {{ report }}
         <blockquote>{{ report.description|default:"No description provided"|linebreaksbr }}</blockquote>
 
         {% if images %}
-            <div class="galleria">
+            <div class="galleria" style="display: none;">
                 {% for image in images %}
                     <img src="{{ image.image.url }}" alt="{{ image.name }}" />
                 {% endfor %}
@@ -235,58 +235,63 @@ Report #{{ report.pk }} - {{ report }}
 {% block js %}
     {{ block.super }}
 
-    <script src="//maps.googleapis.com/maps/api/js?key={{ GOOGLE_API_KEY }}"></script>
-
+    <script src="//maps.googleapis.com/maps/api/js?key={{ GOOGLE_API_KEY }}&callback=initMap"
+            async></script>
     <script>
-        var category_id_to_species_id = {{ category_id_to_species_id|safe }};
-    </script>
+        function initMap() {
+            google.maps.event.addDomListener(window, 'load', function(){
+                var options = getDefaultMapOptions();
+                options.center = {lat: {{ report.point.y }}, lng: {{ report.point.x }}}
+                var map = new google.maps.Map(document.getElementById('map-canvas'), options);
 
-    <script src="{% static 'js/species_selector.js' %}"></script>
-    <script src="{% static 'js/galleria.min.js' %}"></script>
-
-    <script>
-        if($('.galleria').length){
-            Galleria.loadTheme('{% static "js/galleria.classic.min.js" %}');
-            Galleria.run('.galleria', {
-                "lightbox": true
+                // draw the marker on the map where the report was located
+                var marker = new google.maps.Marker({
+                    position: {
+                        lat: {{ report.point.y }}, lng: {{ report.point.x }}
+                    },
+                    map: map,
+                    icon: generateIcon('{{ report.icon_url }}')
+                });
             });
         }
+    </script>
 
-        $('#add-comment a').click(function(e){
-            e.preventDefault();
-            $('#add-comment').css("visibility", "hidden");
-            $('#add-comment').css("display", "none").promise().done(function(){
-                $('#create-comment').slideDown();
+    <script src="{% static 'js/galleria.min.js' %}" async></script>
+    <script>var category_id_to_species_id = {{ category_id_to_species_id|safe }};</script>
+    <script src="{% static 'js/species_selector.js' %}" async></script>
+    <script>
+        $(document).ready(function() {
+            if($('.galleria').length){
+                Galleria.loadTheme('{% static "js/galleria.classic.min.js" %}');
+                Galleria.run('.galleria', {
+                    "lightbox": true
+                });
+            }
+            $('.galleria').show();
+
+            $('#add-comment a').click(function(e){
+                e.preventDefault();
+                $('#add-comment').css("visibility", "hidden");
+                $('#add-comment').css("display", "none").promise().done(function(){
+                    $('#create-comment').slideDown();
+                });
             });
-        });
 
-        $('#cancel-comment').click(function(e){
-            e.preventDefault();
-            $('#create-comment').slideUp().promise().done(function(){
-                $('#add-comment').css("display", "block");
-                $('#add-comment').css("visibility", "visible");
+            $('#cancel-comment').click(function(e){
+                e.preventDefault();
+                $('#create-comment').slideUp().promise().done(function(){
+                    $('#add-comment').css("display", "block");
+                    $('#add-comment').css("visibility", "visible");
+                });
             });
-        });
 
-        $('#id_new_species').keydown(function(){
-            $('#id_reported_species').val("");
-        });
-
-        {% if comment_form.is_bound %}
-            $('#add-comment a').click()
-        {% endif %}
-        google.maps.event.addDomListener(window, 'load', function(){;
-            var mapOptions = getDefaultMapOptions();
-            mapOptions.center = {lat: {{ report.point.y }}, lng: {{ report.point.x }}}
-            var map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
-
-            var marker = new google.maps.Marker({
-                position: {
-                    lat: {{ report.point.y }}, lng: {{ report.point.x }}
-                },
-                map: map,
-                icon: generateIcon('{{ report.icon_url }}')
+            $('#id_new_species').keydown(function(){
+                $('#id_reported_species').val("");
             });
+
+            {% if comment_form.is_bound %}
+                $('#add-comment a').click()
+            {% endif %}
         });
     </script>
 {% endblock %}

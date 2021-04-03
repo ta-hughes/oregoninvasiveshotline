@@ -53,62 +53,63 @@
 {% block js %}
     {{ block.super }}
 
-    <script src="//maps.googleapis.com/maps/api/js?key={{ GOOGLE_API_KEY }}"></script>
+    <script src="//maps.googleapis.com/maps/api/js?key={{ GOOGLE_API_KEY }}&callback=initMap"
+            async></script>
+    <script>
+        var reports = {{ reports|jsonify }};
+        function initMap() {
+            var options = getDefaultMapOptions();
+            // this is a style I picked off of https://snazzymaps.com/ and customized
+            // so waterbodies are green, and fit in with the headline background color
+            options.styles = [ { "featureType": "administrative", "elementType": "labels.text.fill", "stylers": [ { "color": "#444444" } ] }, { "featureType": "landscape", "elementType": "all", "stylers": [ { "color": "#f2f2f2" } ] }, { "featureType": "poi", "elementType": "all", "stylers": [ { "visibility": "off" } ] }, { "featureType": "road", "elementType": "all", "stylers": [ { "saturation": -100 }, { "lightness": 45 } ] }, { "featureType": "road.highway", "elementType": "all", "stylers": [ { "visibility": "simplified" } ] }, { "featureType": "road.arterial", "elementType": "labels.icon", "stylers": [ { "visibility": "off" } ] }, { "featureType": "transit", "elementType": "all", "stylers": [ { "visibility": "off" } ] }, { "featureType": "water", "elementType": "all", "stylers": [ { "color": "#557716" }, { "visibility": "on" } ] } ]
+            // this map is for decoration, so it shouldn't be zoomable, pannable, etc
+            options.disableDefaultUI = true;
+            options.disableDoubleClickZoom = true;
+            options.draggable = false;
+            options.scrollwheel = false;
+            var map = new google.maps.Map(document.getElementById('map-canvas'), options);
 
+            // we need to save all the "info windows" we create, so we can close them
+            // all when a balloon is clicked (so only one window opens at a time)
+            var windows = []
+
+            // for each report, draw the marker on the map where the report was located
+            for(var i = 0; i < reports.length; i++){
+                var report = reports[i];
+                var marker = new google.maps.Marker({
+                    position: {
+                        lat: report.lat,
+                        lng: report.lng
+                    },
+                    map: null,
+                    title: report.title,
+                    icon: generateIcon(report.icon_url),
+                });
+
+                // randomly drop the pins on the map within a few seconds
+                with({marker: marker}){
+                    setTimeout(function(){
+                        marker.setAnimation(google.maps.Animation.DROP);
+                        marker.setMap(map);
+                    },  Math.min(1.5, i)*1000*Math.random())
+                }
+            }
+
+            // when the page resizes we need to center the map back at the right place.
+            // We have to do this *after* the resize event finishes, which, unfortunately,
+            // requires this hacky timeout code
+            var timer = 0 ;
+            $(window).on('resize', function(){
+                clearTimeout(timer);
+                timer = setTimeout(function(){
+                    map.panTo(options.center);
+                }, 10);
+            });
+        }
+    </script>
     <script>
         $(document).ready(function () {
-            var reports = {{ reports|jsonify }}
-
-            $('#map-canvas').click(function(){ window.location = '{% url 'reports-list' %}'})
-
-            google.maps.event.addDomListener(window, 'load', function(){;
-                var options = getDefaultMapOptions();
-                // this is a style I picked off of https://snazzymaps.com/ and customized
-                // so waterbodies are green, and fit in with the headline background color
-                options.styles = [ { "featureType": "administrative", "elementType": "labels.text.fill", "stylers": [ { "color": "#444444" } ] }, { "featureType": "landscape", "elementType": "all", "stylers": [ { "color": "#f2f2f2" } ] }, { "featureType": "poi", "elementType": "all", "stylers": [ { "visibility": "off" } ] }, { "featureType": "road", "elementType": "all", "stylers": [ { "saturation": -100 }, { "lightness": 45 } ] }, { "featureType": "road.highway", "elementType": "all", "stylers": [ { "visibility": "simplified" } ] }, { "featureType": "road.arterial", "elementType": "labels.icon", "stylers": [ { "visibility": "off" } ] }, { "featureType": "transit", "elementType": "all", "stylers": [ { "visibility": "off" } ] }, { "featureType": "water", "elementType": "all", "stylers": [ { "color": "#557716" }, { "visibility": "on" } ] } ]
-                // this map is for decoration, so it shouldn't be zoomable, pannable, etc
-                options.disableDefaultUI = true;
-                options.disableDoubleClickZoom = true;
-                options.draggable = false;
-                options.scrollwheel = false;
-                var map = new google.maps.Map(document.getElementById('map-canvas'), options);
-
-                // we need to save all the "info windows" we create, so we can close them
-                // all when a balloon is clicked (so only one window opens at a time)
-                var windows = []
-                // for each report, draw the marker on the map where the report was located
-                for(var i = 0; i < reports.length; i++){
-                    var report = reports[i];
-                    var marker = new google.maps.Marker({
-                        position: {
-                            lat: report.lat,
-                            lng: report.lng
-                        },
-                        map: null,
-                        title: report.title,
-                        icon: generateIcon(report.icon_url),
-                    });
-
-                    // randomly drop the pins on the map within a few seconds
-                    with({marker: marker}){
-                        setTimeout(function(){
-                            marker.setAnimation(google.maps.Animation.DROP);
-                            marker.setMap(map);
-                        },  Math.min(1.5, i)*1000*Math.random())
-                    }
-                }
-
-                // when the page resizes we need to center the map back at the right place.
-                // We have to do this *after* the resize event finishes, which, unfortunately,
-                // requires this hacky timeout code
-                var timer = 0 ;
-                $(window).on('resize', function(){
-                    clearTimeout(timer);
-                    timer = setTimeout(function(){
-                        map.panTo(options.center);
-                    }, 10);
-                });
-            })
+            $('#map-canvas').click(function(){ window.location='{% url 'reports-list' %}'});
 
             /* When the "About the Hotline" button is click, animate a scroll to a certain
                position on the page. In some cases, we need to pad the bottom of the page,
