@@ -41,20 +41,19 @@ Resources:
     Properties:
       TemplateURL: https://s3-us-west-2.amazonaws.com/cloudformation-templates.wdt.pdx.edu/20210115/rds/postgres.template.yml
       Parameters:
+        VpcStackName: !GetAtt 'AppRole.Outputs.VpcStackName'
         AvailabilityZone: us-west-2a
         DBInstanceName: oregoninvasiveshotline-stage
         DBPassword: !Ref 'DBPassword'
         DBUsername: oregoninvasiveshotline_l
         EC2SecurityGroupId: !GetAtt 'Host.Outputs.EC2SecurityGroup'
-        VpcStackName: !GetAtt 'AppRole.Outputs.VpcStackName'
   Volume:
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL: https://s3-us-west-2.amazonaws.com/cloudformation-templates.wdt.pdx.edu/20210115/ec2/ebs/volume.template.yml
       Parameters:
-        AvailabilityZone: us-west-2a
         Name: oregoninvasiveshotline-stage
-
+        AvailabilityZone: us-west-2a
 Parameters:
   ELBListenerPriority:
     Type: String

@@ -16,9 +16,8 @@ def defaults(request):
         trace_id = Hub.current.scope.span.trace_id
 
     return {
-        'PROJECT': settings.PROJECT,
         'CONTACT_EMAIL': settings.CONTACT_EMAIL,
-        'GOOGLE': settings.GOOGLE,
+        'GOOGLE_API_KEY': settings.GOOGLE_API_KEY,
 
         'ENVIRONMENT': settings.ENV,
         'RELEASE': __version__,

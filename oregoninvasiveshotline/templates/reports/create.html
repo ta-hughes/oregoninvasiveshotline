@@ -82,7 +82,7 @@ Report an Invader
 {% block js %}
     {{ block.super }}
 
-    <script src="{{ GOOGLE.maps.url }}"></script>
+    <script src="//maps.googleapis.com/maps/api/js?key={{ GOOGLE_API_KEY }}"></script>
 
     <script>
         var category_id_to_species_id = {{ category_id_to_species_id|safe }};

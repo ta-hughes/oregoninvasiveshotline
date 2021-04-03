@@ -1,0 +1,25 @@
+ENV: prod
+DEBUG: false
+DEBUG_PROPOGATE_EXCEPTIONS: false
+TEMPLATE_DEBUG: false
+EMAIL_BACKEND: django.core.mail.backends.smtp.EmailBackend
+DEFAULT_FROM_EMAIL: no-reply@wdt.pdx.edu
+NOTIFICATIONS:
+  from_email: no-reply@oregoninvasiveshotline.org
+ALLOWED_HOSTS:
+- invasives.wdt.pdx.edu
+- oregoninvasiveshotline.org
+- www.oregoninvasiveshotline.org
+STATICFILES_STORAGE: django.contrib.staticfiles.storage.ManifestStaticFilesStorage
+DATABASES:
+  default:
+    HOST: oregoninvasiveshotline-prod.c6xuiyamhpsi.us-west-2.rds.amazonaws.com
+    NAME: oregoninvasiveshotline
+    USER: oregoninvasiveshotline_l
+    PASSWORD: ''
+HAYSTACK_CONNECTIONS:
+  default:
+    URL: localhost:9200
+    INDEX_NAME: oregoninvasiveshotline-prod
+STATIC_ROOT: /vol/www/oregoninvasiveshotline/static
+MEDIA_ROOT: /vol/www/oregoninvasiveshotline/media
