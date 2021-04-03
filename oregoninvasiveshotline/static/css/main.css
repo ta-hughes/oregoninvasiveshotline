@@ -29,6 +29,13 @@ kbd {
     color:#000;
 }
 
+select[multiple] {
+    width: 7.615em;
+    height: 2.333em;
+    vertical-align: middle;
+}
+
+
 .nowrap {
     white-space:nowrap;
 }
