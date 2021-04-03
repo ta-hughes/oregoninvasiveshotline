@@ -61,6 +61,7 @@ services:
       - APP_CONFIG=app.docker.yml
       - APP_SERVICE=wsgi
       - EMCEE_CMD_ENV=docker
+      - GOOGLE_API_KEY=
     networks:
       - default
     ports:

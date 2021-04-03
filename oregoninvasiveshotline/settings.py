@@ -167,7 +167,7 @@ ICON_DIR = "generated_icons"
 ICON_TYPE = "png"
 
 GOOGLE_ANALYTICS_TRACKING_ID = None
-GOOGLE_API_KEY = ''
+GOOGLE_API_KEY = os.environ.get('GOOGLE_API_KEY', '')
 
 NOTIFICATIONS = {
     'from_email': "webmaster@localhost",

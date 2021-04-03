@@ -17,6 +17,5 @@ HAYSTACK_CONNECTIONS:
   default:
     URL: elasticsearch:9200
 CELERY_BROKER_URL: pyamqp://guest:guest@rabbitmq//
-GOOGLE_API_KEY: AIzaSyCmEwWyELBJacdGqvlzg1KhGxK2Ps0zTPk
 STATIC_ROOT: /static
 MEDIA_ROOT: /media
