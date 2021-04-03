@@ -1,12 +1,19 @@
-extends: emcee.backends.aws:commands.yml
-name: Oregon Invasives Hotline
-distribution: psu.oit.arc.oregoninvasiveshotline
-package: oregoninvasiveshotline
+extends: emcee:commands.yml
+project:
+  name: invasives
+  full_name: Oregon Invasives Hotline
+  namespace: invasives
+  namespace_s: invasives
 iam:
   user: invasives
   uid: 1101
+python:
+  package: oregoninvasiveshotline
+  distribution: psu.oit.arc.oregoninvasiveshotline
 remote:
-  host_name: invasives
+  path:
+    root: ${remote.deploy_root}/oregoninvasiveshotline
+services:
   nginx:
     alt_fqdns: oregoninvasiveshotline.org
     client_max_body_size: 8m
@@ -16,14 +23,18 @@ remote:
       connect-src *.sentry.io;'
 environment:
   dev:
-    python:
-      venv: venv
+    backend: emcee.backends.dev
   docker:
+    backend: emcee.backends.docker
     python:
       venv: /venv/venv-docker
   stage:
-    db:
-      host: oregoninvasiveshotline-stage.c6xuiyamhpsi.us-west-2.rds.amazonaws.com
+    backend: emcee.backends.aws
+    services:
+      db:
+        host: oregoninvasiveshotline-stage.c6xuiyamhpsi.us-west-2.rds.amazonaws.com
   prod:
-    db:
-      host: oregoninvasiveshotline-prod.c6xuiyamhpsi.us-west-2.rds.amazonaws.com
+    backend: emcee.backends.aws
+    services:
+      db:
+        host: oregoninvasiveshotline-prod.c6xuiyamhpsi.us-west-2.rds.amazonaws.com

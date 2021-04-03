@@ -52,11 +52,11 @@ def google_analytics(tracking_id=None, cookie_domain=None, tracker_name=None, fi
     what it can contain).
 
     """
-    tracking_id = tracking_id or get_setting('GOOGLE.analytics.tracking_id', None)
+    tracking_id = tracking_id or settings.GOOGLE_ANALYTICS_TRACKING_ID
     if tracking_id and not settings.DEBUG:
-        cookie_domain = cookie_domain or get_setting('GOOGLE.analytics.cookie_domain', 'auto')
-        tracker_name = tracker_name or get_setting('GOOGLE.analytics.tracker_name', None)
-        fields = fields or get_setting('GOOGLE.analytics.fields', None)
+        cookie_domain = cookie_domain or 'auto'
+        tracker_name = tracker_name or None
+        fields = fields or None
         value = """
             <script>
                 (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
