@@ -1,5 +1,5 @@
 -f https://packages.wdt.pdx.edu/dist
-psu.oit.arc.oregoninvasiveshotline==1.14.1
+psu.oit.arc.oregoninvasiveshotline==1.14.2
 amqp==5.0.2
 attrs==20.3.0
 awscli==1.18.199
