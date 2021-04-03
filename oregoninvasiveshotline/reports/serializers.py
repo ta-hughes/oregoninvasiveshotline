@@ -1,6 +1,7 @@
 from django.template.loader import render_to_string
 
 from haystack.models import SearchResult
+import pytz
 
 from rest_framework import serializers
 
@@ -13,7 +14,15 @@ class ReportSerializer(serializers.Serializer):
     category = serializers.CharField()
     content = serializers.SerializerMethodField()
     county = serializers.CharField()
-    created_on = serializers.DateTimeField(format='%b %d, %Y')
+
+    # encountered error with translation of datetime object in production
+    # the given value was an unaware datetime with values which do not
+    # exist in the local timezone. (2am is skipped when we go DST).
+    #
+    # so, ensure that this field understands the incoming data are in UTC.
+    created_on = serializers.DateTimeField(format='%b %d, %Y',
+                                           default_timezone=pytz.utc)
+
     edrr_status = serializers.CharField()
     icon_url = serializers.CharField(required=False)
     image_url = serializers.CharField(required=False)
