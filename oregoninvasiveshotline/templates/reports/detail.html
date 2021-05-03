@@ -256,9 +256,9 @@ Report #{{ report.pk }} - {{ report }}
         }
     </script>
 
-    <script src="{% static 'js/galleria.min.js' %}" async></script>
     <script>var category_id_to_species_id = {{ category_id_to_species_id|safe }};</script>
     <script src="{% static 'js/species_selector.js' %}" async></script>
+    <script src="{% static 'js/galleria.min.js' %}"></script>
     <script>
         $(document).ready(function() {
             if($('.galleria').length){
