@@ -143,7 +143,7 @@
             {% endif %}
           </script>
           {# Links backend trace_id to frontend context #}
-          {% if trace_id %}
+          {% if TRACE_ID %}
             <meta name="sentry-trace" content="{{ TRACE_ID }}" />
           {% endif %}
 

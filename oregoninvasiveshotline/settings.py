@@ -184,7 +184,7 @@ settings = load_app_configuration(app_config, globals())
 processors.set_secret_key(config, settings)
 processors.set_database_parameters(config, settings)
 processors.set_smtp_parameters(config, settings)
-processors.set_sentry_dsn(config, settings)
+processors.set_sentry_dsn(config, settings, traces_sample_rate=0.1)
 
 if config.env in ['stage', 'prod']:
     from emcee.backends.aws.ssm import ssm
