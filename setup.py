@@ -55,7 +55,7 @@ setup(
         'Django~=2.2.0',
         'psycopg2~=2.8.6',
         'elasticsearch>=2.4.0,<3.0.0',
-        'celery~=5.0.0',
+        'celery~=5.1.0',
         'djangorestframework~=3.12.4',
         'django-bootstrap-form==3.4',
         'django-haystack~=3.0.0',
