@@ -1,19 +1,19 @@
--f https://packages.wdt.pdx.edu/dist
-psu.oit.arc.oregoninvasiveshotline==1.14.6
+--find-links https://packages.wdt.pdx.edu/dist/
+psu.oit.arc.oregoninvasiveshotline==1.14.7
 amqp==5.0.6
-awscli==1.19.64
+awscli==1.19.90
 billiard==3.6.4.0
-boto3==1.17.64
-botocore==1.20.64
-celery==5.0.5
-certifi==2020.12.5
+boto3==1.17.90
+botocore==1.20.90
+celery==5.1.0
+certifi==2021.5.30
 chardet==4.0.0
 click==7.1.2
 click-didyoumean==0.0.3
 click-plugins==1.1.1
-click-repl==0.1.6
+click-repl==0.2.0
 colorama==0.4.3
-Django==2.2.20
+Django==2.2.24
 django-bootstrap-form==3.4
 django-haystack==3.0
 djangorestframework==3.12.4
@@ -21,7 +21,7 @@ docutils==0.15.2
 elasticsearch==2.4.1
 idna==2.10
 jmespath==0.10.0
-kombu==5.0.2
+kombu==5.1.0
 Markdown==3.3.4
 oyaml==1.0
 packaging==20.9
@@ -36,13 +36,13 @@ python-dateutil==2.8.1
 pytz==2021.1
 PyYAML==5.4.1
 requests==2.25.1
-requests-aws4auth==1.0.1
+requests-aws4auth==1.1.1
 rsa==4.7.2
 s3transfer==0.4.2
 sentry-sdk==1.1.0
-six==1.15.0
+six==1.16.0
 sqlparse==0.4.1
 terminaltables==3.1.0
-urllib3==1.26.4
+urllib3==1.26.5
 vine==5.0.0
 wcwidth==0.2.5

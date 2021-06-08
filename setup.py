@@ -47,6 +47,31 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     zip_safe=False,
+    install_requires=[
+        'pytz',
+        'Markdown~=3.3.4',
+        'Pillow~=8.2.0',
+
+        'Django~=2.2.0',
+        'psycopg2~=2.8.6',
+        'elasticsearch>=2.4.0,<3.0.0',
+        'celery~=5.1.0',
+        'djangorestframework~=3.12.4',
+        'django-bootstrap-form==3.4',
+        'django-haystack~=3.0.0',
+
+        'psu.oit.wdt.emcee[aws]~=1.1.0b3',
+        'sentry-sdk~=1.1.0',
+    ],
+    extras_require={
+        'dev': [
+            'bpython',
+            'coverage',
+            'flake8',
+            'model_mommy',
+            'docker-compose'
+        ]
+    },
     classifiers=[
         'Development Status :: 5 - Production/Stable'
         'Programming Language :: Python :: 3',
