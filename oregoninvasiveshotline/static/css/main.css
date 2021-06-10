@@ -56,8 +56,8 @@ select[multiple] {
     background-color:#fff;
 }
 
-#id_q {
-    width:400px;
+#search-input-group {
+    width: 100%;
 }
 
 #header {

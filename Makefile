@@ -38,9 +38,10 @@ client_dependencies:  ## Builds npm dependencies and copies built ('dist') artif
 	@cp node_modules/bootstrap/dist/js/*.min.js* oregoninvasiveshotline/static/js/
 	@cp node_modules/bootstrap/dist/css/*.min.css* oregoninvasiveshotline/static/css/
 	@cp node_modules/bootstrap/dist/fonts/* oregoninvasiveshotline/static/fonts/
-	@echo "Installing bootstrap-multiselect..."
-	@cp node_modules/bootstrap-multiselect/dist/js/*.min.js oregoninvasiveshotline/static/js/
-	@cp node_modules/bootstrap-multiselect/dist/css/*.css oregoninvasiveshotline/static/css/
+	@echo "Installing chosen-js..."
+	@cp node_modules/chosen-js/chosen.jquery.min.js oregoninvasiveshotline/static/js/
+	@cp node_modules/chosen-js/chosen.min.css oregoninvasiveshotline/static/css/
+	@cp node_modules/chosen-js/chosen-*.png oregoninvasiveshotline/static/css/
 	@echo "Installing galleria..."
 	@cp node_modules/galleria/dist/galleria.min.js* oregoninvasiveshotline/static/js/
 	@cp node_modules/galleria/dist/themes/classic/galleria.classic.css oregoninvasiveshotline/static/css/

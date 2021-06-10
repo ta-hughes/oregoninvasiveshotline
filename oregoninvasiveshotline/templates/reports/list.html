@@ -3,7 +3,8 @@
 {% block title %}Report List{% endblock %}
 {% block css %}
     {{ block.super }}
-    <link rel="stylesheet" href="{% static 'css/bootstrap-multiselect.css' %}">
+    <link rel="stylesheet" href="{% static 'css/chosen.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/chosen-bootstrap.css' %}">
 {% endblock %}
 {% block body_class %}report-page white{% endblock %}
 {% block main_class %}container-fluid{% endblock %}
@@ -14,12 +15,22 @@
     <div class="tab-content">
         <div class="tab-pane active" id="{{ tab }}">
             <form class="form-inline">
-                {{ form.non_field_errors }}
-                {% include 'reports/search/_fields.html' %}
-                {{ form.claimed_by|bootstrap }}
-                {{ form.is_public|bootstrap }}
-                {{ form.is_archived|bootstrap }}
-                {% include 'reports/search/_buttons.html' %}
+                <div class="row">
+                    <div class="col-lg-7">
+                      <span class="strong">Search</span><br/>
+                      {% include 'reports/search/_fields.html' %}
+                    </div>
+                    <div class="col-lg-5">
+                        <span class="strong">Filters</span><br/>
+                        {{ form.claimed_by|bootstrap }}
+                        {{ form.is_public|bootstrap }}
+                        {{ form.is_archived|bootstrap }}
+                        {% if form.source %}{{ form.source|bootstrap }}{% endif %}
+                    </div>
+                </div>
+                <div class="row">
+                  {{ form.non_field_errors }}
+                </div>
             </form>
             {% include 'reports/_list.html' %}
         </div>
