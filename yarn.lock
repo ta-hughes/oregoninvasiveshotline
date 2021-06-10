@@ -2,7 +2,7 @@
 # yarn lockfile v1
 
 
-"@sentry/browser@^6.4.1":
+"@sentry/browser@^6.5.1":
   version "6.5.1"
   resolved "https://registry.yarnpkg.com/@sentry/browser/-/browser-6.5.1.tgz#9a6ed5607b3b0f4e83f38720e3e202906f8c5bdb"
   integrity sha512-iVLCdEFwsoWAzE/hNknexPQjjDpMQV7mmaq9Z1P63bD6MfhwVTx4hG4pHn8HEvC38VvCVf1wv0v/LxtoODAYXg==
@@ -41,7 +41,7 @@
     "@sentry/types" "6.5.1"
     tslib "^1.9.3"
 
-"@sentry/tracing@^6.4.1":
+"@sentry/tracing@^6.5.1":
   version "6.5.1"
   resolved "https://registry.yarnpkg.com/@sentry/tracing/-/tracing-6.5.1.tgz#a5f3e497d4f1f319f36475df050e135cf65af750"
   integrity sha512-y1W/xFC2hAuKqSuuaovkElHY4pbli3XoXrreesg8PtO7ilX6ZbatOQbHsEsHQyoUv0F6aVA+MABOxWH2jt7tfw==
