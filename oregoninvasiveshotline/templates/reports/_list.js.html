@@ -52,49 +52,18 @@
         });
     }
 </script>
-<script type='text/javascript' src="{% static 'js/chosen.jquery.min.js' %}"></script>
+<script type='text/javascript' src="{% static 'js/select2.min.js' %}"></script>
 <script>
     $(document).ready(function () {
-        if ($().chosen){
-            $('select[name="categories"]').chosen({width: "100%"});
-            $('select[name="counties"]').chosen({width: "100%"});
-        }
-        //chosen viewport-aware hack
-        //Based on work by MattDease and slaneyrw
-        function checkViewport(chosen){
-            var viewport = $(window).height();
-            var h = chosen.offset().top-$(window).scrollTop();
-            var drop = $('.chosen-drop',chosen);
-            var total = h + drop.height() + drop.parent().height();
-            if(total>viewport){
-                drop.addClass('chosen-above');
-            } else {
-                drop.removeClass('chosen-above');
-            }
-        }
-        $(window).on('scroll', function(){
-            $('.chosen-container').each(function(){
-                checkViewport($(this));
+        if ($().select2){
+            $('select[name="categories"]').select2({
+                theme: "bootstrap",
+                width: "100%"
             });
-        });
-        $('.chosen-container').on('keydown', function(){
-            checkViewport($(this));
-        });
+            $('select[name="counties"]').select2({
+                theme: "bootstrap",
+                width: "100%"
+            });
+        }
     });
-/*
-    $(document).ready(function () {
-        // Initialize multiselects
-        var multiSelectMaxHeight = 400;
-        $('select[name="categories"]').multiselect({
-            maxHeight: multiSelectMaxHeight,
-            nonSelectedText: 'Categories',
-            numberDisplayed: 2
-        });
-        $('select[name="counties"]').multiselect({
-            maxHeight: multiSelectMaxHeight,
-            nonSelectedText: 'Counties',
-            numberDisplayed: 2
-        });
-    });
-*/
 </script>
