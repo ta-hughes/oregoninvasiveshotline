@@ -1,6 +1,22 @@
 {
   "name": "oregoninvasiveshotline",
   "private": true,
+  "version": "1.14.8",
+  "description": "Oregon Invasives Hotline",
+  "homepage": "https://oregoninvasiveshotline.org",
+  "repository": "https://github.com/PSU-OIT-ARC/oregoninvasiveshotline",
+  "bugs": "https://github.com/PSU-OIT-ARC/oregoninvasiveshotline/issues",
+  "author": "PSU Web Development Team <webteam@pdx.edu>",
+  "contributors": [
+    {
+      "name": "Brandon Conway",
+      "email": "conwayb@pdx.edu"
+    },
+    {
+      "name": "Thom Linton",
+      "email": "tlinton@pdx.edu"
+    }
+  ],
   "scripts": {},
   "dependencies": {
     "@sentry/browser": "~6.6.0",
