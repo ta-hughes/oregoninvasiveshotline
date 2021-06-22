@@ -67,3 +67,11 @@
         }
     });
 </script>
+<script>
+  $(document).ready(function () {
+    $('.modal-remote').on('click', function(e){
+      e.preventDefault();
+      $('#map-legend-dialog').modal('show').find('.modal-body').load($(this).attr('href'));
+    });
+  });
+</script>

@@ -20,7 +20,7 @@ services:
     csp_policy: 'default-src ''unsafe-inline'' data: oregoninvasiveshotline.org
       *.wdt.pdx.edu cdnjs.cloudflare.com http://*.tiles.osgeo.org khms0.googleapis.com
       khms1.googleapis.com maps.googleapis.com *.google-analytics.com *.gstatic.com
-      fonts.googleapis.com fonts.gstatic.com; connect-src *.sentry.io;'
+      fonts.googleapis.com fonts.gstatic.com; connect-src oregoninvasiveshotline.org *.sentry.io;'
 environment:
   dev:
     backend: emcee.backends.dev
