@@ -21,6 +21,26 @@
                       {% include 'reports/search/_fields.html' %}
                     </div>
                     <div class="col-lg-5">
+                        <div class="row">
+                          <div class="col-lg-6">
+                            <span class="strong">Counties</span>
+                            {{ form.counties }}
+                          </div>
+                          <div class="col-lg-6">
+                            <span class="strong">Categories</span>
+                            <a href="{% url 'reports-help' %}?modal=true"
+                               class="modal-remote help"
+                               title="Category legend">
+                              <span class="glyphicon glyphicon-question-sign"></span>
+                              <span class="sr-only">[?]</span>
+                            </a>
+                            {{ form.categories }}
+                          </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-offset-7 col-lg-5" style="padding-top: 1em;">
                         <span class="strong">Filters</span><br/>
                         {{ form.claimed_by|bootstrap }}
                         {{ form.is_public|bootstrap }}

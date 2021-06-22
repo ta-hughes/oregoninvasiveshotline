@@ -1,11 +1,15 @@
+
+
 <div class="row">
   <div class="col-md-12">
     <div style="margin: 1em 0em 0.5em 0em; border-top: 1px solid #eee;"></div>
   </div>
 </div>
+
 <div class="row">
     <div class="col-md-7">
         <br>
+
         {% if reports %}
             <div id="map-canvas" style="height: 550px;"></div>
         {% else %}
@@ -20,36 +24,13 @@
             </div>
         {% endif %}
         <br>
+
+        {% include 'reports/_legend_dialog.html' %}
     </div>
 
     <div class="col-md-5 {% if not reports %}hidden{% endif %}">
-        <p class="reports-table-sort comma-list">
 
-            <div class="pull-right">
-                <label for="id_q" class="control-label">
-                    <a href="help" class="help" target="_blank" title="Help">
-                        <span class="glyphicon glyphicon-question-sign"></span>
-                        <span class="sr-only">[?]</span>
-                        <span>Help</span>
-                    </a>
-                </label>
-            </div>
-
-            Sort By:
-            {% for subwidget in form.order_by %}
-                {# closing tag placement is intentional to remove trailing whitespace #}
-                <span class="comma">
-                    <a href="{% add_get order_by=subwidget.data.value %}"
-                       class="{% if subwidget.data.value == form.cleaned_data.order_by %}strong{% endif %}">
-                      {{ subwidget.choice_label }}</a></span>
-            {% endfor %}
-            {% if user.is_active %}
-                {% if subscription_url %}
-                    | <a href="{{ subscription_url }}">Subscribe to this search</a>
-                {% endif %}
-                | Export: <a href="{% add_get export='csv' %}">CSV</a>, <a href="{% add_get export='kml' %}">KML</a>
-            {% endif %}
-        </p>
+        {% include 'reports/search/_sort.html' %}
 
         <table class="table reports-table double-zebra">
             <tbody>
