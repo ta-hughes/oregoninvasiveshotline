@@ -10,11 +10,22 @@ venv ?= venv
 venv_python ?= python3
 venv_autoinstall ?= pip wheel
 bin = $(venv)/bin
+docker_compose = docker-compose
 
 
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
+test:  ## Runs tests in current environment
+	@$(bin)/python manage.py test --keepdb --failfast
+test_container:  ## Runs tests in docker environment
+	$(docker_compose) -f docker-compose.dev.yml run --user=invasives --rm -e EMCEE_APP_CONFIG=app.test.yml -e APP_SERVICE=test app
+shell:
+	$(bin)/python manage.py shell
+run:
+	$(bin)/python manage.py runserver
+celery:
+	$(bin)/celery -A oregoninvasiveshotline worker -l INFO
 
 update_pip_requirements:  ## Updates python dependencies
 	@if [ ! -d "./release-env" ]; then python3 -m venv ./release-env; fi
