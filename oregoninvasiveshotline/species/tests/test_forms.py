@@ -5,7 +5,6 @@ from oregoninvasiveshotline.users.models import User
 
 from ..forms import SpeciesSearchForm
 from ..models import Species
-from ..search_indexes import SpeciesIndex
 
 
 class SpeciesSearchFormTest(TestCase):
@@ -17,16 +16,14 @@ class SpeciesSearchFormTest(TestCase):
         self.user.set_password('foobar')
         self.user.save()
         self.client.login(username='foobar@example.com', password='foobar')
-        self.index = SpeciesIndex()
-        self.index.clear()
-
-    def tearDown(self):
-        self.index.clear()
 
     def test_get_initial_queryset(self):
         form = SpeciesSearchForm(data={'q': ''})
-        results = form.search()
-        self.assertEqual(len(results), SpeciesIndex.objects.all().models(Species).count())
+        results = form.search(Species.objects.all())
+        self.assertEqual(
+            results.count(),
+            Species.objects.count()
+        )
 
     def test_valid_form(self):
         form = SpeciesSearchForm({'q': 'other'})
@@ -35,18 +32,21 @@ class SpeciesSearchFormTest(TestCase):
     def test_form_with_empty_querystring_returns_everything(self):
         form = SpeciesSearchForm({'q': ''})
         self.assertTrue(form.is_valid())
-        results = form.search()
-        self.assertEqual(len(results), SpeciesIndex.objects.all().models(Species).count())
+        results = form.search(Species.objects.all())
+        self.assertEqual(
+            results.count(),
+            Species.objects.count()
+        )
 
     def test_search_returns_correct_object(self):
         # test object
-        name = 'other'
+        name = 'dog'
         make(Species, name=name)
         # set it all up
-        form = SpeciesSearchForm({'q': 'other'})
+        form = SpeciesSearchForm({'q': name})
         # make sure the form is valid
         self.assertTrue(form.is_valid())
-        results = form.search()[0]
+        results = form.search(Species.objects.all())[0]
         # Check to see that the id of the test object "other"
         # is in the list of ids returned by the search function
         self.assertEqual(results.name, name)
@@ -61,10 +61,6 @@ class SpeciesSearchFormTest(TestCase):
             'order_by': 'name',
             'order': 'descending',
         })
-        results = form.search()
-
-        species = list()
-        for s in results:
-            species.append(s.object)
+        species = form.search(Species.objects.all())
 
         self.assertTrue(species, Species.objects.all().order_by('-name'))

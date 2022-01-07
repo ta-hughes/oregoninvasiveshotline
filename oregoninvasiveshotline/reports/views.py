@@ -32,22 +32,23 @@ from .utils import icon_file_name
 
 
 def list_(request):
-    user = request.user
     params = request.GET
+    user = request.user
     report_ids = request.session.get('report_ids', [])
 
     form = ReportSearchForm(params, user=user, report_ids=report_ids)
-    results = form.search()
+    reports = Report.objects.all()
+    if form.is_valid():
+        reports = form.search(reports)
 
     # Handle the case where they want to export the reports
     # XXX: Why isn't this a separate view?
     export_format = params.get('export')
     if user.is_active and export_format in ('kml', 'csv'):
-        export_data = [report.object for report in results]
-        return _export(reports=export_data, format=export_format)
+        return _export(reports=reports, format=export_format)
 
     # Paginate the results
-    paginator = Paginator(results, settings.ITEMS_PER_PAGE)
+    paginator = Paginator(reports, settings.ITEMS_PER_PAGE)
     active_page = request.GET.get('page')
 
     try:

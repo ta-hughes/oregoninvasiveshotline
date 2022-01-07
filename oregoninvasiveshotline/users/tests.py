@@ -16,7 +16,6 @@ from oregoninvasiveshotline.notifications.models import UserNotificationQuery
 from oregoninvasiveshotline.reports.models import Invite, Report
 
 from .forms import PublicLoginForm, UserForm, UserSearchForm
-from .search_indexes import UserIndex
 from .utils import get_tab_counts
 from .models import User
 
@@ -251,13 +250,6 @@ class UserSearchFormTest(TestCase, UserMixin):
     """
     Tests for the User search form
     """
-    def setUp(self):
-        self.index = UserIndex()
-        self.index.clear()
-
-    def tearDown(self):
-        self.index.clear()
-
     def test_search_list_managers_only(self):
         user = self.create_user(
             username="foo@example.com",
@@ -277,12 +269,7 @@ class UserSearchFormTest(TestCase, UserMixin):
         )
 
         form = UserSearchForm({"q": "", "is_manager": True})
-        results = form.search()
-
-        # Create a user queryset since form.search() returns a SearchQuerySet
-        users = list()
-        for u in results:
-            users.append(u.object)
+        users = form.search(User.objects.all())
 
         self.assertNotIn(other_user, users)
         self.assertIn(admin, users)

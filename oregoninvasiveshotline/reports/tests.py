@@ -32,7 +32,6 @@ from oregoninvasiveshotline.users.models import User
 
 from .forms import InviteForm, ManagementForm, ReportForm, ReportSearchForm
 from .models import Invite, Report, receiver__generate_icon
-from .search_indexes import ReportIndex
 from .views import _export
 
 ORIGIN = Point(0, 0)
@@ -58,13 +57,10 @@ class ReportTest(SuppressPostSaveMixin, TestCase):
 
     def setUp(self):
         self.report = Report()
-        self.index = ReportIndex()
-        self.index.clear()
 
     def tearDown(self):
         if self.report.pk is not None:
             self.report.delete()
-        self.index.clear()
 
     def test_species(self):
         reported_species = make(Species)
@@ -201,13 +197,10 @@ class ReportSearchFormTest(TestCase, UserMixin):
             is_staff=True
         )
         self.report = Report()
-        self.index = ReportIndex()
-        self.index.clear()
 
     def tearDown(self):
         if self.report.pk is not None:
             self.report.delete()
-        self.index.clear()
 
     def test_filter_by_open_and_claimed_reports(self):
         # test combined filters
@@ -222,13 +215,7 @@ class ReportSearchFormTest(TestCase, UserMixin):
             "claimed_by": "me",
             "is_archived": "notarchived"
         }, user=self.user)
-        results = form.search()
-
-        # Since form.search() returns a SearchQuerySet, we create from that a
-        # list of reports so we can see if our desired reports are in the list.
-        reports = list()
-        for r in results:
-            reports.append(r.object)
+        reports = form.search(Report.objects.all())
 
         self.assertIn(claimed_open_report, reports)
         self.assertNotIn(claimed_archived_report, reports)
@@ -246,11 +233,7 @@ class ReportSearchFormTest(TestCase, UserMixin):
             "q": "",
             "claimed_by": "me",
         }, user=self.user)
-        results = form.search()
-
-        reports = list()
-        for r in results:
-            reports.append(r.object)
+        reports = form.search(Report.objects.all())
 
         self.assertIn(claimed_open_report, reports)
         self.assertIn(claimed_archived_report, reports)
@@ -265,11 +248,7 @@ class ReportSearchFormTest(TestCase, UserMixin):
             "q": "",
             "claimed_by": "nobody",
         }, user=self.user)
-        results = form.search()
-
-        reports = list()
-        for r in results:
-            reports.append(r.object)
+        reports = form.search(Report.objects.all())
 
         self.assertIn(unclaimed_report, reports)
         self.assertNotIn(claimed_report, reports)
@@ -283,11 +262,7 @@ class ReportSearchFormTest(TestCase, UserMixin):
             "q": "",
             "is_archived": "archived",
         }, user=self.user)
-        results = form.search()
-
-        reports = list()
-        for r in results:
-            reports.append(r.object)
+        reports = form.search(Report.objects.all())
 
         self.assertIn(archived_report, reports)
         self.assertNotIn(unarchived_report, reports)
@@ -301,11 +276,7 @@ class ReportSearchFormTest(TestCase, UserMixin):
             "q": "",
             "is_archived": "notarchived",
         }, user=self.user)
-        results = form.search()
-
-        reports = list()
-        for r in results:
-            reports.append(r.object)
+        reports = form.search(Report.objects.all())
 
         self.assertIn(unarchived_report, reports)
         self.assertNotIn(archived_report, reports)
@@ -319,11 +290,7 @@ class ReportSearchFormTest(TestCase, UserMixin):
             "q": "",
             "is_public": "public",
         }, user=self.user)
-        results = form.search()
-
-        reports = list()
-        for r in results:
-            reports.append(r.object)
+        reports = form.search(Report.objects.all())
 
         self.assertIn(pub_report, reports)
         self.assertNotIn(priv_report, reports)
@@ -337,11 +304,7 @@ class ReportSearchFormTest(TestCase, UserMixin):
             "q": "",
             "is_public": "notpublic",
         }, user=self.user)
-        results = form.search()
-
-        reports = list()
-        for r in results:
-            reports.append(r.object)
+        reports = form.search(Report.objects.all())
 
         self.assertIn(priv_report, reports)
         self.assertNotIn(pub_report, reports)
@@ -357,11 +320,7 @@ class ReportSearchFormTest(TestCase, UserMixin):
             "q": "",
             "source": "invited",
         }, user=self.user)
-        results = form.search()
-
-        reports = list()
-        for r in results:
-            reports.append(r.object)
+        reports = form.search(Report.objects.all())
 
         self.assertIn(invited_report, reports)
         self.assertNotIn(other_report, reports)
@@ -375,11 +334,7 @@ class ReportSearchFormTest(TestCase, UserMixin):
             "q": "",
             "source": "reported",
         }, user=self.user, report_ids=[my_report.pk])
-        results = form.search()
-
-        reports = list()
-        for r in results:
-            reports.append(r.object)
+        reports = form.search(Report.objects.all())
 
         self.assertIn(my_report, reports)
         self.assertNotIn(other_report, reports)
@@ -394,18 +349,14 @@ class ReportSearchFormTest(TestCase, UserMixin):
         form = ReportSearchForm({
             "order_by": "-created_on",
         }, user=self.user)
-        results = form.search()
-
-        reports = list()
-        for r in results:
-            reports.append(r.object)
+        reports = form.search(Report.objects.all())
 
         self.assertTrue(reports, Report.objects.all().order_by("-created_on"))
 
     def test_inactive_users_only_see_public_fields(self):
         self.user.is_active = False
         self.user.save()
-        form = ReportSearchForm(self, user=self.user)
+        form = ReportSearchForm({'q': ""}, user=self.user)
         form_fields = sorted(tuple(form.fields.keys()))
         public_fields = sorted(form.public_fields)
         self.assertEqual(form_fields, public_fields)
@@ -420,13 +371,7 @@ class ReportSearchFormTest(TestCase, UserMixin):
         # Since we aren't creating reports through a view, manually assign the
         # created report to report_ids (already covered in view tests)
         form = ReportSearchForm({"q": ""}, user=self.user, report_ids=[my_report.pk])
-        results = form.search()
-
-        # Since form.search() returns a SearchQuerySet, we create from that a
-        # list of reports so we can see if our desired reports are in the list.
-        reports = list()
-        for r in results:
-            reports.append(r.object)
+        reports = form.search(Report.objects.all())
 
         # Ensure that only pub_report and my_report are in the list of reports
         self.assertIn(pub_report, reports)
@@ -436,13 +381,6 @@ class ReportSearchFormTest(TestCase, UserMixin):
 
 
 class CreateViewTest(TestCase):
-
-    def setUp(self):
-        self.index = ReportIndex()
-        self.index.clear()
-
-    def tearDown(self):
-        self.index.clear()
 
     def test_get(self):
         c1 = make(Category)
@@ -498,11 +436,6 @@ class DetailViewTest(TestCase, UserMixin):
             username="inactive@example.com",
             is_active=False
         )
-        self.index = ReportIndex()
-        self.index.clear()
-
-    def tearDown(self):
-        self.index.clear()
 
     def test_anonymous_users_cant_view_non_public_reports_and_is_prompted_to_login(self):
         report = make(Report, is_public=False, point=ORIGIN)
@@ -686,13 +619,6 @@ class DetailViewTest(TestCase, UserMixin):
 
 class ReportFormTest(TransactionTestCase, UserMixin):
 
-    def setUp(self):
-        self.index = ReportIndex()
-        self.index.clear()
-
-    def tearDown(self):
-        self.index.clear()
-
     def test_reported_species_is_not_required(self):
         form = ReportForm({})
         self.assertFalse(form.is_valid())
@@ -806,13 +732,6 @@ class ReportFormTest(TransactionTestCase, UserMixin):
 
 class ManagementFormTest(SuppressPostSaveMixin, TestCase):
 
-    def setUp(self):
-        self.index = ReportIndex()
-        self.index.clear()
-
-    def tearDown(self):
-        self.index.clear()
-
     def test_species_and_category_initialized(self):
         species = make(Species)
         report = make(Report, reported_species=species, reported_category=species.category, point=ORIGIN)
@@ -900,13 +819,6 @@ class ManagementFormTest(SuppressPostSaveMixin, TestCase):
 
 class InviteFormTest(TestCase, UserMixin):
 
-    def setUp(self):
-        self.index = ReportIndex()
-        self.index.clear()
-
-    def tearDown(self):
-        self.index.clear()
-
     def test_clean_emails(self):
         # test a few valid emails
         form = InviteForm({
@@ -975,11 +887,6 @@ class ClaimViewTest(TestCase, UserMixin):
             password="other",
             is_active=True
         )
-        self.index = ReportIndex()
-        self.index.clear()
-
-    def tearDown(self):
-        self.index.clear()
 
     def test_claim_unclaimed_report_immediately_claims_it(self):
         report = make(Report, claimed_by=None, point=ORIGIN)
@@ -1008,11 +915,6 @@ class ReportListView(TestCase, UserMixin):
             is_active=True,
             is_staff=False
         )
-        self.index = ReportIndex()
-        self.index.clear()
-
-    def tearDown(self):
-        self.index.clear()
 
     def test_get(self):
         reports = make(Report, _quantity=3, point=ORIGIN)
@@ -1031,11 +933,6 @@ class UnclaimViewTest(TestCase, UserMixin):
             is_active=True,
             is_staff=False
         )
-        self.index = ReportIndex()
-        self.index.clear()
-
-    def tearDown(self):
-        self.index.clear()
 
     def test_only_person_who_claimed_report_can_unclaim_it(self):
         report = make(Report, point=ORIGIN)
@@ -1056,13 +953,6 @@ class UnclaimViewTest(TestCase, UserMixin):
 
 
 class ExportTest(TestCase):
-
-    def setUp(self):
-        self.index = ReportIndex()
-        self.index.clear()
-
-    def tearDown(self):
-        self.index.clear()
 
     def test_csv(self):
         reports = make(Report, _quantity=3, point=ORIGIN)
@@ -1088,11 +978,6 @@ class DeleteViewTest(TestCase, UserMixin):
             is_active=True,
             is_staff=False
         )
-        self.index = ReportIndex()
-        self.index.clear()
-
-    def tearDown(self):
-        self.index.clear()
 
     def test_permissions(self):
         report = make(Report, point=ORIGIN)
