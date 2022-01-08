@@ -1,4 +1,4 @@
-ENV: docker
+ENV: test
 DEBUG: true
 DEBUG_PROPOGATE_EXCEPTIONS: true
 TEMPLATE_DEBUG: true
@@ -9,6 +9,7 @@ NOTIFICATIONS:
 ALLOWED_HOSTS: ["*"]
 CSRF_COOKIE_HTTPONLY: false
 CSRF_COOKIE_SECURE: false
+CELERY_TASK_ALWAYS_EAGER: true
 SECRET_KEY: "NOT A SECRET"
 DATABASES:
   default:
@@ -16,3 +17,6 @@ DATABASES:
 CELERY_BROKER_URL: pyamqp://guest:guest@rabbitmq//
 STATIC_ROOT: /static
 MEDIA_ROOT: /media
+
+
+

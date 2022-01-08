@@ -56,6 +56,43 @@ STATIC_URL = '/static/'
 MEDIA_ROOT = os.path.join(FILE_ROOT, 'media')
 MEDIA_URL = '/media/'
 
+# Logging configuration
+FIRST_PARTY_LOGGER = {
+    'handlers': ['console'],
+    'propagate': False,
+    'level': 'INFO'
+}
+THIRD_PARTY_LOGGER = {
+    'handlers': ['console'],
+    'propagate': False,
+    'level': 'WARN'
+}
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'simple': {
+            'format': '%(asctime)s %(levelname)s [%(name)s] %(message)s'
+        }
+    },
+    'filters': {},
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple'
+        },
+    },
+    'loggers': {
+        'oregoninvasiveshotline': FIRST_PARTY_LOGGER,
+        'celery.task': FIRST_PARTY_LOGGER,
+        'django': THIRD_PARTY_LOGGER,
+        'elasticsearch': THIRD_PARTY_LOGGER,
+    },
+    'root': THIRD_PARTY_LOGGER
+}
+
 LOGIN_URL = "login"
 LOGIN_REDIRECT_URL = "users-home"
 
@@ -105,7 +142,6 @@ INSTALLED_APPS = [
 
     # Third party
     "bootstrapform",
-    "haystack",
     "rest_framework",
 
     # Django
@@ -138,14 +174,6 @@ DATABASES = {
         'USER': "invasives",
         'PASSWORD': "invasives",
         'ATOMIC_REQUESTS': True
-    }
-}
-
-HAYSTACK_SIGNAL_PROCESSOR = "haystack.signals.RealtimeSignalProcessor"
-HAYSTACK_CONNECTIONS = {
-    'default': {
-        'ENGINE': "haystack.backends.elasticsearch2_backend.Elasticsearch2SearchEngine",
-        'INDEX_NAME': "oregoninvasiveshotline"
     }
 }
 

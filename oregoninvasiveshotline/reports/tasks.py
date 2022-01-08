@@ -54,7 +54,8 @@ def notify_report_subscribers(report_id):
             query = user_notification_query.query
             form = ReportSearchForm(QueryDict(query), user=user)
 
-            if form.is_valid() and form.search().filter(id=report.pk).count():
+            if form.is_valid() and \
+               form.search(Report.objects.all()).filter(pk=report.pk).count():
                 next_url = reverse('reports-detail', args=[report.pk])
 
                 if user.is_active:

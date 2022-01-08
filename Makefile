@@ -10,11 +10,22 @@ venv ?= venv
 venv_python ?= python3
 venv_autoinstall ?= pip wheel
 bin = $(venv)/bin
+docker_compose = docker-compose
 
 
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
+test:  ## Runs tests in current environment
+	@$(bin)/python manage.py test --keepdb --failfast
+test_container:  ## Runs tests in docker environment
+	$(docker_compose) -f docker-compose.dev.yml run --user=invasives --rm -e EMCEE_APP_CONFIG=app.test.yml -e APP_SERVICE=test app
+shell:
+	$(bin)/python manage.py shell
+run:
+	$(bin)/python manage.py runserver
+celery:
+	$(bin)/celery -A oregoninvasiveshotline worker -l INFO
 
 update_pip_requirements:  ## Updates python dependencies
 	@if [ ! -d "./release-env" ]; then python3 -m venv ./release-env; fi
@@ -22,6 +33,8 @@ update_pip_requirements:  ## Updates python dependencies
 	@./release-env/bin/pip install --upgrade --upgrade-strategy=eager -r requirements.txt
 	@./release-env/bin/pip freeze > requirements-frozen.txt
 	@sed -i '1 i\--find-links https://packages.wdt.pdx.edu/dist/' requirements-frozen.txt
+	@cp ./requirements-frozen.txt ./docker/requirements-frozen.txt
+	@sed -i '/psu.oit.arc.oregoninvasiveshotline/d' ./docker/requirements-frozen.txt
 	@./release-env/bin/pip list --outdated
 
 client_dependencies:  ## Builds npm dependencies and copies built ('dist') artifacts into static collection directory.

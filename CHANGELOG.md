@@ -1,5 +1,9 @@
 # Changelog for Oregon Invasives Hotline
 
+# 1.15.0 - 2022-01-07
+
+- Replaces use of Elasticsearch with PostgreSQL full-text search.
+
 ## 1.14.1 - 2021-02-10
 
 - Drops support for Python<3.7.

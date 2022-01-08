@@ -10,7 +10,6 @@ about the species that was reported
 
 - PostgreSQL 11
 - PostGIS 2.5.x
-- Elasticsearch 2.x
 - Python 3.7
 - Django 2.2 LTS
 - Google Maps

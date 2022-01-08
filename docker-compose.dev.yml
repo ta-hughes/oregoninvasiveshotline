@@ -37,13 +37,6 @@ services:
     volumes:
       - ./volumes/postgres:/var/lib/postgresql
 
-  elasticsearch:
-    image: elasticsearch:2
-    networks:
-      - default
-    volumes:
-      - ./volumes/elasticsearch:/usr/share/elasticsearch/data
-
   rabbitmq:
     image: rabbitmq:3-alpine
     networks:
@@ -72,7 +65,6 @@ services:
       - ./volumes/media:/media
     depends_on:
       - postgres
-      - elasticsearch
       - rabbitmq
     secrets:
       - SecretKey
@@ -94,18 +86,3 @@ services:
     secrets:
       - SecretKey
       - DBPassword
-
-  test:
-    build: docker
-    environment:
-      - APP_CONFIG=app.test.yml
-      - APP_SERVICE=test
-      - EMCEE_CMD_ENV=test
-    networks:
-      - default
-    volumes:
-      - ./:/webapps/oregoninvasiveshotline
-    depends_on:
-      - postgres
-      - elasticsearch
-      - rabbitmq
