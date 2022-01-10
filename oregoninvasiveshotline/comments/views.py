@@ -1,8 +1,9 @@
+import functools
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404, redirect, render
-from django.utils.functional import curry
 
 from oregoninvasiveshotline.images.forms import get_image_formset
 from oregoninvasiveshotline.images.models import Image
@@ -24,7 +25,7 @@ def edit(request, comment_id):
     if not can_edit_comment(request.user, comment):
         raise PermissionDenied()
 
-    PartialCommentForm = curry(CommentForm, user=request.user, report=comment.report, instance=comment)
+    PartialCommentForm = functools.partial(CommentForm, user=request.user, report=comment.report, instance=comment)
     # this is dumb, but the only way to pass an extra arg to the subform
     ImageFormSet = get_image_formset(user=request.user)
 
