@@ -1,7 +1,8 @@
-import csv
+from collections import OrderedDict
+import functools
 import itertools
 import posixpath
-from collections import OrderedDict
+import csv
 
 from django.conf import settings
 from django.contrib import messages
@@ -13,7 +14,6 @@ from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
-from django.utils.functional import curry
 
 from oregoninvasiveshotline.utils.db import will_be_deleted_with
 from oregoninvasiveshotline.comments.forms import CommentForm
@@ -224,7 +224,7 @@ def detail(request, report_id):
     # process the comment form only if they are allowed to leave comments
     if can_create_comment(request.user, report):
         ImageFormSet = get_image_formset(user=request.user)
-        PartialCommentForm = curry(CommentForm, user=request.user, report=report)
+        PartialCommentForm = functools.partial(CommentForm, user=request.user, report=report)
 
         if request.POST and submit_flag == CommentForm.SUBMIT_FLAG:
             image_formset = ImageFormSet(request.POST, request.FILES, queryset=Image.objects.none())

@@ -111,7 +111,6 @@ TEMPLATES = [{
     'APP_DIRS': True,
     'OPTIONS': {
         'builtins': [
-            "django.contrib.staticfiles.templatetags.staticfiles",
             "bootstrapform.templatetags.bootstrap",
             "oregoninvasiveshotline.templatetags.arc"
         ],

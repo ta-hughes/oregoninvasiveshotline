@@ -1,6 +1,7 @@
+import functools
+
 from django import forms
 from django.forms.models import modelformset_factory
-from django.utils.functional import curry
 
 from oregoninvasiveshotline.utils.forms import BaseModelFormSet
 from oregoninvasiveshotline.reports.perms import can_adjust_visibility
@@ -58,5 +59,5 @@ def get_image_formset(*args, **kwargs):
     http://stackoverflow.com/a/813647/2733517
     """
     ImageFormSet = modelformset_factory(Image, form=ImageForm, formset=BaseImageFormSet, can_delete=True)
-    ImageFormSet.form = staticmethod(curry(ImageForm, *args, **kwargs))
+    ImageFormSet.form = staticmethod(functools.partial(ImageForm, *args, **kwargs))
     return ImageFormSet
