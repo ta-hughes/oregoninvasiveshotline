@@ -55,10 +55,7 @@ def provision(createdb=False):
 
     # Provision containers
     printer.header("Initializing container volumes...")
-    for service in ['elasticsearch/master',
-                    'elasticsearch/node-1',
-                    'elasticsearch/node-2',
-                    'rabbitmq']:
+    for service in ['rabbitmq']:
         services_path = os.path.join(config.remote.path.root, 'services', service)
         remote(('mkdir', '-p', services_path), run_as=config.iam.user)
 
