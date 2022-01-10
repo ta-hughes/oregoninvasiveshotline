@@ -80,7 +80,7 @@ services:
       - default
     volumes:
       - ./:/webapps/oregoninvasiveshotline
-      - ./volumes/media:/webapps/oregoninvasiveshotline/media
+      - ./volumes/media:/media
     depends_on:
       - app
     secrets:
