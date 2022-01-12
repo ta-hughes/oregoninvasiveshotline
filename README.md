@@ -55,11 +55,10 @@ prompted to supply these keys the first time you provision infrastructure for a 
 
 ### Regular maintenance tasks
 
-This project ships with a crontab which handles scheduling of several regular tasks:
+This project ships with a celerybeat configuration which handles scheduling of several regular tasks:
 
 - Clearing expired HTTP sessions
 - Generates icons for uploaded images
-- Rebuilds the Elasticsearch index
 
 ### Email notifications
 

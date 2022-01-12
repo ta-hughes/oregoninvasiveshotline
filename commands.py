@@ -18,14 +18,10 @@ from emcee.provision.base import provision_host, patch_host
 from emcee.provision.docker import provision_docker
 from emcee.provision.python import provision_python, provision_uwsgi
 from emcee.provision.gis import provision_gis
-from emcee.provision.services import (provision_nginx,
-                                      provision_supervisor)
+from emcee.provision.services import provision_nginx
 from emcee.provision.secrets import provision_secret, show_secret
 
-from emcee.deploy import deployer, django, docker
-from emcee.deploy.services import (push_crontab,
-                                   push_supervisor_config,
-                                   restart_supervisor)
+from emcee.deploy import deployer, docker
 
 from emcee.backends.aws.infrastructure.commands import *
 from emcee.backends.aws.provision.db import (provision_database,
@@ -35,7 +31,7 @@ from emcee.backends.aws.provision.db import (provision_database,
                                              update_database_client)
 from emcee.backends.aws.provision.volumes import (provision_volume,
                                                   provision_swapfile)
-from emcee.backends.aws.deploy import EC2RemoteProcessor
+from emcee.backends.aws.deploy import DockerRemoteProcessor
 
 configs.load(YAMLCommandConfiguration)
 
@@ -44,13 +40,9 @@ configs.load(YAMLCommandConfiguration)
 def provision(createdb=False):
     # Configure host properties and prepare host platforms
     provision_host()
-    provision_python()
-    provision_gis()
-    provision_uwsgi()
 
     # Provision application services
     provision_nginx()
-    provision_supervisor()
     provision_docker()
 
     # Provision containers
@@ -75,25 +67,23 @@ def provision(createdb=False):
     api_key = input('Enter the Google API key for this project/environment: ')
     provision_secret('GOOGLE_API_KEY', api_key)
 
-
-@command
-def provision_media_assets():
-    # Loading data model will cause instantiation of 'ClearableImageInput' which
-    # will require that the path '{remote.path.root}/media' exist and be readable
-    # by {service.user} so it's execution must be delayed until media assets have
-    # been imported.
-
     # Create media directory on EBS mount and link to app's media root
     printer.header("Creating media directory on EBS volume...")
     remote(('mkdir', '-p', '/vol/store/media'), sudo=True)
-    remote(('test', '-h', config.remote.path.media, '||',
-            'ln', '-sf', '/vol/store/media', config.remote.path.media), sudo=True)
 
-    # Set the correct permissions on generated assets
-    printer.header("Setting permissions on media assets...")
-    owner = '{}:{}'.format(config.iam.user, config.services.nginx.group)
-    remote(('chown', '-R', owner, '/vol/store/media'), sudo=True)
-    remote(('chown', '-R', owner, config.remote.path.media), sudo=True)
+    # Create link for log storage path
+    printer.header("Creating log path...")
+    remote(('test', '-h', config.remote.path.log_dir, '||',
+            'mkdir', '-p', config.remote.path.log_dir))
+
+    # Create link for static asset path
+    printer.header("Creating static asset path...")
+    remote(('test', '-h', config.remote.path.static, '||',
+            'mkdir', '-p', config.remote.path.static))
+
+    # Create link for stored media path
+    remote(('test', '-h', config.remote.path.media, '||',
+            'ln', '-sf', '/vol/store/media', config.remote.path.media))
 
     # Synchronize icons and assorted media assets:
     archive_path = 'media.tar'
@@ -107,41 +97,25 @@ def provision_media_assets():
                cd=config.remote.path.media
         )
 
-
-@command
-def provision_data_fixtures():
-    # Install static/managed record data
-    for fixture in ['counties.json', 'category.json', 'severity.json', 'pages.json']:
-        printer.info("Installing fixture '{}'...".format(fixture))
-        manage(('loaddata', fixture))
-
-    # Generate icons
-    manage(('generate_icons', '--no-input'))
+    # Set the correct permissions on generated assets
+    printer.header("Setting permissions on media assets...")
+    owner = '{}:{}'.format(config.iam.user, config.services.nginx.group)
+    remote(('chown', '-h', owner, config.remote.path.media), sudo=True)
+    remote(('chown', '-R', owner, '/vol/store/media'), sudo=True)
 
 
-@deployer('services')
-class InvasivesServicesDeployer(docker.Deployer):
-    remote_processor_cls = EC2RemoteProcessor
-
-
-class InvasivesRemoteProcessor(EC2RemoteProcessor):
-    def activate_application(self, archive_path):
-        super().activate_application(archive_path)
-
-        # Reload the supervisor process
-        restart_supervisor()
+class InvasivesLocalProcessor(docker.LocalProcessor):
+    include_app = True
 
 
 @deployer()
-class InvasivesDeployer(django.Deployer):
-    remote_processor_cls = InvasivesRemoteProcessor
+class InvasivesServicesDeployer(docker.Deployer):
+    local_processor_cls = InvasivesLocalProcessor
+    remote_processor_cls = DockerRemoteProcessor
     app_config_cls = YAMLAppConfiguration
 
-    def setup_application_hosting(self):
-        super().setup_application_hosting()
+    def get_base_images(self):
+        return ['python:3.7-bullseye']
 
-        # Install crontab
-        push_crontab(template='assets/crontab')
-
-        # Install supervisor worker configuration
-        push_supervisor_config(template='assets/supervisor.conf')
+    def get_bootstrap_container(self):
+        return 'app'

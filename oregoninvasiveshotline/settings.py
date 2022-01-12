@@ -5,6 +5,8 @@ from django.utils.translation import ugettext_lazy as _
 from django.conf import global_settings
 from django.urls import reverse_lazy
 
+from celery.schedules import crontab
+
 from emcee.runner.config import YAMLCommandConfiguration
 from emcee.runner import configs, config
 from emcee.app.config import YAMLAppConfiguration, load_app_configuration
@@ -184,6 +186,22 @@ REST_FRAMEWORK = {
         "rest_framework.renderers.JSONRenderer",
         "rest_framework.renderers.BrowsableAPIRenderer"
     ]
+}
+
+CELERY_BEAT_SCHEDULE = {
+    ## Clears expired sessions
+    ## 3:00 a.m.
+    "clear_expired_sessions": {
+        "task": "oregoninvasiveshotline.tasks.clear_expired_sessions",
+        "schedule": crontab(hour=3, minute=0),
+    },
+
+    ## Regenerates icons
+    ## 3:15 a.m.
+    "regenerate_icons": {
+        "task": "oregoninvasiveshotline.reports.tasks.generate_icons",
+        "schedule": crontab(hour=3, minute=15),
+    },
 }
 
 # Application-specific configuration
