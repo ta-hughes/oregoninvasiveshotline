@@ -16,8 +16,6 @@ from emcee.commands.django import manage
 
 from emcee.provision.base import provision_host, patch_host
 from emcee.provision.docker import provision_docker
-from emcee.provision.python import provision_python, provision_uwsgi
-from emcee.provision.gis import provision_gis
 from emcee.provision.services import provision_nginx
 from emcee.provision.secrets import provision_secret, show_secret
 
