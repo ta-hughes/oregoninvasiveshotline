@@ -54,6 +54,7 @@ setup(
         'Django~=3.2.0',
         'psycopg2~=2.9.0',
         'celery~=5.2.0',
+        'uwsgi~=2.0.0',
         'djangorestframework~=3.13.0',
         'django-bootstrap-form==3.4',
         'psu.oit.wdt.emcee[aws]~=1.1.0b3',

@@ -1,4 +1,5 @@
 from django.template.loader import render_to_string
+from django.core.management import call_command
 from django.core.mail import send_mail
 from django.urls import reverse
 from django.http import QueryDict
@@ -9,6 +10,11 @@ from oregoninvasiveshotline.notifications.models import UserNotificationQuery, N
 from oregoninvasiveshotline.reports.models import Report, Invite
 from oregoninvasiveshotline.users.models import User
 from oregoninvasiveshotline.celery import app
+
+
+@app.task
+def generate_icons():
+    call_command('generate_icons', noinput=True)
 
 
 @app.task

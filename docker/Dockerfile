@@ -11,19 +11,27 @@ RUN apt update -y && apt install -y \
 ARG APP_PYTHON=python3.7
 ARG APP_ENV=/opt/venv
 
+ARG APP_USER=invasives
+ARG APP_USER_ID
+ARG APP_GROUP=invasives
+ARG APP_GROUP_ID
+
 # Set environment variable defaults
 ENV PROJECT_NAME oregoninvasiveshotline
 ENV PROJECT_DIR /webapps/${PROJECT_NAME}
-ENV APP_USER invasives
-ENV APP_GROUP invasives
 
 # Export build arguments as environment variables
 ENV APP_PYTHON ${APP_PYTHON}
 ENV APP_ENV ${APP_ENV}
 
+ENV APP_USER ${APP_USER}
+ENV APP_USER_ID ${APP_USER_ID}
+ENV APP_GROUP ${APP_GROUP}
+ENV APP_GROUP_ID ${APP_GROUP_ID}
+
 # Configure user
-RUN groupadd "${APP_GROUP}" || echo "Group already exists"
-RUN useradd -m -g "${APP_GROUP}" "${APP_USER}" || echo "User already exists"
+RUN groupadd -g ${APP_GROUP_ID} "${APP_GROUP}" || echo "Group already exists"
+RUN useradd -m -g "${APP_GROUP}" -u ${APP_USER_ID} "${APP_USER}" || echo "User already exists"
 
 # Prepare virtual environment package requirements
 COPY --chown=${APP_USER}:${APP_GROUP} /requirements-frozen.txt /requirements-frozen.txt

@@ -36,9 +36,9 @@ services:
       file: docker-compose.base.yml
       service: app
     environment:
-      - APP_CONFIG=app.prod.yml
+      - APP_CONFIG=app.stage.yml
       - APP_NUM_PROCS=2
-      - EMCEE_CMD_ENV=prod
+      - EMCEE_CMD_ENV=stage
     networks:
       - services
     ports:
@@ -61,8 +61,8 @@ services:
       file: docker-compose.base.yml
       service: celery
     environment:
-      - APP_CONFIG=app.prod.yml
-      - EMCEE_CMD_ENV=prod
+      - APP_CONFIG=app.stage.yml
+      - EMCEE_CMD_ENV=stage
     networks:
       - services
     volumes:
@@ -81,10 +81,10 @@ services:
         - APP_GROUP_ID=1101
     extends:
       file: docker-compose.base.yml
-      service: celery
+      service: scheduler
     environment:
-      - APP_CONFIG=app.prod.yml
-      - EMCEE_CMD_ENV=prod
+      - APP_CONFIG=app.stage.yml
+      - EMCEE_CMD_ENV=stage
     networks:
       - services
     volumes:

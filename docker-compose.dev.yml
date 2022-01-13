@@ -38,7 +38,9 @@ services:
       - ./volumes/postgres:/var/lib/postgresql
 
   rabbitmq:
-    image: rabbitmq:3-alpine
+    extends:
+      file: docker-compose.base.yml
+      service: rabbitmq
     networks:
       - default
     volumes:
@@ -47,14 +49,16 @@ services:
     # on container delete/init cycle.
     #   Refs: https://github.com/docker-library/rabbitmq/issues/106#issuecomment-241882358
     hostname: 'rabbitmq-dev'
+    user: '1000'  # adjust uid with a local account uid
 
   app:
     build: docker
+    extends:
+      file: docker-compose.base.yml
+      service: app
     environment:
       - APP_CONFIG=app.docker.yml
-      - APP_SERVICE=wsgi
       - EMCEE_CMD_ENV=docker
-      - GOOGLE_API_KEY=
     networks:
       - default
     ports:
@@ -72,9 +76,11 @@ services:
 
   celery:
     build: docker
+    extends:
+      file: docker-compose.base.yml
+      service: celery
     environment:
       - APP_CONFIG=app.docker.yml
-      - APP_SERVICE=celery
       - EMCEE_CMD_ENV=docker
     networks:
       - default

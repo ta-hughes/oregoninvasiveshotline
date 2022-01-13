@@ -14,6 +14,9 @@ remote:
   path:
     root: ${remote.deploy_root}/oregoninvasiveshotline
 services:
+  db:
+    user: oregoninvasiveshotline_l
+    name: oregoninvasiveshotline
   nginx:
     alt_fqdns: oregoninvasiveshotline.org
     client_max_body_size: 8m

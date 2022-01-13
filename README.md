@@ -1,7 +1,5 @@
 # Oregon Invasive Species Hotline
 
-[![Build Status](https://travis-ci.org/PSU-OIT-ARC/oregoninvasiveshotline.svg?branch=master)](https://travis-ci.org/PSU-OIT-ARC/oregoninvasiveshotline)
-
 This project allows members of the public to submit reports of invasive species for experts to
 review. Experts can login and review the reports, comment on them, and make a final determination
 about the species that was reported
@@ -55,11 +53,10 @@ prompted to supply these keys the first time you provision infrastructure for a 
 
 ### Regular maintenance tasks
 
-This project ships with a crontab which handles scheduling of several regular tasks:
+This project ships with a celerybeat configuration which handles scheduling of several regular tasks:
 
 - Clearing expired HTTP sessions
 - Generates icons for uploaded images
-- Rebuilds the Elasticsearch index
 
 ### Email notifications
 
