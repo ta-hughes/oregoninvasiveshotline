@@ -1,6 +1,10 @@
 # Changelog for Oregon Invasives Hotline
 
-# 1.15.1 - 2022-01-
+# 1.15.2 - 2022-01-13
+
+- Migrates to fully container-based deployment.
+
+# 1.15.1 - 2022-01-10
 
 - Uses Django 3.2 LTS
 
