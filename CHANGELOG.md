@@ -1,14 +1,14 @@
 # Changelog for Oregon Invasives Hotline
 
-# 1.15.2 - 2022-01-13
+## 1.15.2 - 2022-01-13
 
 - Migrates to fully container-based deployment.
 
-# 1.15.1 - 2022-01-10
+## 1.15.1 - 2022-01-10
 
 - Uses Django 3.2 LTS
 
-# 1.15.0 - 2022-01-07
+## 1.15.0 - 2022-01-07
 
 - Replaces use of Elasticsearch with PostgreSQL full-text search.
 
