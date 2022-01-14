@@ -25,7 +25,7 @@ if [[ ${APP_SERVICE} == "wsgi" ]]; then
 elif [[ ${APP_SERVICE} == "celery" ]]; then
     exec ${APP_ENV}/bin/celery -A oregoninvasiveshotline worker -l INFO
 elif [[ ${APP_SERVICE} == "scheduler" ]]; then
-    exec ${APP_ENV}/bin/celery beat -l INFO
+    exec ${APP_ENV}/bin/celery -A oregoninvasiveshotline beat -l INFO
 elif [[ ${APP_SERVICE} == "test" ]]; then
     ${APP_ENV}/bin/pip install -r requirements-dev.txt
     exec ${APP_ENV}/bin/python manage.py test
