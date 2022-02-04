@@ -1,5 +1,6 @@
 FROM python:3.7-bullseye
 MAINTAINER Thom Linton <tlinton@pdx.edu>
+LABEL org.opencontainers.image.source https://github.com/PSU-OIT-ARC/oregoninvasiveshotline
 
 
 # Install project dependencies
@@ -12,13 +13,9 @@ ARG APP_PYTHON=python3.7
 ARG APP_ENV=/opt/venv
 
 ARG APP_USER=invasives
-ARG APP_USER_ID
+ARG APP_USER_ID=1000
 ARG APP_GROUP=invasives
-ARG APP_GROUP_ID
-
-# Set environment variable defaults
-ENV PROJECT_NAME oregoninvasiveshotline
-ENV PROJECT_DIR /webapps/${PROJECT_NAME}
+ARG APP_GROUP_ID=1000
 
 # Export build arguments as environment variables
 ENV APP_PYTHON ${APP_PYTHON}
@@ -48,6 +45,6 @@ RUN ${APP_ENV}/bin/pip install -r /requirements-frozen.txt
 RUN ${APP_ENV}/bin/pip cache purge
 
 # Install container entrypoint
-WORKDIR ${PROJECT_DIR}
+WORKDIR /app
 COPY ./entrypoint.sh /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]

@@ -2,14 +2,14 @@ ENV: prod
 DEBUG: false
 DEBUG_PROPOGATE_EXCEPTIONS: false
 TEMPLATE_DEBUG: false
-EMAIL_BACKEND: django.core.mail.backends.smtp.EmailBackend
-DEFAULT_FROM_EMAIL: no-reply@wdt.pdx.edu
-NOTIFICATIONS:
-  from_email: no-reply@oregoninvasiveshotline.org
 ALLOWED_HOSTS:
 - invasives.wdt.pdx.edu
 - oregoninvasiveshotline.org
 - www.oregoninvasiveshotline.org
+DEFAULT_FROM_EMAIL: no-reply@wdt.pdx.edu
+NOTIFICATIONS:
+  from_email: no-reply@oregoninvasiveshotline.org
+EMAIL_BACKEND: django.core.mail.backends.smtp.EmailBackend
 STATICFILES_STORAGE: django.contrib.staticfiles.storage.ManifestStaticFilesStorage
 DATABASES:
   default:
@@ -18,5 +18,5 @@ DATABASES:
     USER: oregoninvasiveshotline_l
     PASSWORD: ''
 CELERY_BROKER_URL: 'pyamqp://guest:guest@rabbitmq//'
-STATIC_ROOT: /static
-MEDIA_ROOT: /media
+STATIC_ROOT: /vol/www/oregoninvasiveshotline/static
+MEDIA_ROOT: /vol/store/media

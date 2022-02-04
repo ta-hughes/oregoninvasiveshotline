@@ -1,96 +1,11 @@
-version: '2.4'
+version: "3"
 
-
-networks:
-  services:
-    driver: bridge
 
 services:
-  rabbitmq:
-    extends:
-      file: docker-compose.base.yml
-      service: rabbitmq
-    container_name: oregoninvasiveshotline_rabbitmq_1
-    networks:
-      - services
-    ports:
-      - 127.0.0.1:5672:5672
-    volumes:
-      - /vol/www/oregoninvasiveshotline/services/rabbitmq:/var/lib/rabbitmq
-    # override hostname to prevent reinitialization of data
-    # on container delete/init cycle.
-    #   Refs: https://github.com/docker-library/rabbitmq/issues/106#issuecomment-241882358
-    hostname: 'rabbitmq'
-    user: "1101"
-    mem_limit: 256M
-    mem_swappiness: 1
-    restart: always
-
   app:
+    image: ghcr.io/psu-oit-arc/oregoninvasiveshotline/app-prod
     build:
       context: docker
       args:
         - APP_USER_ID=1101
         - APP_GROUP_ID=1101
-    extends:
-      file: docker-compose.base.yml
-      service: app
-    environment:
-      - APP_CONFIG=app.prod.yml
-      - APP_NUM_PROCS=2
-      - EMCEE_CMD_ENV=prod
-    networks:
-      - services
-    ports:
-      - 127.0.0.1:8000:8000
-    volumes:
-      - /vol/www/oregoninvasiveshotline/active:/webapps/oregoninvasiveshotline
-      - /vol/www/oregoninvasiveshotline/static:/static
-      - /vol/store/media:/media
-    depends_on:
-      - rabbitmq
-    user: '1101:1101'
-
-  celery:
-    build:
-      context: docker
-      args:
-        - APP_USER_ID=1101
-        - APP_GROUP_ID=1101
-    extends:
-      file: docker-compose.base.yml
-      service: celery
-    environment:
-      - APP_CONFIG=app.prod.yml
-      - EMCEE_CMD_ENV=prod
-    networks:
-      - services
-    volumes:
-      - /vol/www/oregoninvasiveshotline/active:/webapps/oregoninvasiveshotline
-      - /vol/www/oregoninvasiveshotline/static:/static
-      - /vol/store/media:/media
-    depends_on:
-      - rabbitmq
-    user: '1101:1101'
-
-  scheduler:
-    build:
-      context: docker
-      args:
-        - APP_USER_ID=1101
-        - APP_GROUP_ID=1101
-    extends:
-      file: docker-compose.base.yml
-      service: scheduler
-    environment:
-      - APP_CONFIG=app.prod.yml
-      - EMCEE_CMD_ENV=prod
-    networks:
-      - services
-    volumes:
-      - /vol/www/oregoninvasiveshotline/active:/webapps/oregoninvasiveshotline
-      - /vol/www/oregoninvasiveshotline/static:/static
-      - /vol/store/media:/media
-    depends_on:
-      - rabbitmq
-    user: '1101:1101'

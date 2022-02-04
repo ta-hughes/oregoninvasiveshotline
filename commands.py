@@ -5,20 +5,17 @@ from emcee.runner import command, configs, config
 from emcee.runner.commands import remote
 from emcee.runner.utils import confirm
 from emcee.app.config import YAMLAppConfiguration
-from emcee.app import app_configs
 from emcee import printer
 
 from emcee.commands.transport import warmup, shell
 from emcee.commands.files import copy_file
 from emcee.commands.deploy import deploy, list_builds
-from emcee.commands.python import virtualenv, install
-from emcee.commands.django import manage
 
 from emcee.provision.base import provision_host, patch_host
-from emcee.provision.docker import provision_docker
-from emcee.provision.services import provision_nginx
+from emcee.provision.docker import provision_docker, authenticate_ghcr
 from emcee.provision.secrets import provision_secret, show_secret
 
+from emcee.deploy.docker import publish_images
 from emcee.deploy import deployer, docker
 
 from emcee.backends.aws.infrastructure.commands import *
@@ -29,7 +26,6 @@ from emcee.backends.aws.provision.db import (provision_database,
                                              update_database_client)
 from emcee.backends.aws.provision.volumes import (provision_volume,
                                                   provision_swapfile)
-from emcee.backends.aws.deploy import DockerRemoteProcessor
 
 configs.load(YAMLCommandConfiguration)
 
@@ -40,10 +36,9 @@ def provision(createdb=False):
     provision_host()
 
     # Provision application services
-    provision_nginx()
     provision_docker()
 
-    # Provision containers
+    # Provision container volumes
     printer.header("Initializing container volumes...")
     for service in ['rabbitmq']:
         services_path = os.path.join(config.remote.path.root, 'services', service)
@@ -55,17 +50,7 @@ def provision(createdb=False):
     # Initialize swapfile on EBS volume
     provision_swapfile(1024, path='/vol/store')
 
-    # Provision database dependencies
-    update_database_client('postgresql', with_devel=True)
-    update_database_ca('postgresql')
-    if createdb:
-        provision_database(backend_options={'with_postgis': True})
-
-    # Provision application secrets
-    api_key = input('Enter the Google API key for this project/environment: ')
-    provision_secret('GOOGLE_API_KEY', api_key)
-
-    # Create media directory on EBS mount and link to app's media root
+    # Create persistent asset directory on EBS mount
     printer.header("Creating media directory on EBS volume...")
     remote(('mkdir', '-p', '/vol/store/media'), sudo=True)
 
@@ -101,19 +86,28 @@ def provision(createdb=False):
     remote(('chown', '-h', owner, config.remote.path.media), sudo=True)
     remote(('chown', '-R', owner, '/vol/store/media'), sudo=True)
 
+    # Provision database dependencies
+    update_database_client('postgresql', with_devel=True)
+    update_database_ca('postgresql')
+    if createdb:
+        provision_database(backend_options={'with_postgis': True})
+
+    # Provision application secrets
+    api_key = input('Enter the Google API key for this project/environment: ')
+    provision_secret('GOOGLE_API_KEY', api_key)
+
 
 class InvasivesLocalProcessor(docker.LocalProcessor):
     include_app = True
+    include_uwsgi = True
+    include_nginx = True
 
 
 @deployer()
-class InvasivesServicesDeployer(docker.Deployer):
+class InvasivesDeployer(docker.Deployer):
     local_processor_cls = InvasivesLocalProcessor
-    remote_processor_cls = DockerRemoteProcessor
+    remote_processor_cls = docker.RemoteProcessor
     app_config_cls = YAMLAppConfiguration
-
-    def get_base_images(self):
-        return ['python:3.7-bullseye']
 
     def get_bootstrap_container(self):
         return 'app'

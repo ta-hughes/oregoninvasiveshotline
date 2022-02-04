@@ -223,22 +223,48 @@ NOTIFICATIONS = {
     'invite_reviewer__subject': "Oregon Invasives Hotline - Submission Review Request"
 }
 
+# Configure 'INTERNAL_IPS' to support development environments
+if config.env in ['dev', 'docker']:
+    import ipaddress
 
+    class CIDRList(object):
+        addresses = [
+            "127.0.0.0/8",
+            "169.254.0.0/16",  # RFC 3927/6890
+            "10.0.0.0/8",  # RFC 1918
+            "172.0.0.0/12",
+            "192.168.0.0/16",
+            "fe80::/10",
+            "fd00::/8"  # RFC 7436
+        ]
+
+        def __init__(self):
+            """Create a new ip_network object for each address range provided."""
+            self.networks = [
+                ipaddress.ip_network(address)
+                for address in self.addresses
+            ]
+
+        def __contains__(self, address):
+            """Check if the given address is contained in any of the networks."""
+            return any([
+                ipaddress.ip_address(address) in network
+                for network in self.networks
+            ])
+
+    INTERNAL_IPS = CIDRList()
+
+# Configure application secrets
 settings = load_app_configuration(app_config, globals())
 processors.set_secret_key(config, settings)
 processors.set_database_parameters(config, settings)
-processors.set_smtp_parameters(config, settings)
 processors.set_sentry_dsn(config, settings, traces_sample_rate=0.1)
+processors.set_smtp_parameters(config, settings)
+
+# Configure Google Maps API key
+GOOGLE_API_KEY = processors.get_secret_value(config, 'GOOGLE_API_KEY')
 
 if config.env in ['stage', 'prod']:
-    from emcee.backends.aws.ssm import ssm
-
-    # Configure Google Maps API key
-    GOOGLE_ANALYTICS_TRACKING_ID = "UA-57378202-5"
-    GOOGLE_API_KEY = ssm('GOOGLE_API_KEY',
-                         ssm_prefix=config.infrastructure.ssm_prefix,
-                         region=config.infrastructure.region)
-
     # Instruct Django to inspect HTTP header to help determine
     # whether the request was made securely
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
@@ -247,3 +273,6 @@ if config.env in ['stage', 'prod']:
     PASSWORD_HASHERS = global_settings.PASSWORD_HASHERS + [
         'oregoninvasiveshotline.hashers.RubyPasswordHasher'
     ]
+
+    # Configure Google Analytics account
+    GOOGLE_ANALYTICS_TRACKING_ID = "UA-57378202-5"
