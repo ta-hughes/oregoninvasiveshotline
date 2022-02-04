@@ -90,7 +90,6 @@ LOGGING = {
         'oregoninvasiveshotline': FIRST_PARTY_LOGGER,
         'celery.task': FIRST_PARTY_LOGGER,
         'django': THIRD_PARTY_LOGGER,
-        'elasticsearch': THIRD_PARTY_LOGGER,
     },
     'root': THIRD_PARTY_LOGGER
 }
