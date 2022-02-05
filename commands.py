@@ -96,6 +96,10 @@ def provision(createdb=False):
     api_key = input('Enter the Google API key for this project/environment: ')
     provision_secret('GOOGLE_API_KEY', api_key)
 
+    # Authenticates appropriate user on remote host for
+    # interaction with the GitHub Container Registry.
+    authenticate_ghcr()
+
 
 class InvasivesLocalProcessor(docker.LocalProcessor):
     include_app = True
