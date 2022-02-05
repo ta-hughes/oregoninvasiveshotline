@@ -34,19 +34,25 @@ environment:
       db:
         host: oregoninvasiveshotline-stage.c6xuiyamhpsi.us-west-2.rds.amazonaws.com
       nginx:
+        media_root: /media
+        static_root: /static
         csp_policy: 'default-src ''unsafe-inline'' data: invasives.stage.wdt.pdx.edu
           *.stage.wdt.pdx.edu cdnjs.cloudflare.com http://*.tiles.osgeo.org
           khms0.googleapis.com khms1.googleapis.com maps.googleapis.com
           *.google-analytics.com *.gstatic.com fonts.googleapis.com fonts.gstatic.com;
           connect-src invasives.stage.wdt.pdx.edu *.sentry.io;'
+        access_control_origin: https://invasives.stage.wdt.pdx.edu
   prod:
     backend: emcee.backends.aws
     services:
       db:
         host: oregoninvasiveshotline-prod.c6xuiyamhpsi.us-west-2.rds.amazonaws.com
       nginx:
+        media_root: /media
+        static_root: /static
         alt_fqdns: oregoninvasiveshotline.org
         csp_policy: 'default-src ''unsafe-inline'' data: oregoninvasiveshotline.org
           *.wdt.pdx.edu cdnjs.cloudflare.com http://*.tiles.osgeo.org khms0.googleapis.com
           khms1.googleapis.com maps.googleapis.com *.google-analytics.com *.gstatic.com
           fonts.googleapis.com fonts.gstatic.com; connect-src oregoninvasiveshotline.org *.sentry.io;'
+        access_control_origin: https://oregoninvasiveshotline.org

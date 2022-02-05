@@ -98,7 +98,7 @@ services:
         mode: host
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - /vol/www/oregoninvasiveshotline/active/nginx/oregoninvasiveshotline.conf:/etc/nginx/conf.d/default.conf
+      - /vol/www/oregoninvasiveshotline/active/nginx/invasives.conf:/etc/nginx/conf.d/default.conf
       - /vol/www/oregoninvasiveshotline/active/nginx/host_defaults.conf:/etc/nginx/host_defaults.conf
       - /vol/www/oregoninvasiveshotline/active/nginx/server_defaults.conf:/etc/nginx/server_defaults.conf
       - /vol/www/oregoninvasiveshotline/static:/static
