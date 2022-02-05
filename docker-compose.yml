@@ -1,4 +1,4 @@
-version: "2.4"
+version: "3"
 
 secrets:
   SecretKey:
@@ -9,15 +9,6 @@ secrets:
 networks:
   default:
     driver: bridge
-    ipam:
-      config:
-        # this value is a soft-reservation of the subnet in
-        # order to reduce friction w.r.t. a given local docker
-        # environment and project configuration.
-        #
-        # if you encounter network definition conflicts, change
-        # the value below and revise its use in 'local.*.cfg'.
-        - subnet: 172.23.0.0/16
 
 services:
   postgres:
@@ -36,11 +27,10 @@ services:
       - ALLOW_IP_RANGE=172.23.0.0/16
     volumes:
       - ./volumes/postgres:/var/lib/postgresql
+    # user: '1000'  # adjust uid with a local account uid
 
   rabbitmq:
-    extends:
-      file: docker-compose.base.yml
-      service: rabbitmq
+    image: rabbitmq:3-alpine
     networks:
       - default
     volumes:
@@ -52,43 +42,47 @@ services:
     user: '1000'  # adjust uid with a local account uid
 
   app:
-    build: docker
-    extends:
-      file: docker-compose.base.yml
-      service: app
+    build:
+      context: docker
+      # args:
+      #   - APP_USER_ID=  # adjust uid/gid with local account
+      #   - APP_GROUP_ID=
     environment:
-      - APP_CONFIG=app.docker.yml
       - EMCEE_CMD_ENV=docker
+      - APP_SERVICE=wsgi
     networks:
       - default
     ports:
       - 8000:8000
     volumes:
-      - ./:/webapps/oregoninvasiveshotline
-      - ./volumes/static:/static
-      - ./volumes/media:/media
+      - /etc/localtime:/etc/localtime:ro
+      - ./:/app
     depends_on:
       - postgres
       - rabbitmq
     secrets:
       - SecretKey
       - DBPassword
+    user: '1000:1000'  # adjust uid with a local account uid
 
   celery:
-    build: docker
-    extends:
-      file: docker-compose.base.yml
-      service: celery
+    build:
+      context: docker
+      # args:
+      #   - APP_USER_ID=  # adjust uid/gid with local account
+      #   - APP_GROUP_ID=
     environment:
-      - APP_CONFIG=app.docker.yml
       - EMCEE_CMD_ENV=docker
+      - APP_SERVICE=celery
     networks:
       - default
     volumes:
-      - ./:/webapps/oregoninvasiveshotline
+      - /etc/localtime:/etc/localtime:ro
       - ./volumes/media:/media
+      - ./:/app
     depends_on:
       - app
     secrets:
       - SecretKey
       - DBPassword
+    user: '1000:1000'  # adjust uid with a local account uid

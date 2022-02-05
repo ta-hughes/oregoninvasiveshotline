@@ -2,12 +2,12 @@ ENV: stage
 DEBUG: false
 DEBUG_PROPOGATE_EXCEPTIONS: false
 TEMPLATE_DEBUG: false
-EMAIL_BACKEND: django.core.mail.backends.smtp.EmailBackend
+ALLOWED_HOSTS:
+- invasives.stage.wdt.pdx.edu
 DEFAULT_FROM_EMAIL: no-reply@stage.wdt.pdx.edu
 NOTIFICATIONS:
   from_email: no-reply@stage.wdt.pdx.edu
-ALLOWED_HOSTS:
-- invasives.stage.wdt.pdx.edu
+EMAIL_BACKEND: django.core.mail.backends.smtp.EmailBackend
 STATICFILES_STORAGE: django.contrib.staticfiles.storage.ManifestStaticFilesStorage
 DATABASES:
   default:
@@ -16,5 +16,5 @@ DATABASES:
     USER: oregoninvasiveshotline_l
     PASSWORD: ''
 CELERY_BROKER_URL: 'pyamqp://guest:guest@rabbitmq//'
-STATIC_ROOT: /static
-MEDIA_ROOT: /media
+STATIC_ROOT: /vol/www/oregoninvasiveshotline/static
+MEDIA_ROOT: /vol/store/media

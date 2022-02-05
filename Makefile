@@ -10,7 +10,6 @@ venv ?= venv
 venv_python ?= python3
 venv_autoinstall ?= pip wheel
 bin = $(venv)/bin
-docker_compose = docker-compose
 
 
 help:
@@ -19,7 +18,7 @@ help:
 test:  ## Runs tests in current environment
 	@$(bin)/python manage.py test --keepdb --failfast
 test_container:  ## Runs tests in docker environment
-	$(docker_compose) -f docker-compose.dev.yml run --user=invasives --rm -e EMCEE_APP_CONFIG=app.test.yml -e APP_SERVICE=test app
+	$(bin)/docker-compose run --user=invasives --rm -e EMCEE_CMD_ENV=docker -e EMCEE_APP_CONFIG=app.test.yml -e APP_SERVICE=test app
 shell:
 	$(bin)/python manage.py shell
 run:

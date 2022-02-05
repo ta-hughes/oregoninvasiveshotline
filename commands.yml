@@ -7,6 +7,7 @@ project:
 iam:
   user: invasives
   uid: 1101
+  gid: 1101
 python:
   package: oregoninvasiveshotline
   distribution: psu.oit.arc.oregoninvasiveshotline
@@ -18,26 +19,40 @@ services:
     user: oregoninvasiveshotline_l
     name: oregoninvasiveshotline
   nginx:
-    alt_fqdns: oregoninvasiveshotline.org
+    http_upstream: "app:8000"
     client_max_body_size: 8m
-    csp_policy: 'default-src ''unsafe-inline'' data: oregoninvasiveshotline.org
-      *.wdt.pdx.edu cdnjs.cloudflare.com http://*.tiles.osgeo.org khms0.googleapis.com
-      khms1.googleapis.com maps.googleapis.com *.google-analytics.com *.gstatic.com
-      fonts.googleapis.com fonts.gstatic.com; connect-src oregoninvasiveshotline.org *.sentry.io;'
+    access_control_origin: '*'
+    static_expires_time: 1d
 environment:
   dev:
     backend: emcee.backends.dev
   docker:
     backend: emcee.backends.docker
-    python:
-      venv: /opt/venv
   stage:
     backend: emcee.backends.aws
     services:
       db:
         host: oregoninvasiveshotline-stage.c6xuiyamhpsi.us-west-2.rds.amazonaws.com
+      nginx:
+        media_root: /media
+        static_root: /static
+        csp_policy: 'default-src ''unsafe-inline'' data: invasives.stage.wdt.pdx.edu
+          *.stage.wdt.pdx.edu cdnjs.cloudflare.com http://*.tiles.osgeo.org
+          khms0.googleapis.com khms1.googleapis.com maps.googleapis.com
+          *.google-analytics.com *.gstatic.com fonts.googleapis.com fonts.gstatic.com;
+          connect-src invasives.stage.wdt.pdx.edu *.sentry.io;'
+        access_control_origin: https://invasives.stage.wdt.pdx.edu
   prod:
     backend: emcee.backends.aws
     services:
       db:
         host: oregoninvasiveshotline-prod.c6xuiyamhpsi.us-west-2.rds.amazonaws.com
+      nginx:
+        media_root: /media
+        static_root: /static
+        alt_fqdns: oregoninvasiveshotline.org
+        csp_policy: 'default-src ''unsafe-inline'' data: oregoninvasiveshotline.org
+          *.wdt.pdx.edu cdnjs.cloudflare.com http://*.tiles.osgeo.org khms0.googleapis.com
+          khms1.googleapis.com maps.googleapis.com *.google-analytics.com *.gstatic.com
+          fonts.googleapis.com fonts.gstatic.com; connect-src oregoninvasiveshotline.org *.sentry.io;'
+        access_control_origin: https://oregoninvasiveshotline.org
