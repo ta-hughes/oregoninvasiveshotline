@@ -19,8 +19,8 @@
   ],
   "scripts": {},
   "dependencies": {
-    "@sentry/browser": "~6.16.0",
-    "@sentry/tracing": "~6.16.0",
+    "@sentry/browser": "~6.17.0",
+    "@sentry/tracing": "~6.17.0",
     "bootstrap": "~3.4.0",
     "galleria": "~1.6.0",
     "jquery": "~3.6.0",
