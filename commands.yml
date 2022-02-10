@@ -19,7 +19,7 @@ services:
     user: oregoninvasiveshotline_l
     name: oregoninvasiveshotline
   nginx:
-    http_upstream: "app:8000"
+    http_upstream: "http://app:8000"
     client_max_body_size: 8m
     access_control_origin: '*'
     static_expires_time: 1d
