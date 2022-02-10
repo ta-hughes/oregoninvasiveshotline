@@ -4,13 +4,16 @@ project:
   full_name: Oregon Invasives Hotline
   namespace: invasives
   namespace_s: invasives
+python:
+  package: oregoninvasiveshotline
+  distribution: psu.oit.arc.oregoninvasiveshotline
 iam:
   user: invasives
   uid: 1101
   gid: 1101
-python:
-  package: oregoninvasiveshotline
-  distribution: psu.oit.arc.oregoninvasiveshotline
+docker:
+  dockerfiles:
+    - docker/Dockerfile
 remote:
   path:
     root: ${remote.deploy_root}/oregoninvasiveshotline
