@@ -140,11 +140,9 @@ INSTALLED_APPS = [
     "oregoninvasiveshotline.species",
     "oregoninvasiveshotline.users",
 
-    # Third party
     "bootstrapform",
     "rest_framework",
 
-    # Django
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -187,6 +185,22 @@ REST_FRAMEWORK = {
     ]
 }
 
+CELERY_ENABLE_UTC = True
+CELERY_TIMEZONE = TIME_ZONE
+CELERY_TASK_ALWAYS_EAGER = False
+CELERY_TASK_EAGER_PROPAGATES = True
+CELERY_SEND_TASK_ERROR_EMAILS = True
+
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+## Celeryd settings
+CELERY_WORKER_CONCURRENCY = 1
+## Result store settings
+CELERY_TASK_IGNORE_RESULT = True
+## Celerybeat settings
+CELERY_BEAT_SCHEDULER = 'celery.beat.PersistentScheduler'
+
 CELERY_BEAT_SCHEDULE = {
     ## Clears expired sessions
     ## 3:00 a.m.
@@ -223,8 +237,22 @@ NOTIFICATIONS = {
     'invite_reviewer__subject': "Oregon Invasives Hotline - Submission Review Request"
 }
 
-# Configure 'INTERNAL_IPS' to support development environments
-if config.env in ['dev', 'docker']:
+# Configure environment-specific configuration
+if config.env in ['stage', 'prod']:
+    # Instruct Django to inspect HTTP header to help determine
+    # whether the request was made securely
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+    # Set compatibility password hasher
+    PASSWORD_HASHERS = global_settings.PASSWORD_HASHERS + [
+        'oregoninvasiveshotline.hashers.RubyPasswordHasher'
+    ]
+
+    # Configure Google Analytics account
+    GOOGLE_ANALYTICS_TRACKING_ID = "UA-57378202-5"
+
+elif config.env in ['dev', 'docker']:
+    # Configure 'INTERNAL_IPS' to support development environments
     import ipaddress
 
     class CIDRList(object):
@@ -232,7 +260,7 @@ if config.env in ['dev', 'docker']:
             "127.0.0.0/8",
             "169.254.0.0/16",  # RFC 3927/6890
             "10.0.0.0/8",  # RFC 1918
-            "172.0.0.0/12",
+            "172.16.0.0/12",
             "192.168.0.0/16",
             "fe80::/10",
             "fd00::/8"  # RFC 7436
@@ -263,16 +291,3 @@ processors.set_smtp_parameters(config, settings)
 
 # Configure Google Maps API key
 GOOGLE_API_KEY = processors.get_secret_value(config, 'GOOGLE_API_KEY')
-
-if config.env in ['stage', 'prod']:
-    # Instruct Django to inspect HTTP header to help determine
-    # whether the request was made securely
-    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-
-    # Set compatibility password hasher
-    PASSWORD_HASHERS = global_settings.PASSWORD_HASHERS + [
-        'oregoninvasiveshotline.hashers.RubyPasswordHasher'
-    ]
-
-    # Configure Google Analytics account
-    GOOGLE_ANALYTICS_TRACKING_ID = "UA-57378202-5"
