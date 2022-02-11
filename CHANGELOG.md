@@ -1,5 +1,9 @@
 # Changelog for Oregon Invasives Hotline
 
+## 1.15.5 - 2022-02-10
+
+- Uses Emcee 1.1.0b9 deployment tooling.
+
 ## 1.15.4 - 2022-02-04
 
 - Uses Emcee 1.1.0b8 deployment tooling.

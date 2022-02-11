@@ -3,7 +3,7 @@ version: "3"
 
 services:
   app:
-    image: ghcr.io/psu-oit-arc/oregoninvasiveshotline/app-stage
+    image: ghcr.io/psu-oit-arc/oregoninvasiveshotline/app-stage:1.15.5
     build:
       context: docker
       args:
