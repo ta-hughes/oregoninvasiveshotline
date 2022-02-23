@@ -14,7 +14,7 @@ from oregoninvasiveshotline.celery import app
 
 @app.task
 def generate_icons():
-    call_command('generate_icons', no_input=True)
+    call_command('generate_icons', interactive=False)
 
 
 @app.task
