@@ -7,7 +7,7 @@ networks:
 
 services:
   bootstrap:
-    image: ghcr.io/psu-oit-arc/oregoninvasiveshotline/app-stage:1.15.5
+    image: ghcr.io/psu-oit-arc/oregoninvasiveshotline/app-stage:1.15.6
     networks:
       - overlay
     volumes:
