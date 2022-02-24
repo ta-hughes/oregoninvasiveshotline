@@ -57,7 +57,7 @@ setup(
         'uwsgi~=2.0.0',
         'djangorestframework~=3.13.0',
         'django-bootstrap-form==3.4',
-        'psu.oit.wdt.emcee[aws]~=1.1.0b9',
+        'psu.oit.wdt.emcee[aws]~=1.1.0',
         'sentry-sdk~=1.5.0',
     ],
     extras_require={

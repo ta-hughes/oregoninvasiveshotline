@@ -14,7 +14,7 @@ class Command(BaseCommand):
         parser.add_argument(
             '--force', action='store_true', default=False, help='Force regeneration')
         parser.add_argument(
-            '--noinput', '--no-input', dest='interactive', action='store_false', default=True,
+            '--no-input', action='store_false', dest='interactive', default=True,
             help='Don\'t ask the user for confirmation')
         parser.add_argument(
             '--quiet', action='store_true', default=False, help='Squelch command output')
