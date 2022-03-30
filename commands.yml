@@ -2,8 +2,6 @@ extends: emcee:commands.yml
 project:
   name: invasives
   full_name: Oregon Invasives Hotline
-  namespace: invasives
-  namespace_s: invasives
 python:
   package: oregoninvasiveshotline
   distribution: psu.oit.arc.oregoninvasiveshotline
