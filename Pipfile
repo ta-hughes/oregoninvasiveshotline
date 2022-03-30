@@ -1,0 +1,31 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[[source]]
+url = "https://packages.wdt.pdx.edu/simple"
+verify_ssl = true
+name = "wdt"
+
+[packages]
+pytz = "*"
+markdown = "~=3.3.0"
+pillow = "~=9.0.0"
+django = "~=3.2.0"
+psycopg2 = "~=2.9.0"
+celery = "~=5.2.0"
+uwsgi = "~=2.0.0"
+djangorestframework = "~=3.13.0"
+django-bootstrap-form = "==3.4"
+"psu.oit.wdt.emcee" = {version = "~=1.1.0", extras = ["aws"], index = "wdt" }
+sentry-sdk = "~=1.5.0"
+
+[dev-packages]
+bpython = "*"
+coverage = "*"
+flake8 = "*"
+model_mommy = "*"
+
+[requires]
+python_version = "3.9"
