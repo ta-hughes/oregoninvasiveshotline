@@ -1,5 +1,11 @@
 # Changelog for Oregon Invasives Hotline
 
+## 1.15.7 - 2022-03-31
+
+- Uses Python 3.9
+- Updates CSP for Google Maps Platform.
+- Revises implementation and handling of requirements.
+
 ## 1.15.6 - 2022-02-23
 
 - Uses Emcee 1.1 deployment tooling.
