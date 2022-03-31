@@ -1,108 +1,99 @@
-version: "3.7"
-
+version: '3.7'
 networks:
   overlay:
     driver: overlay
     attachable: true
-
 services:
   rabbitmq:
     image: rabbitmq:3-alpine
     networks:
-      - overlay
+    - overlay
     volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - /etc/passwd:/etc/passwd:ro
-      - /vol/www/oregoninvasiveshotline/services/rabbitmq:/var/lib/rabbitmq
+    - /etc/localtime:/etc/localtime:ro
+    - /etc/passwd:/etc/passwd:ro
+    - /vol/www/oregoninvasiveshotline/services/rabbitmq:/var/lib/rabbitmq
     logging:
       driver: json-file
     deploy:
       endpoint_mode: dnsrr
       replicas: 1
-    # override hostname to prevent reinitialization of data data
-    # on container delete/init cycle.
-    #   Refs: https://github.com/docker-library/rabbitmq/issues/106#issuecomment-241882358
-    hostname: 'rabbitmq-stage'
-    user: '1101:1101'  # 'invasives:invasives'
-
+    hostname: rabbitmq-stage
+    user: 1101:1101
   app:
-    image: ghcr.io/psu-oit-arc/oregoninvasiveshotline/app-stage:1.15.6
+    image: ghcr.io/psu-oit-arc/oregoninvasiveshotline/app-stage:1.15.7
     networks:
-      - overlay
+    - overlay
     volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - /etc/passwd:/etc/passwd:ro
-      - /vol/store/media:/vol/store/media
-      - /vol/www/oregoninvasiveshotline:/vol/www/oregoninvasiveshotline
-      - ./uwsgi:/uwsgi
-      - ./:/app
+    - /etc/localtime:/etc/localtime:ro
+    - /etc/passwd:/etc/passwd:ro
+    - /vol/store/media:/vol/store/media
+    - /vol/www/oregoninvasiveshotline:/vol/www/oregoninvasiveshotline
+    - ./uwsgi:/uwsgi
+    - ./:/app
     environment:
-      - EMCEE_CMD_ENV=stage
-      - APP_SERVICE=wsgi
+    - EMCEE_CMD_ENV=stage
+    - APP_SERVICE=wsgi
     logging:
       driver: json-file
     deploy:
       replicas: 1
-    user: 'invasives:invasives'
-
+    user: invasives:invasives
   celery:
-    image: ghcr.io/psu-oit-arc/oregoninvasiveshotline/app-stage:1.15.6
+    image: ghcr.io/psu-oit-arc/oregoninvasiveshotline/app-stage:1.15.7
     networks:
-      - overlay
+    - overlay
     volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - /etc/passwd:/etc/passwd:ro
-      - /vol/store/media:/vol/store/media
-      - /vol/www/oregoninvasiveshotline:/vol/www/oregoninvasiveshotline
-      - ./:/app
+    - /etc/localtime:/etc/localtime:ro
+    - /etc/passwd:/etc/passwd:ro
+    - /vol/store/media:/vol/store/media
+    - /vol/www/oregoninvasiveshotline:/vol/www/oregoninvasiveshotline
+    - ./:/app
     environment:
-      - EMCEE_CMD_ENV=stage
-      - APP_SERVICE=celery
+    - EMCEE_CMD_ENV=stage
+    - APP_SERVICE=celery
     logging:
       driver: json-file
     deploy:
       replicas: 1
     depends_on:
-      - rabbitmq
-    user: 'invasives:invasives'
-
+    - rabbitmq
+    user: invasives:invasives
   scheduler:
-    image: ghcr.io/psu-oit-arc/oregoninvasiveshotline/app-stage:1.15.6
+    image: ghcr.io/psu-oit-arc/oregoninvasiveshotline/app-stage:1.15.7
     networks:
-      - overlay
+    - overlay
     volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - /etc/passwd:/etc/passwd:ro
-      - /vol/store/media:/vol/store/media
-      - /vol/www/oregoninvasiveshotline:/vol/www/oregoninvasiveshotline
-      - ./:/app
+    - /etc/localtime:/etc/localtime:ro
+    - /etc/passwd:/etc/passwd:ro
+    - /vol/store/media:/vol/store/media
+    - /vol/www/oregoninvasiveshotline:/vol/www/oregoninvasiveshotline
+    - ./:/app
     environment:
-      - EMCEE_CMD_ENV=stage
-      - APP_SERVICE=scheduler
+    - EMCEE_CMD_ENV=stage
+    - APP_SERVICE=scheduler
     logging:
       driver: json-file
     deploy:
       replicas: 1
     depends_on:
-      - rabbitmq
-    user: 'invasives:invasives'
-
+    - rabbitmq
+    user: invasives:invasives
   proxy:
     image: nginx:stable
     networks:
-      - overlay
+    - overlay
     ports:
-      - target: 80
-        published: 80
-        protocol: tcp
-        mode: host
+    - target: 80
+      published: 80
+      protocol: tcp
+      mode: host
     volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - /vol/store/media:/media
-      - /vol/www/oregoninvasiveshotline/static:/static
-      - ./nginx/oregoninvasiveshotline.conf:/etc/nginx/conf.d/default.conf
-      - ./nginx/host_defaults.conf:/etc/nginx/host_defaults.conf
-      - ./nginx/server_defaults.conf:/etc/nginx/server_defaults.conf
+    - /etc/localtime:/etc/localtime:ro
+    - /vol/store/media:/media
+    - /vol/www/oregoninvasiveshotline/static:/static
+    - ./nginx/oregoninvasiveshotline.conf:/etc/nginx/conf.d/default.conf
+    - ./nginx/host_defaults.conf:/etc/nginx/host_defaults.conf
+    - ./nginx/server_defaults.conf:/etc/nginx/server_defaults.conf
     logging:
       driver: json-file
     deploy:
@@ -111,4 +102,4 @@ services:
         limits:
           memory: 128M
     depends_on:
-      - app
+    - app
