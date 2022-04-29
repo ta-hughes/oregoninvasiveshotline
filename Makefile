@@ -36,6 +36,7 @@ update_pip_requirements:  ## Updates python dependencies
 
 client_dependencies:  ## Builds npm dependencies and copies built ('dist') artifacts into static collection directory.
 	@yarn install
+	@yarn upgrade
 	@echo "Installing sentry/browser + sentry/tracing..."
 	@cp node_modules/@sentry/tracing/build/bundle.tracing.min.js oregoninvasiveshotline/static/js/sentry.browser.min.js
 	@echo "Installing js-cookie..."
