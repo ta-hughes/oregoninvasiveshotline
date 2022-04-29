@@ -1,5 +1,9 @@
 # Changelog for Oregon Invasives Hotline
 
+## 1.15.8 - 2022-04-29
+
+- Bugfix/maintenance release.
+
 ## 1.15.7 - 2022-03-31
 
 - Uses Python 3.9

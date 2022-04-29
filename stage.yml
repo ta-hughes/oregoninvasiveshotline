@@ -20,7 +20,7 @@ services:
     hostname: rabbitmq-stage
     user: 1101:1101
   app:
-    image: ghcr.io/psu-oit-arc/oregoninvasiveshotline/app-stage:1.15.7
+    image: ghcr.io/psu-oit-arc/oregoninvasiveshotline/app-stage:1.15.8
     networks:
     - overlay
     volumes:
@@ -39,7 +39,7 @@ services:
       replicas: 1
     user: invasives:invasives
   celery:
-    image: ghcr.io/psu-oit-arc/oregoninvasiveshotline/app-stage:1.15.7
+    image: ghcr.io/psu-oit-arc/oregoninvasiveshotline/app-stage:1.15.8
     networks:
     - overlay
     volumes:
@@ -59,7 +59,7 @@ services:
     - rabbitmq
     user: invasives:invasives
   scheduler:
-    image: ghcr.io/psu-oit-arc/oregoninvasiveshotline/app-stage:1.15.7
+    image: ghcr.io/psu-oit-arc/oregoninvasiveshotline/app-stage:1.15.8
     networks:
     - overlay
     volumes:
