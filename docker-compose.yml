@@ -5,6 +5,8 @@ secrets:
     file: docker/secret_key.txt
   DBPassword:
     file: docker/db_password.txt
+  GOOGLE_API_KEY:
+    file: docker/google_api_key.txt
 
 networks:
   default:
@@ -63,6 +65,7 @@ services:
     secrets:
       - SecretKey
       - DBPassword
+      - GOOGLE_API_KEY
     user: '1000:1000'  # adjust uid with a local account uid
 
   celery:
