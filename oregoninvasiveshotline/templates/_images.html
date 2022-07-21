@@ -1,6 +1,7 @@
 <fieldset id="images">
     <legend>Images</legend>
     <p><em>To add photos, click the button below and browse for the image on your computer. You can add multiple pictures by clicking the "Add Another Image" link.</em></p>
+    <p class="alert alert-warning">The total size of your images when uploading must not exceed 16MB.</p>
     <div class="formset">
         {{ formset.management_form }}
         <!-- the first form yielded is the empty form. We use that as a template for the JS, so make it hidden -->

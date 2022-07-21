@@ -2,9 +2,7 @@
 import os.path
 
 from django.utils.translation import ugettext_lazy as _
-from django.conf import global_settings
 from django.urls import reverse_lazy
-
 from celery.schedules import crontab
 
 from emcee.runner.config import YAMLCommandConfiguration
@@ -104,6 +102,13 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"}
+]
+PASSWORD_HASHERS = [
+    'django.contrib.auth.hashers.Argon2PasswordHasher',
+    'django.contrib.auth.hashers.PBKDF2PasswordHasher',
+    'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher',
+    'django.contrib.auth.hashers.BCryptSHA256PasswordHasher',
+    'django.contrib.auth.hashers.BCryptPasswordHasher',
 ]
 
 TEMPLATES = [{
@@ -225,7 +230,7 @@ ICON_DIR = "generated_icons"
 ICON_TYPE = "png"
 
 GOOGLE_ANALYTICS_TRACKING_ID = None
-GOOGLE_API_KEY = os.environ.get('GOOGLE_API_KEY', '')
+GOOGLE_API_KEY = None
 
 NOTIFICATIONS = {
     'from_email': "webmaster@localhost",
@@ -244,9 +249,9 @@ if config.env in ['stage', 'prod']:
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
     # Set compatibility password hasher
-    PASSWORD_HASHERS = global_settings.PASSWORD_HASHERS + [
+    PASSWORD_HASHERS.append(
         'oregoninvasiveshotline.hashers.RubyPasswordHasher'
-    ]
+    )
 
     # Configure Google Analytics account
     GOOGLE_ANALYTICS_TRACKING_ID = "UA-57378202-5"

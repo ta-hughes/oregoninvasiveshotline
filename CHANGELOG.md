@@ -1,5 +1,9 @@
 # Changelog for Oregon Invasives Hotline
 
+## 1.15.9 - 2022-07-22
+
+- Bugfix/maintenance release.
+
 ## 1.15.8 - 2022-04-29
 
 - Bugfix/maintenance release.

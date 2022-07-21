@@ -8,7 +8,7 @@ about the species that was reported
 
 - PostgreSQL 11
 - PostGIS 2.5.x
-- Python 3.7
+- Python 3.9
 - Django 3.2 LTS
 - Google Maps
 
