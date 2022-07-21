@@ -2,9 +2,7 @@
 import os.path
 
 from django.utils.translation import ugettext_lazy as _
-from django.conf import global_settings
 from django.urls import reverse_lazy
-
 from celery.schedules import crontab
 
 from emcee.runner.config import YAMLCommandConfiguration
@@ -251,9 +249,9 @@ if config.env in ['stage', 'prod']:
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
     # Set compatibility password hasher
-    PASSWORD_HASHERS = global_settings.PASSWORD_HASHERS + [
+    PASSWORD_HASHERS.append(
         'oregoninvasiveshotline.hashers.RubyPasswordHasher'
-    ]
+    )
 
     # Configure Google Analytics account
     GOOGLE_ANALYTICS_TRACKING_ID = "UA-57378202-5"
