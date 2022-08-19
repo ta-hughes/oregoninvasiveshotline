@@ -5,7 +5,7 @@ networks:
     attachable: true
 services:
   bootstrap:
-    image: ghcr.io/psu-oit-arc/oregoninvasiveshotline/app-stage:1.15.9
+    image: ghcr.io/psu-oit-arc/oregoninvasiveshotline/app-stage:1.15.10
     networks:
     - overlay
     volumes:
