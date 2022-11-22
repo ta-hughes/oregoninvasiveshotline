@@ -15,6 +15,7 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
 
+from oregoninvasiveshotline.utils.urls import safe_redirect
 from oregoninvasiveshotline.utils.db import will_be_deleted_with
 from oregoninvasiveshotline.comments.forms import CommentForm
 from oregoninvasiveshotline.comments.models import Comment
@@ -238,7 +239,7 @@ def detail(request, report_id):
                         report.claimed_by = request.user
                         report.save()
                         messages.success(request, "Report claimed!")
-                return redirect(request.get_full_path())
+                return safe_redirect(request, request.get_full_path())
 
         else:
             comment_form = PartialCommentForm()
@@ -252,7 +253,7 @@ def detail(request, report_id):
             if management_form.is_valid():
                 management_form.save()
                 messages.success(request, "Updated!")
-                return redirect(request.get_full_path())
+                return safe_redirect(request, request.get_full_path())
         else:
             management_form = ManagementForm(instance=report)
 
@@ -265,7 +266,7 @@ def detail(request, report_id):
                 if invite_report.already_invited:
                     message += " (%d already invited)" % len(invite_report.already_invited)
                 messages.success(request, message)
-                return redirect(request.get_full_path())
+                return safe_redirect(request, request.get_full_path())
         else:
             invite_form = InviteForm()
 
