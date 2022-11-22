@@ -3,6 +3,8 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.flatpages.models import FlatPage
 from django.shortcuts import get_object_or_404, redirect, render
 
+from oregoninvasiveshotline.utils.urls import safe_redirect
+
 from . import HIDDEN_PAGE_PREFIX
 from .forms import FlatterPageForm
 
@@ -27,7 +29,11 @@ def edit(request, page_id=None):
         if form.is_valid():
             form.save()
             messages.success(request, "Saved")
-            return redirect(request.GET.get("next", 'pages-list'))
+            return safe_redirect(
+                request,
+                request.GET.get("next"),
+                fallback='pages-list'
+            )
     else:
         form = FlatterPageForm(instance=page)
 

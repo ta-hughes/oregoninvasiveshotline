@@ -1,3 +1,4 @@
+import logging
 import random
 
 from django.shortcuts import get_object_or_404, redirect, render
@@ -11,6 +12,7 @@ from django.contrib import messages
 from django.db import transaction
 from django.conf import settings
 
+from oregoninvasiveshotline.utils.urls import safe_redirect
 from oregoninvasiveshotline.utils.db import will_be_deleted_with
 from oregoninvasiveshotline.reports.models import Invite, Report
 
@@ -20,6 +22,8 @@ from .perms import can_list_users, permissions
 from .forms import PublicLoginForm, UserForm, UserSearchForm
 from .tasks import notify_public_user_for_login_link
 from .models import User
+
+logger = logging.getLogger(__name__)
 
 
 class LoginView(DjangoLoginView):
@@ -49,35 +53,41 @@ class LoginView(DjangoLoginView):
                     messages.success(self.request, msg)
                     transaction.on_commit(lambda: notify_public_user_for_login_link.delay(user.pk))
 
-            return redirect(self.request.get_full_path())
+            next_url = self.request.get_full_path()
+            return safe_redirect(self.request, next_url)
 
         return super().form_valid(form)
 
 
 def authenticate(request):
-    params = request.GET
-    signature = params.get('sig', '')
+    signature = request.GET.get('sig', '')
+    user = None
 
     try:
         user = User.from_signature(signature)
     except BadSignature:
-        messages.error(request, 'Unable to login with that URL')
-        return redirect('home')
+        msg = "Bad signature '{}' detected during authentication"
+        logger.warning(msg.format(signature))
+    finally:
+        # Signature has expired
+        if user is None:
+            messages.error(request, 'Unable to login with that URL')
+            return redirect('home')
 
-    if user is None:
-        # Signature expired
-        messages.error(request, 'That login URL has expired')
-        return redirect('login')
-
+    # Create authenticated session for active and/or invited users
     if user.is_active or Invite.objects.filter(user=user).exists():
         django_login(request, user)
 
     # Add user's reports to their session
-    report_ids = Report.objects.filter(created_by=user).values_list('pk', flat=True)
-    request.session['report_ids'] = list(report_ids)
+    request.session['report_ids'] = list(
+        Report.objects.filter(created_by=user).values_list('pk', flat=True)
+    )
 
-    next_url = params.get('next') or settings.LOGIN_REDIRECT_URL
-    return redirect(next_url)
+    return safe_redirect(
+        request,
+        request.GET.get('next'),
+        settings.LOGIN_REDIRECT_URL
+    )
 
 
 def avatar(request, user_id, colors=AVATAR_COLORS):
