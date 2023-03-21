@@ -1,5 +1,11 @@
 # Changelog for Oregon Invasives Hotline
 
+## 1.15.12 - 2023-03-20
+
+- Maintenance release.
+- Revises docker workflow, image construction.
+- Uses Emcee 1.2.
+
 ## 1.15.11 - 2022-11-22
 
 - Bugfix/maintenance release.
