@@ -28,27 +28,27 @@ services:
       - POSTGRES_DBNAME=invasives
       - ALLOW_IP_RANGE=172.23.0.0/16
     volumes:
-      - ./volumes/postgres:/var/lib/postgresql
-    # user: '1000'  # adjust uid with a local account uid
+      - ${VOLUME_PATH}/postgres:/var/lib/postgresql
 
   rabbitmq:
     image: rabbitmq:3-alpine
     networks:
       - default
     volumes:
-      - ./volumes/rabbitmq:/var/lib/rabbitmq
+      - ${VOLUME_PATH}/rabbitmq:/var/lib/rabbitmq
     # override hostname to prevent reinitialization of data
     # on container delete/init cycle.
     #   Refs: https://github.com/docker-library/rabbitmq/issues/106#issuecomment-241882358
     hostname: 'rabbitmq-dev'
-    user: '1000'  # adjust uid with a local account uid
+    user: '${USER_ID}'
 
   app:
     build:
-      context: docker
-      # args:
-      #   - APP_USER_ID=  # adjust uid/gid with local account
-      #   - APP_GROUP_ID=
+      context: .
+      dockerfile: docker/Dockerfile
+      args:
+        - APP_USER_ID=${USER_ID}
+        - APP_GROUP_ID=${GROUP_ID}
     environment:
       - EMCEE_CMD_ENV=docker
       - APP_SERVICE=wsgi
@@ -58,6 +58,8 @@ services:
       - 8000:8000
     volumes:
       - /etc/localtime:/etc/localtime:ro
+      - ${VOLUME_PATH}/media:/media
+      - ${VOLUME_PATH}/static:/static
       - ./:/app
     depends_on:
       - postgres
@@ -66,14 +68,15 @@ services:
       - SecretKey
       - DBPassword
       - GOOGLE_API_KEY
-    user: '1000:1000'  # adjust uid with a local account uid
+    user: '${USER_ID}'
 
   celery:
     build:
-      context: docker
-      # args:
-      #   - APP_USER_ID=  # adjust uid/gid with local account
-      #   - APP_GROUP_ID=
+      context: .
+      dockerfile: docker/Dockerfile
+      args:
+        - APP_USER_ID=${USER_ID}
+        - APP_GROUP_ID=${GROUP_ID}
     environment:
       - EMCEE_CMD_ENV=docker
       - APP_SERVICE=celery
@@ -81,10 +84,11 @@ services:
       - default
     volumes:
       - /etc/localtime:/etc/localtime:ro
+      - ${VOLUME_PATH}/media:/media
       - ./:/app
     depends_on:
       - app
     secrets:
       - SecretKey
       - DBPassword
-    user: '1000:1000'  # adjust uid with a local account uid
+    user: '${USER_ID}'
