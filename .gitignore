@@ -1,15 +1,16 @@
 # Root
-/.env/
-/build/
-/dist/
-/media/
-/static/
-/volumes/
+/.env
+/builds
+/dist
+/node_modules
+/media
+/static
+/volumes
 /*.egg-info/
 /.coverage
+/trash
 
 # Anywhere
-node_modules/
 __pycache__/
 *.pyc
 *.pyo
