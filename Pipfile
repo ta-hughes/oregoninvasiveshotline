@@ -11,15 +11,15 @@ name = "wdt"
 [packages]
 pytz = "*"
 markdown = "~=3.4.0"
-Pillow = "~=9.3.0"
+Pillow = "~=9.4.0"
 Django = { version = "~=3.2.0", extras = ["argon2", "bcrypt"]}
 psycopg2 = "~=2.9.0"
 celery = "~=5.2.0"
 uwsgi = "~=2.0.0"
 djangorestframework = "~=3.14.0"
 django-bootstrap-form = "==3.4"
-"psu.oit.wdt.emcee" = {version = "~=1.1.0", extras = ["aws"], index = "wdt" }
-sentry-sdk = "~=1.11.0"
+"psu.oit.wdt.emcee" = {version = "~=1.2.0.dev2", extras = ["aws"], index = "wdt" }
+sentry-sdk = "~=1.17.0"
 
 [dev-packages]
 coverage = "*"

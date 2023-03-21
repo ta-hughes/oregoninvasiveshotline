@@ -14,5 +14,5 @@ DATABASES:
   default:
     HOST: postgres
 CELERY_BROKER_URL: pyamqp://guest:guest@rabbitmq//
-STATIC_ROOT: /app/static
-MEDIA_ROOT: /app/media
+STATIC_ROOT: /static
+MEDIA_ROOT: /media
