@@ -22,7 +22,7 @@ if [[ ${APP_SERVICE} == "wsgi" ]]; then
           --ignore-sigpipe \
           --ignore-write-errors \
           --disable-write-exception \
-          --python-auto-reload 2
+          --python-auto-reload 0
     else
         exec ${APP_ENV}/bin/uwsgi --include /uwsgi/uwsgi.ini
     fi
