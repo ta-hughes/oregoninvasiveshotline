@@ -1,10 +1,13 @@
 # Changelog for Oregon Invasives Hotline
 
+## 1.15.14 - 2023-11-07
+
+- Bufgix/maintenance release
+
 ## 1.15.13 - 2023-11-01
 
 - Uses OSM for admin geospatial widget.
 - Disables autoreload for development server.
-- Bufgix/maintenance release
 
 ## 1.15.12 - 2023-03-20
 
