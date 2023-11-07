@@ -5,6 +5,7 @@ import shutil
 import codecs
 import json
 import csv
+import io
 import os
 from datetime import timedelta
 from unittest.mock import Mock, patch
@@ -14,6 +15,7 @@ from django.conf import settings
 from django.core import mail
 from django.core.exceptions import NON_FIELD_ERRORS
 from django.core.files.base import File
+from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.contrib.gis.geos import Point
 from django.db.models.signals import post_save
 from django.db import transaction
@@ -62,6 +64,16 @@ class ReportTest(SuppressPostSaveMixin, TestCase):
         if self.report.pk is not None:
             self.report.delete()
 
+    def _make_report_image(self):
+        return InMemoryUploadedFile(
+            io.BytesIO(open(TEST_IMAGE_PATH, 'rb').read()),
+            'image',
+            'test.png',
+            'image/png',
+            os.path.getsize(TEST_IMAGE_PATH),
+            None
+        )
+
     def test_species(self):
         reported_species = make(Species)
         actual_species = make(Species)
@@ -101,14 +113,21 @@ class ReportTest(SuppressPostSaveMixin, TestCase):
         report = make(Report, point=ORIGIN)
 
         # A report with only a private image shouldn't have an image URL
-        make(Image, report=report, visibility=Image.PRIVATE)
+        make(
+            Image,
+            report=report,
+            visibility=Image.PRIVATE
+        )
         expected_url = None
         self.assertEqual(report.image_url, expected_url)
 
         # A report with a public image should have an image URL
-        path = os.path.join(settings.MEDIA_ROOT, 'test.png')
-        shutil.copyfile(TEST_IMAGE_PATH, path)
-        image = make(Image, report=report, image=File(open(path, 'rb')), visibility=Image.PUBLIC)
+        image = make(
+            Image,
+            report=report,
+            image=self._make_report_image(),
+            visibility=Image.PUBLIC
+        )
         file_name = '{image.pk}.png'.format(image=image)
         expected_url = posixpath.join(settings.MEDIA_URL, 'generated_thumbnails', file_name)
         self.assertEqual(report.image_url, expected_url)
@@ -119,13 +138,21 @@ class ReportTest(SuppressPostSaveMixin, TestCase):
     def test_image_url_from_comment(self):
         report = make(Report, point=ORIGIN)
 
-        make(Image, comment=make(Comment, report=report), visibility=Image.PRIVATE, _quantity=2)
+        make(
+            Image,
+            comment=make(Comment, report=report),
+            visibility=Image.PRIVATE,
+            _quantity=2
+        )
         expected_url = None
         self.assertEqual(report.image_url, expected_url)
 
-        path = os.path.join(settings.MEDIA_ROOT, 'test.png')
-        shutil.copyfile(TEST_IMAGE_PATH, path)
-        image = make(Image, report=report, image=File(open(path, 'rb')), visibility=Image.PUBLIC)
+        image = make(
+            Image,
+            report=report,
+            image=self._make_report_image(),
+            visibility=Image.PUBLIC
+        )
         file_name = '{image.pk}.png'.format(image=image)
         expected_url = posixpath.join(settings.MEDIA_URL, 'generated_thumbnails', file_name)
         self.assertEqual(report.image_url, expected_url)
@@ -147,12 +174,15 @@ class TestReportIconGeneration(TestCase):
             b'a911d19b70b66ec9422f223028219589d74466a066cf08c0115be038327a7e37ff101afa37d185ce02898'
             b'0000000049454e44ae426082'
         )
-        icon_dir = os.path.join(settings.MEDIA_ROOT, 'icons')
-        fd, name = tempfile.mkstemp(dir=icon_dir, suffix='.png')
-        os.write(fd, content)
-        os.close(fd)
-        icon_file = File(open(name, 'rb'), name)
-        return icon_file
+
+        return InMemoryUploadedFile(
+            io.BytesIO(content),
+            'image',
+            'test.png',
+            'image/png',
+            len(content),
+            None
+        )
 
     def test_generate_icon_manually(self):
         report = prepare(
@@ -625,7 +655,7 @@ class ReportFormTest(TransactionTestCase, UserMixin):
         self.assertFalse(form.has_error("reported_species"))
 
     def test_save_creates_user_if_it_doesnt_exist(self):
-        # the user doesn't exist, so he should be created when the form is saved
+        # the user doesn't exist, so it should be created when the form is saved
         form = ReportForm({
             "email": "foo@example.com",
             "first_name": "Foo",
@@ -634,7 +664,7 @@ class ReportFormTest(TransactionTestCase, UserMixin):
             "suffix": "PHD",
         })
         self.assertFalse(form.is_valid())
-        report = prepare(Report, pk=1, point=ORIGIN)
+        report = make(Report, pk=1, point=ORIGIN)
         pre_count = User.objects.count()
 
         with patch("oregoninvasiveshotline.reports.forms.forms.ModelForm.save") as save:
