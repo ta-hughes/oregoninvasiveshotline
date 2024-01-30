@@ -1,19 +1,21 @@
-ENV: stage
+ENV: prod
 DEBUG: false
 DEBUG_PROPOGATE_EXCEPTIONS: false
 TEMPLATE_DEBUG: false
 ALLOWED_HOSTS:
-- invasives.stage.wdt.pdx.edu
-DEFAULT_FROM_EMAIL: no-reply@stage.wdt.pdx.edu
+- invasives.wdt.pdx.edu
+- oregoninvasiveshotline.org
+- www.oregoninvasiveshotline.org
+DEFAULT_FROM_EMAIL: no-reply@wdt.pdx.edu
 NOTIFICATIONS:
-  from_email: no-reply@stage.wdt.pdx.edu
+  from_email: no-reply@oregoninvasiveshotline.org
 EMAIL_BACKEND: django.core.mail.backends.smtp.EmailBackend
 STATICFILES_STORAGE: django.contrib.staticfiles.storage.ManifestStaticFilesStorage
 DATABASES:
   default:
-    HOST: oregoninvasiveshotline-stage.c6xuiyamhpsi.us-west-2.rds.amazonaws.com
-    NAME: oregoninvasiveshotline
-    USER: oregoninvasiveshotline_l
+    HOST: postgresql
+    NAME: invasives
+    USER: invasives
     PASSWORD: ''
 CELERY_BROKER_URL: 'pyamqp://guest:guest@rabbitmq//'
 STATIC_ROOT: /vol/www/oregoninvasiveshotline/static

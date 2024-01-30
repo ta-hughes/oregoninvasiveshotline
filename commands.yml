@@ -7,8 +7,8 @@ python:
   distribution: psu.oit.arc.oregoninvasiveshotline
 iam:
   user: invasives
-  uid: 1101
-  gid: 1101
+  uid: 1100
+  gid: 1100
 docker:
   dockerfiles:
     - docker/Dockerfile
@@ -16,42 +16,18 @@ remote:
   path:
     root: ${remote.deploy_root}/oregoninvasiveshotline
 services:
-  db:
-    user: oregoninvasiveshotline_l
-    name: oregoninvasiveshotline
   nginx:
+    group: 101
     http_upstream: "http://app:8000"
     client_max_body_size: 16m
     access_control_origin: '*'
     static_expires_time: 1d
 environment:
-  dev:
-    backend: emcee.backends.dev
   docker:
     backend: emcee.backends.docker
-  stage:
+  cloud:
     backend: emcee.backends.aws
-    remote:
-      distribution:
-        name: amazon2
-        version: ""
     services:
-      db:
-        host: oregoninvasiveshotline-stage.c6xuiyamhpsi.us-west-2.rds.amazonaws.com
-      nginx:
-        media_root: /media
-        static_root: /static
-        csp_policy: 'default-src ''unsafe-inline'' data: invasives.stage.wdt.pdx.edu *.stage.wdt.pdx.edu; script-src ''self'' ''unsafe-inline'' ''unsafe-eval'' cdnjs.cloudflare.com https://www.google-analytics.com https://ssl.google-analytics.com https://*.googleapis.com https://*.gstatic.com *.google.com https://*.ggpht.com *.googleusercontent.com; img-src ''self'' cdnjs.cloudflare.com http://*.tile.openstreetmap.org https://*.tile.openstreetmap.org https://www.google-analytics.com https://*.googleapis.com https://*.gstatic.com *.google.com *.googleusercontent.com data:; frame-src *.google.com; connect-src ''self'' invasives.stage.wdt.pdx.edu *.sentry.io https://www.google-analytics.com https://*.googleapis.com *.google.com https://*.gstatic.com data: blob:; font-src https://invasives.stage.wdt.pdx.edu https://fonts.gstatic.com; style-src ''self'' ''unsafe-inline'' cdnjs.cloudflare.com https://fonts.googleapis.com'
-        access_control_origin: https://invasives.stage.wdt.pdx.edu
-  prod:
-    backend: emcee.backends.aws
-    remote:
-      distribution:
-        name: amazon2
-        version: ""
-    services:
-      db:
-        host: oregoninvasiveshotline-prod.c6xuiyamhpsi.us-west-2.rds.amazonaws.com
       nginx:
         media_root: /media
         static_root: /static
