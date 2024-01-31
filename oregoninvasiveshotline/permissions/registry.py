@@ -322,9 +322,9 @@ class PermissionsRegistry:
             # This contains the names of all of the view's args
             # (positional and keyword). This is used to find the field
             # value for permissions that operate on a model.
-            view_args_spec = inspect.getargspec(view)
+            view_args_spec = inspect.getfullargspec(view)
             view_arg_names = view_args_spec.args
-            perm_func_arg_spec = inspect.getargspec(perm_func)
+            perm_func_arg_spec = inspect.getfullargspec(perm_func)
             perm_func_arg_names = perm_func_arg_spec.args
 
             @wraps(view)

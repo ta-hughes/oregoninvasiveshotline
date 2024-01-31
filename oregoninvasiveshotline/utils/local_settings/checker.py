@@ -1,8 +1,5 @@
 import sys
-from collections import Mapping, Sequence
-
-from six import string_types
-from six.moves import input
+from collections.abc import Mapping, Sequence
 
 from .base import Base
 from .color_printer import color_printer as printer
@@ -49,7 +46,7 @@ class Checker(Base):
     def _populate_registry(self, obj, prefix=None):
         if isinstance(obj, Mapping):
             items = obj.items()
-        elif isinstance(obj, Sequence) and not isinstance(obj, string_types):
+        elif isinstance(obj, Sequence) and not isinstance(obj, str):
             items = zip(range(len(obj)), obj)
         else:
             return
@@ -63,7 +60,7 @@ class Checker(Base):
     def _check(self, obj, prefix, settings_to_write, missing):
         if isinstance(obj, Mapping):
             items = sorted(obj.items(), key=lambda item: item[0])
-        elif isinstance(obj, Sequence) and not isinstance(obj, string_types):
+        elif isinstance(obj, Sequence) and not isinstance(obj, str):
             items = zip(range(len(obj)), obj)
         else:
             return {}, {}
