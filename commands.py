@@ -1,4 +1,5 @@
 import os.path
+import pathlib
 import time
 
 from emcee.runner.config import YAMLCommandConfiguration
@@ -17,7 +18,7 @@ from emcee.provision.docker import provision_docker, authenticate_ghcr
 from emcee.provision.secrets import provision_secret, show_secret
 
 from emcee.deploy.docker import publish_images
-from emcee.deploy import deployer, docker
+from emcee.deploy import deployer, docker, DeploymentCheckError
 
 from emcee.backends.aws.infrastructure.commands import *
 from emcee.backends.aws.provision.volumes import (provision_volume,
@@ -72,14 +73,12 @@ def provision(createdb=False):
     remote(('test', '-h', config.remote.path.media, '||',
             'ln', '-sf', '/vol/store/media', config.remote.path.media))
 
-    # Synchronize icons and assorted media assets:
-    archive_path = 'media.tar'
-    if os.path.exists(archive_path) and \
-       confirm("Synchronize media from '{}'?".format(archive_path)):
-
+    # Synchronize icons and assorted media assets
+    if confirm("Synchronize media from archive?"):
+        archive_path = pathlib.Path(input("Path to archive: ").strip())
         copy_file(archive_path, config.remote.path.media, sudo=True)
-        remote(('tar', 'xvf', archive_path, '&&',
-                'rm', archive_path),
+        remote(('tar', 'xvf', archive_path.name, '&&',
+                'rm', archive_path.name),
                cd=config.remote.path.media,
                sudo=True
         )

@@ -3,7 +3,7 @@ DEBUG: false
 DEBUG_PROPOGATE_EXCEPTIONS: false
 TEMPLATE_DEBUG: false
 ALLOWED_HOSTS:
-- invasives.wdt.pdx.edu
+- invasives.cloud.wdt.pdx.edu
 - oregoninvasiveshotline.org
 - www.oregoninvasiveshotline.org
 DEFAULT_FROM_EMAIL: no-reply@wdt.pdx.edu
