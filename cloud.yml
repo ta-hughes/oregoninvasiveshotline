@@ -30,7 +30,7 @@ services:
     volumes:
     - /etc/localtime:/etc/localtime:ro
     - /etc/passwd:/etc/passwd:ro
-    - /vol/www/oregoninvasiveshotline/services/rabbitmq:/var/lib/rabbitmq
+    - /vol/store/services/rabbitmq:/var/lib/rabbitmq
     logging:
       driver: json-file
     deploy:
