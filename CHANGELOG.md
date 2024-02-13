@@ -1,8 +1,18 @@
 # Changelog for Oregon Invasives Hotline
 
+## 1.16.0 - 2024-02-15
+
+- Uses Python 3.11.
+- Updates package, client dependencies.
+- Adds support for PEP 517, PEP 518, PEP 621, PEP 660.
+- Adds, replaces infrastructure definitions to use new
+  host and VPC.
+- Adds support for, implementation of human-friendly
+  status page to be rendered during maintenance.
+
 ## 1.15.14 - 2023-11-07
 
-- Bufgix/maintenance release
+- Bugfix/maintenance release
 
 ## 1.15.13 - 2023-11-01
 
