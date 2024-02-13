@@ -113,6 +113,7 @@ services:
     - ./nginx/invasives.conf:/etc/nginx/conf.d/default.conf
     - ./nginx/host_defaults.conf:/etc/nginx/host_defaults.conf
     - ./nginx/server_defaults.conf:/etc/nginx/server_defaults.conf
+    - ./nginx-custom/maintenance.conf:/etc/nginx/conf.d/maintenance.conf
     logging:
       driver: json-file
     deploy:
