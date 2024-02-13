@@ -1,8 +1,6 @@
 import re
-from collections import Mapping, Sequence
+from collections.abc import Mapping, Sequence
 from itertools import chain
-
-import six
 
 from .util import NO_DEFAULT, NO_DEFAULT as PLACEHOLDER
 
@@ -197,9 +195,6 @@ class DottedAccessMixin:
 
         segments = []
         path_iter = zip(iter(path), chain(path[1:], (None,)))
-        if six.PY2:
-            # zip() returns a list on Python 2
-            path_iter = iter(path_iter)
         convert_name = self._convert_name
         current_segment = []
         current_segment_contains_group = False

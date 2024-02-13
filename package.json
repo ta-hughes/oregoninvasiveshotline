@@ -1,7 +1,7 @@
 {
   "name": "oregoninvasiveshotline",
   "private": true,
-  "version": "1.15.11",
+  "version": "1.16.0",
   "description": "Oregon Invasives Hotline",
   "homepage": "https://oregoninvasiveshotline.org",
   "repository": "https://github.com/PSU-OIT-ARC/oregoninvasiveshotline",
@@ -19,8 +19,8 @@
   ],
   "scripts": {},
   "dependencies": {
-    "@sentry/browser": "~7.77.0",
-    "@sentry/tracing": "~7.77.0",
+    "@sentry/browser": "~7.101.0",
+    "@sentry/tracing": "~7.101.0",
     "bootstrap": "~3.4.0",
     "galleria": "~1.6.0",
     "jquery": "~3.7.0",

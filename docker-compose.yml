@@ -14,21 +14,16 @@ networks:
 
 services:
   postgres:
-    image: kartoza/postgis:10.0-2.4
+    image: postgis/postgis:11-2.5
     networks:
       - default
     environment:
-      # In some cases, the logic present in the kartoza/postgis
-      # entrypoint may fail to recognize that this database already
-      # exists when the container volume has already such a database
-      # present; in this case, comment the 'POSTGRES_DBNAME' entry
-      # in order to succesfully boot the container.
       - POSTGRES_USER=invasives
-      - POSTGRES_PASS=invasives
-      - POSTGRES_DBNAME=invasives
-      - ALLOW_IP_RANGE=172.23.0.0/16
+      - POSTGRES_PASSWORD=invasives
+      - POSTGRES_DB=invasives
     volumes:
-      - ${VOLUME_PATH}/postgres:/var/lib/postgresql
+      - ${VOLUME_PATH}/postgres/11/main:/var/lib/postgresql/data
+      - ${VOLUME_PATH}/dumps:/archive
 
   rabbitmq:
     image: rabbitmq:3-alpine
@@ -40,6 +35,30 @@ services:
     # on container delete/init cycle.
     #   Refs: https://github.com/docker-library/rabbitmq/issues/106#issuecomment-241882358
     hostname: 'rabbitmq-dev'
+    user: '${USER_ID}'
+
+  bootstrap:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      args:
+        - APP_USER_ID=${USER_ID}
+        - APP_GROUP_ID=${GROUP_ID}
+    environment:
+      - EMCEE_CMD_ENV=docker
+      - APP_SERVICE=bootstrap
+    networks:
+      - default
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${VOLUME_PATH}/media:/media
+      - ${VOLUME_PATH}/static:/static
+      - ./:/app
+    depends_on:
+      - postgres
+    secrets:
+      - SecretKey
+      - DBPassword
     user: '${USER_ID}'
 
   app:

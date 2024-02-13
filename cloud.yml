@@ -4,6 +4,25 @@ networks:
     driver: overlay
     attachable: true
 services:
+  postgresql:
+    image: postgis/postgis:11-2.5
+    networks:
+    - overlay
+    volumes:
+    - type: tmpfs
+      target: /dev/shm
+      tmpfs:
+        size: 1073741824
+    - /etc/localtime:/etc/localtime:ro
+    - /etc/passwd:/etc/passwd:ro
+    - /vol/store/services/postgresql/data:/var/lib/postgresql/data
+    - /vol/store/services/postgresql/archive:/opt/archive
+    logging:
+      driver: json-file
+    deploy:
+      endpoint_mode: dnsrr
+      replicas: 1
+    user: 1100:1100
   rabbitmq:
     image: rabbitmq:3-alpine
     networks:
@@ -11,16 +30,16 @@ services:
     volumes:
     - /etc/localtime:/etc/localtime:ro
     - /etc/passwd:/etc/passwd:ro
-    - /vol/www/oregoninvasiveshotline/services/rabbitmq:/var/lib/rabbitmq
+    - /vol/store/services/rabbitmq:/var/lib/rabbitmq
     logging:
       driver: json-file
     deploy:
       endpoint_mode: dnsrr
       replicas: 1
     hostname: rabbitmq-prod
-    user: 1101:1101
+    user: 1100:1100
   app:
-    image: ghcr.io/psu-oit-arc/oregoninvasiveshotline/app-prod:1.15.14
+    image: ghcr.io/psu-oit-arc/oregoninvasiveshotline/app-cloud:1.16.0
     networks:
     - overlay
     volumes:
@@ -31,7 +50,7 @@ services:
     - ./uwsgi:/uwsgi
     - ./:/app
     environment:
-    - EMCEE_CMD_ENV=prod
+    - EMCEE_CMD_ENV=cloud
     - APP_SERVICE=wsgi
     logging:
       driver: json-file
@@ -39,7 +58,7 @@ services:
       replicas: 1
     user: invasives:invasives
   celery:
-    image: ghcr.io/psu-oit-arc/oregoninvasiveshotline/app-prod:1.15.14
+    image: ghcr.io/psu-oit-arc/oregoninvasiveshotline/app-cloud:1.16.0
     networks:
     - overlay
     volumes:
@@ -49,7 +68,7 @@ services:
     - /vol/www/oregoninvasiveshotline:/vol/www/oregoninvasiveshotline
     - ./:/app
     environment:
-    - EMCEE_CMD_ENV=prod
+    - EMCEE_CMD_ENV=cloud
     - APP_SERVICE=celery
     logging:
       driver: json-file
@@ -59,7 +78,7 @@ services:
     - rabbitmq
     user: invasives:invasives
   scheduler:
-    image: ghcr.io/psu-oit-arc/oregoninvasiveshotline/app-prod:1.15.14
+    image: ghcr.io/psu-oit-arc/oregoninvasiveshotline/app-cloud:1.16.0
     networks:
     - overlay
     volumes:
@@ -69,7 +88,7 @@ services:
     - /vol/www/oregoninvasiveshotline:/vol/www/oregoninvasiveshotline
     - ./:/app
     environment:
-    - EMCEE_CMD_ENV=prod
+    - EMCEE_CMD_ENV=cloud
     - APP_SERVICE=scheduler
     logging:
       driver: json-file
@@ -94,6 +113,7 @@ services:
     - ./nginx/invasives.conf:/etc/nginx/conf.d/default.conf
     - ./nginx/host_defaults.conf:/etc/nginx/host_defaults.conf
     - ./nginx/server_defaults.conf:/etc/nginx/server_defaults.conf
+    - ./nginx-custom/maintenance.conf:/etc/nginx/conf.d/maintenance.conf
     logging:
       driver: json-file
     deploy:

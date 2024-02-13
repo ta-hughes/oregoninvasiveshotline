@@ -1,7 +1,0 @@
-include README.md
-recursive-include oregoninvasiveshotline/static *
-recursive-include oregoninvasiveshotline/templates *
-recursive-include oregoninvasiveshotline/pages/templates *
-recursive-include oregoninvasiveshotline/counties/fixtures *
-recursive-include oregoninvasiveshotline/species/fixtures *
-recursive-include oregoninvasiveshotline/pages/fixtures *

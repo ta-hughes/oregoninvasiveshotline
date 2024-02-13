@@ -21,4 +21,6 @@ class Image(Visibility, models.Model):
         ordering = ['pk']
 
     def __str__(self):
-        return 'Image: "{0.name}" at "{0.image.path}"'.format(self)
+        if self.name:
+            return self.name
+        return self.image.path

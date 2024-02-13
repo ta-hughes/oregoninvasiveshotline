@@ -1,8 +1,6 @@
-from collections import Mapping, MutableSequence, Sequence
+from collections.abc import Mapping, MutableSequence, Sequence
 
 from django.utils.module_loading import import_string
-
-from six import string_types
 
 from .base import Base
 from .checker import Checker
@@ -126,7 +124,7 @@ class Loader(Base):
         if _interpolated is None:
             _interpolated = []
 
-        if isinstance(obj, string_types):
+        if isinstance(obj, str):
             new_value, changed = self._inject(obj, settings)
             if changed:
                 _interpolated.append((obj, new_value))
@@ -150,7 +148,7 @@ class Loader(Base):
         if isinstance(obj, Mapping):
             replacements = {}
             for k, v in obj.items():
-                if isinstance(k, string_types):
+                if isinstance(k, str):
                     new_k, changed = self._inject(k, settings)
                     if changed:
                         replacements[k] = new_k
@@ -158,7 +156,7 @@ class Loader(Base):
             for k, new_k in replacements.items():
                 obj[new_k] = obj[k]
                 del obj[k]
-        elif isinstance(obj, Sequence) and not isinstance(obj, string_types):
+        elif isinstance(obj, Sequence) and not isinstance(obj, str):
             for item in obj:
                 self._interpolate_keys(item, settings)
 
@@ -202,7 +200,7 @@ class Loader(Base):
             return
         for name in import_from_string:
             current_val = settings.get_dotted(name)
-            if isinstance(current_val, string_types):
+            if isinstance(current_val, str):
                 settings.set_dotted(name, import_string(current_val))
 
     def _inject(self, value, settings):
@@ -220,7 +218,7 @@ class Loader(Base):
                 different from the original value
 
         """
-        assert isinstance(value, string_types), 'Expected str; got {0.__class__}'.format(value)
+        assert isinstance(value, str), 'Expected str; got {0.__class__}'.format(value)
 
         begin, end = '{{', '}}'
 
@@ -271,7 +269,7 @@ class Loader(Base):
             except KeyError:
                 raise KeyError('{name} not found in {settings}'.format(**locals()))
 
-            if not isinstance(injection_value, string_types):
+            if not isinstance(injection_value, str):
                 injection_value = self.strategy.encode_value(injection_value)
 
             # Combine before, inject value, and after to get the new

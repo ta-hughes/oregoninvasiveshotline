@@ -4,68 +4,55 @@ Resources:
   AppRole:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: https://s3-us-west-2.amazonaws.com/cloudformation-templates.wdt.pdx.edu/20210115/iam/application_role.template.yml
+      TemplateURL: https://s3-us-west-2.amazonaws.com/cloudformation-templates.wdt.pdx.edu/20221006/iam/application_role.template.yml
       Parameters:
         Name: invasives
-        VpcStackName: vpc-prod
+        VpcStackName: vpc-cloud
   Host:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: https://s3-us-west-2.amazonaws.com/cloudformation-templates.wdt.pdx.edu/20210115/ec2/private_host/private_host.template.yml
+      TemplateURL: https://s3-us-west-2.amazonaws.com/cloudformation-templates.wdt.pdx.edu/20221006/ec2/private_host/private_host.template.yml
       Parameters:
+        ImageId: /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64
+        ImageDistribution: amazon
+        ImageDistributionVersion: 2023
         InstanceType: t3.small
-        ImageId: ami-082b5a644766e0e6f
-        ImageDistribution: amazon2
         HostName: !GetAtt 'AppRole.Outputs.Name'
         VpcStackName: !GetAtt 'AppRole.Outputs.VpcStackName'
         IAMAppRoleName: !GetAtt 'AppRole.Outputs.RoleName'
-        ExternalZoneName: wdt.pdx.edu
-        InternalZoneName: internal
+        ExternalZoneName: cloud.wdt.pdx.edu
+        InternalZoneName: cloud-internal
         UseEFSFilesystem: true
+        EbsDeleteOnTermination: false
+        EnableEbsEncryption: true
+        EbsKmsKey: !GetAtt 'AppRole.Outputs.KmsKeyArn'
         EbsVolumeId: !GetAtt 'Volume.Outputs.EbsVolume'
   Networking:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: https://s3-us-west-2.amazonaws.com/cloudformation-templates.wdt.pdx.edu/20210115/ec2/private_host/networking.template.yml
+      TemplateURL: https://s3-us-west-2.amazonaws.com/cloudformation-templates.wdt.pdx.edu/20221006/ec2/private_host/networking.template.yml
       Parameters:
         EC2Instance: !GetAtt 'Host.Outputs.InstanceId'
-        PrivateIp: !GetAtt 'Host.Outputs.PrivateIP'
         DnsHostName: !GetAtt 'AppRole.Outputs.Name'
         VpcStackName: !GetAtt 'AppRole.Outputs.VpcStackName'
         ExternalZoneName: !GetAtt 'Host.Outputs.ExternalZoneName'
-        InternalZoneName: !GetAtt 'Host.Outputs.InternalZoneName'
         ELBListenerPriority: !Ref 'ELBListenerPriority'
         ListenOn80: true
-  PostgreSQL:
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      TemplateURL: https://s3-us-west-2.amazonaws.com/cloudformation-templates.wdt.pdx.edu/20210115/rds/postgres.template.yml
-      Parameters:
-        VpcStackName: !GetAtt 'AppRole.Outputs.VpcStackName'
-        MultiAZ: true
-        DBInstanceClass: db.t3.small
-        DBInstanceName: oregoninvasiveshotline-prod
-        DBUsername: oregoninvasiveshotline_l
-        DBPassword: !Ref 'DBPassword'
-        EnableEncryption: true
-        KmsKey: !GetAtt 'AppRole.Outputs.KmsKeyArn'
-        EC2SecurityGroupId: !GetAtt 'Host.Outputs.EC2SecurityGroup'
-        DeletionPolicy: Snapshot
   Volume:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: https://s3-us-west-2.amazonaws.com/cloudformation-templates.wdt.pdx.edu/20210115/ec2/ebs/volume.template.yml
+      TemplateURL: https://s3-us-west-2.amazonaws.com/cloudformation-templates.wdt.pdx.edu/20221006/ec2/ebs/volume.template.yml
       Parameters:
-        Name: oregoninvasiveshotline-prod
+        Name: invasives-cloud
+        VolumeSize: 25
         AvailabilityZone: us-west-2a
         EnableEncryption: true
         KmsKey: !GetAtt 'AppRole.Outputs.KmsKeyArn'
-        SnapshotId: snap-00cd6b7489b2dd518
         DeletionPolicy: Snapshot
   Domain:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: https://s3-us-west-2.amazonaws.com/cloudformation-templates.wdt.pdx.edu/20210115/ec2/private_host/domain.template.yml
+      TemplateURL: https://s3-us-west-2.amazonaws.com/cloudformation-templates.wdt.pdx.edu/20221006/ec2/private_host/domain.template.yml
       Parameters:
         ZoneExists: true
         HostedZoneName: oregoninvasiveshotline.org
@@ -82,6 +69,3 @@ Parameters:
   CustomELBListenerPriority:
     Type: String
     Description: Mechanism for declaring CustomELBListenerPriority
-  DBPassword:
-    Type: String
-    Description: Mechanism for declaring DBPassword

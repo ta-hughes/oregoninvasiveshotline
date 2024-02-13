@@ -1,4 +1,5 @@
 import os.path
+import pathlib
 import time
 
 from emcee.runner.config import YAMLCommandConfiguration
@@ -8,7 +9,7 @@ from emcee.runner.utils import confirm
 from emcee.app.config import YAMLAppConfiguration
 from emcee import printer
 
-from emcee.commands.transport import warmup, shell
+from emcee.commands.transport import *
 from emcee.commands.files import copy_file
 from emcee.commands.deploy import deploy, list_builds
 
@@ -17,14 +18,9 @@ from emcee.provision.docker import provision_docker, authenticate_ghcr
 from emcee.provision.secrets import provision_secret, show_secret
 
 from emcee.deploy.docker import publish_images
-from emcee.deploy import deployer, docker
+from emcee.deploy import deployer, docker, DeploymentCheckError
 
 from emcee.backends.aws.infrastructure.commands import *
-from emcee.backends.aws.provision.db import (provision_database,
-                                             archive_database,
-                                             restore_database,
-                                             update_database_ca,
-                                             update_database_client)
 from emcee.backends.aws.provision.volumes import (provision_volume,
                                                   provision_swapfile)
 
@@ -39,14 +35,22 @@ def provision(createdb=False):
     # Provision application services
     provision_docker()
 
-    # Provision container volumes
-    printer.header("Initializing container volumes...")
-    for service in ['rabbitmq']:
-        services_path = os.path.join(config.remote.path.root, 'services', service)
-        remote(('mkdir', '-p', services_path), run_as=config.iam.user)
+    # Provision service volume
+    printer.header("Initializing service volume...")
+    provision_volume(mount_point='/vol/store', filesystem='xfs')
+    remote(['mkdir', '-p', '/vol/store/services'], sudo=True)
 
-    # Initialize/prepare attached EBS volume
-    provision_volume(mount_point='/vol/store', filesystem='ext4')
+    for service in [
+        'postgresql/data',
+        'postgresql/archive',
+        'postgresql/run',
+        'rabbitmq',
+    ]:
+        service_path = os.path.join('/vol/store/services', service)
+        result = remote(['mkdir', '-p', service_path], raise_on_error=False, sudo=True)
+        if result.succeeded:
+            owner = '{}:{}'.format(config.iam.user, config.iam.user)
+            remote(['chown', '-R', owner, service_path], sudo=True)
 
     # Initialize swapfile on EBS volume
     provision_swapfile(1024, path='/vol/store')
@@ -69,16 +73,14 @@ def provision(createdb=False):
     remote(('test', '-h', config.remote.path.media, '||',
             'ln', '-sf', '/vol/store/media', config.remote.path.media))
 
-    # Synchronize icons and assorted media assets:
-    archive_path = 'media.tar'
-    if os.path.exists(archive_path):
-        if not confirm("Synchronize media from '{}'?".format(archive_path)):
-            return
-
-        copy_file(archive_path, config.remote.path.media)
-        remote(('tar', 'xvf', archive_path, '&&',
-                'rm', archive_path),
-               cd=config.remote.path.media
+    # Synchronize icons and assorted media assets
+    if confirm("Synchronize media from archive?"):
+        archive_path = pathlib.Path(input("Path to archive: ").strip())
+        copy_file(archive_path, config.remote.path.media, sudo=True)
+        remote(('tar', 'xvf', archive_path.name, '&&',
+                'rm', archive_path.name),
+               cd=config.remote.path.media,
+               sudo=True
         )
 
     # Set the correct permissions on generated assets
@@ -86,14 +88,11 @@ def provision(createdb=False):
     owner = '{}:{}'.format(config.iam.user, config.services.nginx.group)
     remote(('chown', '-h', owner, config.remote.path.media), sudo=True)
     remote(('chown', '-R', owner, '/vol/store/media'), sudo=True)
-
-    # Provision database dependencies
-    update_database_client('postgresql', with_devel=True)
-    update_database_ca('postgresql')
-    if createdb:
-        provision_database(backend_options={'with_postgis': True})
+    remote(('chmod', 'g+X', '/vol/store/media'), sudo=True)
 
     # Provision application secrets
+    db_password = input("Enter the PostgreSQL superuser password: ")
+    provision_secret('DBPassword', db_password)
     api_key = input('Enter the Google API key for this project/environment: ')
     provision_secret('GOOGLE_API_KEY', api_key)
 
@@ -138,11 +137,16 @@ class InvasivesDeployer(docker.Deployer):
 
     def bootstrap_application(self):
         if not self.remote_processor.is_stack_active():
-            printer.error("Stack is not active in remote environment.")
-            return
+            raise DeploymentCheckError("Stack is not active in remote environment.")
 
-        # Enable maintenance mode before bootstrapping application
+        # enable maintenance mode before bootstrapping application
         maintenance_mode()
+
+        # verify that the database has been initialized
+        stat_cmd = ['stat', '/vol/store/services/postgresql/data']
+        result = remote(stat_cmd, raise_on_error=False, run_as=config.iam.user)
+        if not result.succeeded:
+            raise DeploymentCheckError("PostgreSQL database must be initialized. Exiting.")
 
         printer.info("Bootstrapping application...")
         bootstrap_stackfile = '{}-bootstrap.yml'.format(config.env)

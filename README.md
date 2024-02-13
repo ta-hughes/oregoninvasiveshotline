@@ -8,7 +8,7 @@ about the species that was reported
 
 - PostgreSQL 11
 - PostGIS 2.5.x
-- Python 3.9
+- Python 3.11
 - Django 3.2 LTS
 - Google Maps
 
@@ -18,7 +18,7 @@ Ensure that you have Docker and Docker Compose installed in your host's environm
 
 To use the provided Docker container definitions:
 
-    docker-compose -f docker-compose.dev.yml up -d
+    docker-compose up -d
 
 To authenticate with the provided default user:
 
@@ -38,7 +38,7 @@ To update the frontend dependencies of the project, use the included make rule:
 
 To run the test library:
 
-    docker-compose -f docker-compose.dev.yml run test
+    make test_container
 
 ## Deploying
 
