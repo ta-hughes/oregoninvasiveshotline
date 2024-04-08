@@ -1,5 +1,13 @@
 # Changelog for Oregon Invasives Hotline
 
+## 1.16.1 - 2024-04-08
+
+- Adds basic robots.txt implementation
+- Revises copy for image uploads to reference the
+licensing conditions of submitted content.
+- Revises the invite workflow such that pre-existing
+  staff are sent direct URL.
+
 ## 1.16.0 - 2024-02-15
 
 - Uses Python 3.11.

@@ -3,7 +3,7 @@ import sys
 import io
 
 IMAGE_BASENAME = 'ghcr.io/psu-oit-arc/oregoninvasiveshotline'
-ENVIRONMENTS = ['prod', 'stage']
+ENVIRONMENTS = ['cloud']
 CONFIGS = [
     'docker-compose.{}.yml',
     '{}.yml',
