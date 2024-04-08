@@ -87,13 +87,16 @@ def notify_invited_reviewer(invite_id, message):
 
     subject = get_setting('NOTIFICATIONS.invite_reviewer__subject')
     from_email = get_setting('NOTIFICATIONS.from_email')
-
     next_url = reverse('reports-detail', args=[invite.report.pk])
-    url = invite.user.get_authentication_url(next=next_url)
+
+    if invite.user.is_active:
+        url = build_absolute_url(next_url)
+    else:
+        url = invite.user.get_authentication_url(next=next_url)
 
     body = render_to_string('reports/_invite_expert.txt', {
         'inviter': invite.created_by,
         'message': message,
-        'url': url,
+        'url': url
     })
     send_mail(subject, body, from_email, [invite.user.email])
