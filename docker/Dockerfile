@@ -1,7 +1,6 @@
 FROM python:3.11-bullseye
-MAINTAINER Thom Linton <tlinton@pdx.edu>
-LABEL org.opencontainers.image.source https://github.com/PSU-OIT-ARC/oregoninvasiveshotline
-
+LABEL org.opencontainers.image.authors="tlinton@pdx.edu"
+LABEL org.opencontainers.image.source=https://github.com/PSU-OIT-ARC/oregoninvasiveshotline
 
 # Install project dependencies
 RUN apt update -y && apt install -y \
@@ -19,13 +18,13 @@ ARG APP_GROUP=invasives
 ARG APP_GROUP_ID=1000
 
 # Export build arguments as environment variables
-ENV APP_PYTHON ${APP_PYTHON}
-ENV APP_ENV ${APP_ENV}
+ENV APP_PYTHON=${APP_PYTHON}
+ENV APP_ENV=${APP_ENV}
 
-ENV APP_USER ${APP_USER}
-ENV APP_USER_ID ${APP_USER_ID}
-ENV APP_GROUP ${APP_GROUP}
-ENV APP_GROUP_ID ${APP_GROUP_ID}
+ENV APP_USER=${APP_USER}
+ENV APP_USER_ID=${APP_USER_ID}
+ENV APP_GROUP=${APP_GROUP}
+ENV APP_GROUP_ID=${APP_GROUP_ID}
 
 # Configure user
 RUN groupadd -g ${APP_GROUP_ID} "${APP_GROUP}" || echo "Group already exists"

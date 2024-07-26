@@ -1,5 +1,9 @@
 # Changelog for Oregon Invasives Hotline
 
+## 1.16.2 - 2024-07-26
+
+- Bugfix/maintenance release
+
 ## 1.16.1 - 2024-04-08
 
 - Adds basic robots.txt implementation
